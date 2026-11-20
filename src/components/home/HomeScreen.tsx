@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { ArrowRight, BellRing, Check, ChevronRight, ClipboardCheck, Lightbulb, Settings, Timer } from "lucide-react";
+import { BellRing, CalendarRange, ChartLine, Check, ChevronRight, ClipboardCheck, Lightbulb, Settings, Timer, Zap } from "lucide-react";
 import { SPHERES, type CheckInData } from "@/lib/checkin";
 import { db, dayKey, type CheckIn } from "@/lib/db";
 import { MIN_DAYS, pairDays, usableDays } from "@/lib/insights";
@@ -137,13 +137,13 @@ function Loaded({ data }: { data: Data }) {
         <Link href="/tree/" aria-label={`Сад: ${tree.stageName}`} className="block">
           <TreeScene stage={tree.stage} wilting={tree.wilting} title={`Дерево: ${tree.stageName}`} className="h-[260px]" lift={30} />
         </Link>
-        <span className="absolute top-4 left-4 inline-flex items-center gap-1.5 rounded-full bg-white/85 px-3 py-1.5 text-[13px] font-semibold text-ink backdrop-blur">
+        <span className="absolute top-4 left-4 inline-flex items-center gap-1.5 rounded-full bg-white/95 px-3 py-1.5 text-[13px] font-semibold text-ink">
           <DropIcon />
           {tree.drops} {plural(tree.drops, ["капля", "капли", "капель"])}
         </span>
         <Link
           href={score === null ? "/test/" : "/history/"}
-          className="pressable absolute top-4 right-4 rounded-full bg-white/85 p-1.5 shadow-soft backdrop-blur"
+          className="pressable absolute top-4 right-4 rounded-full bg-white/95 p-1.5 shadow-soft"
           aria-label={score === null ? "Focus Score сегодня ещё нет. Пройти тест" : `Focus Score сегодня: ${score} из 100. История`}
         >
           <ProgressRing value={(score ?? 0) / 100} size={92} stroke={9}>
@@ -156,14 +156,14 @@ function Loaded({ data }: { data: Data }) {
             ) : (
               <span>
                 <span className="stat block text-[28px] text-navy">{score}</span>
-                <span className="text-[11px] font-semibold text-muted">фокус</span>
+                <span className="text-[12px] font-semibold text-ink/80">фокус</span>
               </span>
             )}
           </ProgressRing>
         </Link>
-        <p className="absolute bottom-3 left-4 rounded-full bg-white/85 px-3 py-1 text-[13px] font-semibold text-ink backdrop-blur first-letter:uppercase">
+        <p className="absolute bottom-3 left-4 rounded-full bg-white/95 px-3 py-1 text-[13px] font-semibold text-ink first-letter:uppercase">
           {tree.stageName}
-          {next && tree.nextAt !== null && <span className="font-medium text-muted"> · до «{next}» {tree.nextAt - tree.drops}</span>}
+          {next && tree.nextAt !== null && <span className="font-medium text-ink/80"> · до «{next}» ещё {tree.nextAt - tree.drops}</span>}
         </p>
       </section>
 
@@ -201,13 +201,27 @@ function Loaded({ data }: { data: Data }) {
         </Link>
       </div>
 
+      {score === null && (
+        <Link href="/test/" className="pressable -mt-3 flex min-h-16 items-center gap-4 rounded-card bg-surface p-4 shadow-soft">
+          <span className="grid size-10 shrink-0 place-items-center rounded-full bg-soft text-accent">
+            <Zap aria-hidden size={22} />
+          </span>
+          <span className="min-w-0 flex-1">
+            <span className="block font-semibold text-ink">Тест реакции · 90 сек</span>
+            <span className="block text-[14px] text-muted">Узнайте свой Focus Score на сегодня</span>
+          </span>
+          <ChevronRight aria-hidden size={20} className="text-muted" />
+        </Link>
+      )}
+
       {today && <TodaySpheres data={today} />}
       {usable < MIN_DAYS && <Countdown days={usable} />}
       {today && <Tip data={today} />}
 
       <nav aria-label="Ещё" className="divide-y divide-line overflow-hidden rounded-card-lg bg-surface shadow-soft">
         <Row href="/settings/#reminder" icon={<BellRing aria-hidden size={20} />} tint="bg-s-rest-tint text-s-rest-ink" title="Напоминание" sub="Каждый день в удобное время" plain />
-        <Row href="/history/" icon={<ArrowRight aria-hidden size={20} />} tint="bg-soft text-navy" title="История" sub="Focus Score за 30 дней" />
+        <Row href="/week/" icon={<CalendarRange aria-hidden size={20} />} tint="bg-s-sleep-tint text-s-sleep-ink" title="Итоги недели" sub="Как прошли ваши 7 дней" />
+        <Row href="/history/" icon={<ChartLine aria-hidden size={20} />} tint="bg-soft text-navy" title="История" sub="Focus Score за 30 дней" />
       </nav>
     </>
   );
@@ -281,7 +295,7 @@ function Countdown({ days }: { days: number }) {
         <span className="block font-semibold text-ink">
           До инсайтов: {left} {plural(left, ["день", "дня", "дней"])}
         </span>
-        <span className="block text-[14px] text-muted">Нужны дни с чек-ином и тестом. Потом покажем, что связано с вашим фокусом.</span>
+        <span className="block text-[14px] text-muted">Дни, где есть и чек-ин, и тест.</span>
       </span>
     </Link>
   );

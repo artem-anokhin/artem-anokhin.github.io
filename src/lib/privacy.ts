@@ -1,5 +1,6 @@
 import { SPHERE_KEYS, sanitizeCheckIn } from "./checkin";
-import { db as defaultDb, type CheckIn, type FocusDB, type FocusSession, type FocusTestResult, type Setting } from "./db";
+import { SESSION_LENGTHS, type SessionLength } from "./focusSession";
+import { db as defaultDb, dayKey, type CheckIn, type FocusDB, type FocusSession, type FocusTestResult, type Setting } from "./db";
 import { getProfile, isExperiment, isWindow } from "./settings";
 
 export const EXPORT_FORMAT = "focusai-export";
@@ -125,7 +126,8 @@ export async function importData(raw: unknown, database: FocusDB = defaultDb): P
   const sessions: FocusSession[] = [];
   for (const r of arr(f.sessions)) {
     const x = r as FocusSession;
-    if (x && isDay(x.date) && isNum(x.startedAt) && Number.isInteger(x.minutes) && x.minutes > 0 && x.minutes <= 180) {
+    const sameDay = x && isNum(x.startedAt) && dayKey(new Date(x.startedAt)) === x.date;
+    if (x && isDay(x.date) && sameDay && SESSION_LENGTHS.includes(x.minutes as SessionLength)) {
       sessions.push({ date: x.date, startedAt: x.startedAt, minutes: x.minutes, ...(x.demo === true ? { demo: true as const } : {}) });
     } else skipped++;
   }

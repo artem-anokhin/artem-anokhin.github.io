@@ -33,10 +33,14 @@ export async function getActiveSession(db: FocusDB = defaultDb): Promise<ActiveS
 }
 
 export async function startSession(minutes: SessionLength, db: FocusDB = defaultDb, now = Date.now()): Promise<ActiveSession | null> {
-  if (!SESSION_LENGTHS.includes(minutes) || !(await getProfile(db))) return null; // no consent → no storage
-  const a: ActiveSession = { startedAt: now, minutes };
-  await db.settings.put({ key: ACTIVE_KEY, value: a });
-  return a;
+  if (!SESSION_LENGTHS.includes(minutes)) return null;
+  // Consent check and write in one transaction, so «Удалить все данные» can't race in.
+  return db.transaction("rw", db.settings, async () => {
+    if (!(await getProfile(db))) return null; // no consent → no storage
+    const a: ActiveSession = { startedAt: now, minutes };
+    await db.settings.put({ key: ACTIVE_KEY, value: a });
+    return a;
+  });
 }
 
 /** Stops the running session without saving it (gave up early). */

@@ -227,17 +227,38 @@ export function Stepper({
   );
 }
 
+const HOURS = Array.from({ length: 24 }, (_, h) => String(h).padStart(2, "0"));
+const MINUTES = Array.from({ length: 12 }, (_, m) => String(m * 5).padStart(2, "0"));
+const selectCls =
+  "stat h-16 min-w-0 flex-1 appearance-none rounded-[18px] bg-white text-center text-[26px] text-ink shadow-soft focus-visible:outline-3 focus-visible:outline-accent";
+
+/** 24-hour time picker (hours + 5-minute steps), independent of the phone's 12/24 h setting. */
 export function TimeField({ label, value, onChange }: { label: string; value: string; onChange: (v: string) => void }) {
+  const [h = "00", m = "00"] = value.split(":");
+  // Keep an existing off-grid minute (e.g. 23:18) selectable.
+  const minutes = MINUTES.includes(m) ? MINUTES : [...MINUTES, m].sort();
   return (
-    <label className="block">
+    <div role="group" aria-label={label}>
       <span className="mb-2 block text-[15px] font-semibold text-ink">{label}</span>
-      <input
-        type="time"
-        lang="ru"
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        className="stat h-16 w-full min-w-0 rounded-[18px] bg-white px-3 text-[22px] text-ink shadow-soft"
-      />
-    </label>
+      <div className="flex items-center gap-1">
+        <select aria-label={`${label}: часы`} value={h} onChange={(e) => onChange(`${e.target.value}:${m}`)} className={selectCls}>
+          {HOURS.map((x) => (
+            <option key={x} value={x}>
+              {x}
+            </option>
+          ))}
+        </select>
+        <span aria-hidden className="stat text-[24px] text-muted">
+          :
+        </span>
+        <select aria-label={`${label}: минуты`} value={m} onChange={(e) => onChange(`${h}:${e.target.value}`)} className={selectCls}>
+          {minutes.map((x) => (
+            <option key={x} value={x}>
+              {x}
+            </option>
+          ))}
+        </select>
+      </div>
+    </div>
   );
 }

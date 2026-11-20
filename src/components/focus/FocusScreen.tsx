@@ -46,11 +46,18 @@ function useWakeLock(on: boolean) {
   useEffect(() => {
     if (!on || !("wakeLock" in navigator)) return;
     let lock: { release: () => Promise<void> } | null = null;
+    let gone = false;
     (navigator as Navigator & { wakeLock: { request: (t: "screen") => Promise<{ release: () => Promise<void> }> } }).wakeLock
       .request("screen")
-      .then((l) => (lock = l))
+      .then((l) => {
+        if (gone) void l.release().catch(() => {});
+        else lock = l;
+      })
       .catch(() => {});
-    return () => void lock?.release().catch(() => {});
+    return () => {
+      gone = true;
+      void lock?.release().catch(() => {});
+    };
   }, [on]);
 }
 
@@ -140,7 +147,7 @@ export function FocusScreen() {
 
   return (
     <div className="night fixed inset-0 z-10 overflow-y-auto">
-      <div className="mx-auto flex min-h-full max-w-xl flex-col px-5 pt-[calc(24px+env(safe-area-inset-top))] pb-32">
+      <div className="mx-auto flex min-h-full max-w-xl flex-col px-5 pt-[calc(24px+env(safe-area-inset-top))] pb-36">
         {view.kind === "loading" && <div aria-busy="true" className="mt-24 h-72 animate-pulse rounded-card-lg bg-white/5" />}
 
         {view.kind === "setup" && (
@@ -148,7 +155,7 @@ export function FocusScreen() {
             <header>
               <p className="eyebrow text-night-muted">Фокус</p>
               <h1 className="title mt-1 text-[32px] text-night-ink">Фокус-сессия</h1>
-              <p className="mt-2 text-[17px] text-night-muted">Отложите телефон и учитесь без отвлечений. Сессия до конца — капля для дерева.</p>
+              <p className="mt-2 text-[17px] text-night-muted">Учитесь без отвлечений. Сессия до конца — капля для дерева.</p>
             </header>
 
             <TreeScene night stage={stage} wilting={false} title="Ваше дерево ночью" className="h-56 rounded-card-lg" />
@@ -162,7 +169,7 @@ export function FocusScreen() {
                     <label
                       key={m}
                       className={`pressable flex min-h-12 cursor-pointer items-center justify-center rounded-full text-[17px] font-semibold transition-colors has-[:focus-visible]:outline-3 has-[:focus-visible]:outline-glow ${
-                        on ? "bg-white text-navy" : "text-night-muted"
+                        on ? "bg-white text-navy" : "text-night-ink/85"
                       }`}
                     >
                       <input type="radio" name="len" value={m} checked={on} onChange={() => setLength(m)} className="sr-only" />
