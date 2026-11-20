@@ -28,23 +28,31 @@ function placeTree(svg: string): string {
     .replace(/<title[^>]*>[\s\S]*?<\/title>/, "")
     .replace(/^<svg[^>]*>/, "")
     .replace(/<\/svg>\s*$/, "");
-  return `<svg x="190" y="560" width="700" height="770" viewBox="0 0 200 220">${inner}</svg>`;
+  return `<svg x="240" y="440" width="600" height="660" viewBox="0 0 200 220">${inner}</svg>`;
 }
 
 export function shareCardSvg({ treeSvg, stageName, activeDays, url }: ShareCardInput): string {
   const days = Math.max(0, Math.min(7, Math.round(activeDays)));
-  const font = "Montserrat, Arial, sans-serif";
+  // System UI font: SF on iPhone, Roboto on Android (web fonts can't load inside an SVG image).
+  const font = "-apple-system, 'SF Pro Display', 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif";
+  const dots = Array.from({ length: 7 }, (_, i) => {
+    const cx = 540 - 3 * 92 + i * 92;
+    return `<circle cx="${cx}" cy="1540" r="30" fill="${i < days ? "#1E5BFF" : "#E5E5EA"}"/>`;
+  }).join("");
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${CARD_W}" height="${CARD_H}" viewBox="0 0 ${CARD_W} ${CARD_H}">
-<rect width="100%" height="100%" fill="#F4F7FE"/>
-<rect x="60" y="60" width="960" height="1800" rx="56" fill="#FBFCFF" stroke="#DCE5FA" stroke-width="3"/>
-<text x="540" y="230" text-anchor="middle" font-family="${font}" font-weight="900" font-size="88" fill="#0A2A9E">МОЯ НЕДЕЛЯ</text>
-<text x="540" y="330" text-anchor="middle" font-family="${font}" font-weight="900" font-size="88" fill="#1E5BFF">ФОКУСА</text>
-<text x="540" y="440" text-anchor="middle" font-family="${font}" font-weight="600" font-size="44" fill="#55658A">Стадия дерева: ${esc(stageName)}</text>
+<rect width="100%" height="100%" fill="#F2F2F7"/>
+<text x="96" y="210" font-family="${font}" font-weight="600" font-size="40" fill="#6C6C70">FOCUSAI · НЕДЕЛЯ</text>
+<text x="96" y="300" font-family="${font}" font-weight="700" font-size="92" letter-spacing="-2" fill="#1C1C1E">Моя неделя фокуса</text>
+<rect x="72" y="380" width="936" height="900" rx="56" fill="#FFFFFF"/>
+<defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFFFFF"/><stop offset="1" stop-color="#EEF6EC"/></linearGradient></defs>
+<rect x="72" y="380" width="936" height="900" rx="56" fill="url(#g)"/>
 ${placeTree(treeSvg)}
-<text x="540" y="1490" text-anchor="middle" font-family="${font}" font-weight="900" font-size="150" fill="#0A2A9E">${days} из 7</text>
-<text x="540" y="1570" text-anchor="middle" font-family="${font}" font-weight="600" font-size="46" fill="#0B1533">${plural(days, ["день", "дня", "дней"])} с чек-ином</text>
-<text x="540" y="1720" text-anchor="middle" font-family="${font}" font-weight="800" font-size="40" fill="#0A2A9E">FocusAI — 1 минута в день</text>
-<text x="540" y="1780" text-anchor="middle" font-family="${font}" font-weight="500" font-size="34" fill="#55658A">${esc(url)}</text>
+<text x="540" y="1250" text-anchor="middle" font-family="${font}" font-weight="600" font-size="44" fill="#1C1C1E">Стадия дерева: ${esc(stageName)}</text>
+<text x="540" y="1440" text-anchor="middle" font-family="${font}" font-weight="700" font-size="120" letter-spacing="-3" fill="#1C1C1E">${days} из 7</text>
+${dots}
+<text x="540" y="1650" text-anchor="middle" font-family="${font}" font-weight="500" font-size="44" fill="#6C6C70">${plural(days, ["день", "дня", "дней"])} с чек-ином</text>
+<text x="540" y="1790" text-anchor="middle" font-family="${font}" font-weight="600" font-size="40" fill="#1E5BFF">FocusAI — 1 минута в день</text>
+<text x="540" y="1846" text-anchor="middle" font-family="${font}" font-weight="500" font-size="32" fill="#6C6C70">${esc(url)}</text>
 </svg>`;
 }
 
