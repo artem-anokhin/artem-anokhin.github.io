@@ -12,6 +12,6 @@ describe("FocusTest", () => {
     expect(screen.getByText("Рано, ничего страшного")).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Закончить" }));
     expect(screen.getByText(/Мало нажатий/)).toBeInTheDocument();
-    expect(screen.getByText("Ранние нажатия").nextSibling).toHaveTextContent("1");
+    expect(screen.getByText("Ранние").nextSibling).toHaveTextContent("1");
   });
 });

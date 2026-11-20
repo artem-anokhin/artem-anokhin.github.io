@@ -13,7 +13,9 @@ import {
   type Session,
 } from "@/lib/focusTest";
 import { saveFocusTest } from "@/lib/focusResults";
-import { btnPrimary, btnSecondary } from "@/components/ui/controls";
+import { X } from "lucide-react";
+import { btnNight, btnNightGhost } from "@/components/ui/controls";
+import { DropIcon, ProgressRing } from "@/components/ui/visuals";
 
 type View = "intro" | "running" | "result";
 type SaveStatus = "saving" | "saved" | "error" | "skipped";
@@ -140,26 +142,42 @@ export function FocusTest() {
     };
   }, [view, onPress]);
 
+  const close = (
+    <Link href="/focus/" aria-label="Закрыть тест" className="pressable grid size-11 place-items-center rounded-full bg-white/10 text-night-ink">
+      <X aria-hidden size={22} />
+    </Link>
+  );
+
   if (view === "intro") {
     return (
-      <div className="mx-auto max-w-xl space-y-5">
-        {interrupted && (
-          <p role="status" className="card p-4 text-ink">
-            Тест прерван: вкладка была свёрнута. Начните заново, когда будет удобно.
-          </p>
-        )}
-        <ol className="card list-decimal space-y-3 p-6 pl-10 text-ink">
-          <li>Нажимайте на синюю зону, как только появится круг.</li>
-          <li>Не нажимайте заранее: ранние нажатия считаются ошибкой.</li>
-          <li>На компьютере можно нажимать пробел.</li>
-        </ol>
-        <p className="text-sm text-muted">
-          Короткая версия менее точна, чем лабораторный тест. {DISCLAIMER}
-        </p>
-        <button type="button" className={`${btnPrimary} w-full`} onClick={start}>
-          Начать
-        </button>
-      </div>
+      <Night>
+        {close}
+        <div className="stagger flex flex-1 flex-col items-center justify-center gap-6 text-center">
+          {interrupted && (
+            <p role="status" className="rounded-card bg-white/10 p-4 text-night-ink">
+              Тест прерван: вкладка была свёрнута. Начните заново, когда будет удобно.
+            </p>
+          )}
+          <span aria-hidden className="grid size-44 animate-breathe place-items-center rounded-full bg-accent/25 shadow-glow">
+            <span className="size-24 rounded-full bg-accent" />
+          </span>
+          <div>
+            <h1 className="title text-[32px] text-night-ink">Тест реакции</h1>
+            <p className="mt-2 text-[17px] text-night-muted">90 секунд. Нажимайте, как только загорится круг.</p>
+          </div>
+          <ul className="w-full max-w-sm space-y-2 text-left text-[15px] text-night-ink">
+            <li className="rounded-[18px] bg-white/6 px-4 py-3">Нажимайте в любом месте нижней зоны экрана</li>
+            <li className="rounded-[18px] bg-white/6 px-4 py-3">Не нажимайте заранее — это ошибка</li>
+            <li className="rounded-[18px] bg-white/6 px-4 py-3">На компьютере можно нажимать пробел</li>
+          </ul>
+        </div>
+        <div className="space-y-3">
+          <button type="button" className={`${btnNight} w-full`} onClick={start}>
+            Начать
+          </button>
+          <p className="text-center text-[13px] text-night-muted">Короткая версия менее точна, чем лабораторный тест. {DISCLAIMER}</p>
+        </div>
+      </Night>
     );
   }
 
@@ -167,13 +185,13 @@ export function FocusTest() {
     const sec = Math.ceil(leftMs / 1000);
     const progress = 1 - leftMs / TEST_DURATION_MS;
     return (
-      <div className="mx-auto max-w-xl space-y-4">
-        <div>
-          <div className="h-2 overflow-hidden rounded-full bg-soft" aria-hidden>
-            <div className="h-full bg-accent" style={{ width: `${progress * 100}%` }} />
+      <Night>
+        <div className="flex items-center gap-3">
+          <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-white/12" aria-hidden>
+            <div className="h-full rounded-full bg-glow" style={{ width: `${progress * 100}%` }} />
           </div>
-          <p className="mt-2 text-sm text-muted">
-            Осталось {Math.floor(sec / 60)}:{String(sec % 60).padStart(2, "0")}
+          <p className="stat text-[17px] text-night-muted">
+            {Math.floor(sec / 60)}:{String(sec % 60).padStart(2, "0")}
           </p>
         </div>
         <div
@@ -185,77 +203,95 @@ export function FocusTest() {
             e.preventDefault();
             onPress();
           }}
-          className="card flex min-h-[min(360px,50svh)] cursor-pointer touch-none select-none flex-col items-center justify-center gap-4 bg-soft"
+          className="mt-4 flex flex-1 cursor-pointer touch-none select-none flex-col items-center justify-center gap-6 rounded-sheet bg-white/[0.03]"
         >
-          {stimulus ? (
-            <span className="flex size-32 items-center justify-center rounded-full bg-accent font-display text-2xl font-extrabold text-white">
-              Нажмите!
-            </span>
-          ) : (
-            <span className="font-display text-2xl font-extrabold text-navy">Ждите…</span>
-          )}
-          <span className="min-h-6 text-muted">{stimulus ? "" : feedback}</span>
+          <span
+            aria-hidden
+            className={`grid size-52 place-items-center rounded-full transition-all duration-75 ${
+              stimulus ? "scale-100 bg-accent shadow-glow" : "scale-90 border-2 border-white/15"
+            }`}
+          >
+            {stimulus && <span className="font-display text-2xl font-extrabold text-white">Жми!</span>}
+          </span>
+          <span className="min-h-6 text-[15px] text-night-muted">{stimulus ? "" : feedback || "Ждите…"}</span>
         </div>
         <p className="sr-only" aria-live="polite">
           {stimulus ? "Сигнал" : ""}
         </p>
-        <button type="button" className={`${btnSecondary} w-full`} onClick={finish}>
+        <button type="button" className={`${btnNightGhost} mt-4 w-full`} onClick={finish}>
           Закончить
         </button>
-      </div>
+      </Night>
     );
   }
 
   const s = summary;
   return (
-    <div className="mx-auto max-w-xl space-y-5">
-      <section ref={resultRef} tabIndex={-1} aria-label="Результат теста" className="card p-6 text-center">
+    <Night>
+      {close}
+      <section ref={resultRef} tabIndex={-1} aria-label="Результат теста" className="flex flex-1 flex-col items-center justify-center gap-6 text-center focus:outline-none">
         {s?.score != null ? (
           <>
-            <p className="text-muted">Focus Score</p>
-            <p className="font-display text-6xl font-black text-navy">
-              {s.score}
-              <span className="text-2xl text-muted"> / 100</span>
-            </p>
+            <p className="eyebrow text-night-muted">Focus Score</p>
+            <ProgressRing night size={220} stroke={14} value={s.score / 100}>
+              <span>
+                <span className="stat block text-[64px] text-night-ink">{s.score}</span>
+                <span className="text-[15px] text-night-muted">из 100</span>
+              </span>
+            </ProgressRing>
+            {save === "saved" && (
+              <p className="inline-flex animate-drop items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-[15px] font-semibold text-night-ink">
+                <DropIcon size={18} /> Сохранено · капля для дерева
+              </p>
+            )}
           </>
         ) : (
-          <p className="font-semibold text-ink">Мало нажатий для оценки. Попробуйте ещё раз.</p>
+          <p className="title text-[24px] text-night-ink">Мало нажатий для оценки. Попробуйте ещё раз.</p>
         )}
+        {s && (
+          <dl className="grid w-full grid-cols-3 gap-2">
+            {[
+              ["Реакция", s.medianRt != null ? `${s.medianRt} мс` : "—"],
+              ["Пропуски", String(s.lapses)],
+              ["Ранние", String(s.falseStarts)],
+            ].map(([label, value]) => (
+              <div key={label} className="rounded-card bg-white/6 p-3">
+                <dt className="text-[13px] text-night-muted">{label}</dt>
+                <dd className="stat mt-1 text-[22px] text-night-ink">{value}</dd>
+              </div>
+            ))}
+          </dl>
+        )}
+        <p className="text-[13px] text-night-muted">Результат меняется день ото дня: с ним связаны сон и обстановка. {DISCLAIMER}</p>
+        <p role="status" className="text-[15px] text-night-ink">
+          {save === "saving" && "Сохраняем…"}
+          {save === "error" && (
+            <>
+              Не удалось сохранить.{" "}
+              <button type="button" className="min-h-11 font-semibold underline" onClick={() => s && store(s)}>
+                Повторить
+              </button>
+            </>
+          )}
+        </p>
       </section>
-      {s && (
-        <dl className="grid grid-cols-3 gap-3 text-center">
-          {[
-            ["Медиана", s.medianRt != null ? `${s.medianRt} мс` : "—"],
-            ["Пропуски", String(s.lapses)],
-            ["Ранние нажатия", String(s.falseStarts)],
-          ].map(([label, value]) => (
-            <div key={label} className="card p-3">
-              <dt className="text-xs text-muted">{label}</dt>
-              <dd className="font-display text-xl font-extrabold text-ink">{value}</dd>
-            </div>
-          ))}
-        </dl>
-      )}
-      <p className="text-sm text-muted">Результат может меняться день ото дня: с ним связаны сон и обстановка. {DISCLAIMER}</p>
-      <p role="status" className="text-sm text-ink">
-        {save === "saving" && "Сохраняем…"}
-        {save === "saved" && "Сохранено на устройстве"}
-        {save === "error" && (
-          <>
-            Не удалось сохранить.{" "}
-            <button type="button" className="min-h-11 font-semibold text-accent underline" onClick={() => s && store(s)}>
-              Повторить
-            </button>
-          </>
-        )}
-      </p>
-      <div className="grid gap-3 sm:grid-cols-2">
-        <button type="button" className={btnPrimary} onClick={start}>
-          Пройти ещё раз
-        </button>
-        <Link href="/" className={btnSecondary}>
+      <div className="grid gap-3">
+        <Link href="/" className={btnNight}>
           На главную
         </Link>
+        <button type="button" className={btnNightGhost} onClick={start}>
+          Пройти ещё раз
+        </button>
+      </div>
+    </Night>
+  );
+}
+
+function Night({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="night min-h-dvh">
+      <div className="mx-auto flex min-h-dvh max-w-xl flex-col px-5 pt-[calc(12px+env(safe-area-inset-top))] pb-[calc(20px+env(safe-area-inset-bottom))]">
+        {children}
       </div>
     </div>
   );

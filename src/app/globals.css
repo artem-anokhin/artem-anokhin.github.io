@@ -161,3 +161,8 @@
     scroll-behavior: auto !important;
   }
 }
+
+/* Focus session running: hide app navigation (set by FocusScreen). */
+html[data-immersive] nav[aria-label="Основная навигация"] {
+  display: none;
+}
