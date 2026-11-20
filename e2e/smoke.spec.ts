@@ -22,7 +22,7 @@ test("onboarding → demo → every screen fits 375px → check-in → focus →
   await page.getByRole("button", { name: "Понятно" }).click();
   await page.getByRole("checkbox").check();
   await page.getByRole("button", { name: "Начать" }).click();
-  await expect(page.getByRole("link", { name: /Чек-ин.*1 минута/ })).toBeVisible();
+  await expect(page.getByRole("link", { name: /Отметить день/ })).toBeVisible();
 
   await page.goto("/settings/");
   await page.getByRole("button", { name: "Показать демо-данные" }).click();
@@ -52,7 +52,7 @@ test("onboarding → demo → every screen fits 375px → check-in → focus →
   await page.goto("/settings/");
   await page.getByRole("button", { name: "Убрать демо-данные" }).click();
   await expect(page).toHaveURL(/\/$/);
-  await page.getByRole("link", { name: /Чек-ин.*1 минута/ }).click();
+  await page.getByRole("link", { name: /Отметить день/ }).click();
   for (let i = 0; i < 7; i++) await page.getByRole("button", { name: "Далее" }).click();
   await page.getByRole("button", { name: "Сохранить" }).click();
   await expect(page.getByRole("status").filter({ hasText: "День отмечен" })).toBeVisible();

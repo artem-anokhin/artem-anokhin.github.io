@@ -1,16 +1,10 @@
 import type { Metadata, Viewport } from "next";
-import { Caveat, Inter, Montserrat } from "next/font/google";
+import { Inter } from "next/font/google";
 import { AppShell } from "@/components/AppShell";
 import { ServiceWorker } from "@/components/ServiceWorker";
 import "./globals.css";
 
 const inter = Inter({ subsets: ["latin", "cyrillic"], variable: "--font-inter" });
-const montserrat = Montserrat({
-  subsets: ["latin", "cyrillic"],
-  weight: ["800", "900"],
-  variable: "--font-montserrat",
-});
-const caveat = Caveat({ subsets: ["latin", "cyrillic"], variable: "--font-caveat" });
 
 export const metadata: Metadata = {
   title: "FocusAI",
@@ -20,7 +14,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#0A2A9E",
+  themeColor: "#F2F2F7",
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",
@@ -28,7 +22,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="ru" className={`${inter.variable} ${montserrat.variable} ${caveat.variable}`}>
+    <html lang="ru" className={inter.variable}>
       <body>
         <AppShell>{children}</AppShell>
         <ServiceWorker />

@@ -1,16 +1,16 @@
 @import "tailwindcss";
 
-/* Design tokens — match the pitch deck (see CLAUDE.md §3) */
+/* Design tokens — «Apple-clean» (docs/DESIGN.md). Brand blue is the single interactive tint. */
 @theme {
-  --color-navy: #0a2a9e;
-  --color-deep: #071f7a;
+  --color-navy: #1e5bff;
+  --color-deep: #1648d8;
   --color-accent: #1e5bff;
-  --color-soft: #e7eeff;
-  --color-bg: #f6f7fb;
-  --color-card: #fbfcff;
-  --color-line: #dce5fa;
-  --color-ink: #0b1533;
-  --color-muted: #55658a;
+  --color-soft: #eaf0ff;
+  --color-bg: #f2f2f7;
+  --color-card: #ffffff;
+  --color-line: #e5e5ea;
+  --color-ink: #1c1c1e;
+  --color-muted: #6c6c70;
   --color-leaf: #5db55a;
   --color-leaf-light: #83cf6e;
   --color-trunk: #a9774f;
@@ -19,19 +19,19 @@
 
   /* «Спокойный сад фокуса» (docs/DESIGN.md) */
   --color-surface: #ffffff;
-  --color-sand: #fbf5ea;
-  --color-sand-ink: #6b4a2e;
+  --color-sand: #f2f2f7;
+  --color-sand-ink: #6c6c70;
   --color-sky-top: #cfe0ff;
   --color-sky-bottom: #f3f7ff;
   --color-hill-far: #b9e0b0;
   --color-hill-near: #83cf6e;
   --color-sun: #ffc75a;
   --color-water: #3aa8f0;
-  --color-night: #0b1640;
-  --color-night-2: #13215a;
-  --color-night-ink: #eef2ff;
-  --color-night-muted: #a9b6de;
-  --color-glow: #5b8cff;
+  --color-night: #000000;
+  --color-night-2: #1c1c1e;
+  --color-night-ink: #ffffff;
+  --color-night-muted: #98989f;
+  --color-glow: #4d7dff;
 
   /* Sphere colors: base / tint / ink */
   --color-s-sleep: #6366f1;
@@ -57,15 +57,15 @@
   --color-s-rest-ink: #7a5200;
 
   --font-sans: var(--font-inter), system-ui, sans-serif;
-  --font-display: var(--font-montserrat), system-ui, sans-serif;
-  --font-hand: var(--font-caveat), cursive;
+  --font-display: var(--font-inter), system-ui, sans-serif;
+  
 
-  --radius-card: 24px;
-  --radius-card-lg: 28px;
-  --radius-sheet: 36px;
-  --shadow-card: 0 1px 2px rgba(11, 21, 51, 0.04), 0 6px 20px -6px rgba(10, 42, 158, 0.1);
-  --shadow-soft: 0 1px 2px rgba(11, 21, 51, 0.04), 0 6px 20px -6px rgba(10, 42, 158, 0.1);
-  --shadow-lift: 0 2px 6px rgba(11, 21, 51, 0.06), 0 24px 48px -16px rgba(10, 42, 158, 0.28);
+  --radius-card: 14px;
+  --radius-card-lg: 18px;
+  --radius-sheet: 24px;
+  --shadow-card: none;
+  --shadow-soft: 0 0 0 0.5px rgba(0, 0, 0, 0.04);
+  --shadow-lift: 0 1px 3px rgba(0, 0, 0, 0.08);
   --shadow-glow: 0 0 0 1px rgba(91, 140, 255, 0.25), 0 0 48px rgba(91, 140, 255, 0.35);
 
   --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
@@ -79,7 +79,7 @@
   --animate-drop: drop 700ms var(--ease-out) both;
 
   @keyframes rise {
-    from { opacity: 0; transform: translateY(12px); }
+    from { opacity: 0; transform: translateY(6px); }
     to { opacity: 1; transform: none; }
   }
   @keyframes pop {
@@ -112,10 +112,7 @@
   }
   body {
     @apply bg-bg text-ink font-sans antialiased;
-    background-image:
-      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.035'/%3E%3C/svg%3E"),
-      radial-gradient(120% 60% at 50% -10%, #e7eeff 0%, #f6f7fb 60%);
-    background-attachment: fixed;
+    font-feature-settings: "cv11", "ss01";
   }
   :focus-visible {
     outline: 3px solid var(--color-accent);
@@ -128,16 +125,21 @@
     @apply bg-surface rounded-card-lg shadow-soft;
   }
   .title {
-    @apply font-display font-extrabold leading-[1.15] tracking-[-0.01em] text-ink;
+    @apply font-sans font-bold leading-[1.15] tracking-[-0.022em] text-ink;
   }
+  /* Section label: calm sentence case, no letter-spaced caps. */
   .eyebrow {
-    @apply text-[13px] font-bold uppercase tracking-[0.08em] text-muted;
+    @apply text-[15px] font-semibold tracking-[-0.01em] text-muted;
   }
   .stat {
-    @apply font-display font-black tabular-nums leading-none tracking-[-0.02em];
+    @apply font-sans font-bold tabular-nums leading-none tracking-[-0.03em];
   }
   .night {
-    @apply bg-gradient-to-b from-night-2 to-night text-night-ink;
+    @apply bg-black text-night-ink;
+  }
+  /* iOS-style inset grouped list. */
+  .group-list {
+    @apply divide-y divide-line overflow-hidden rounded-card-lg bg-surface;
   }
   .pressable {
     @apply transition-transform duration-150 active:scale-[0.97];

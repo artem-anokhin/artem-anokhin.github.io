@@ -14,8 +14,8 @@ export function PageHeader({
     <header className="mb-6">
       <div className="flex items-start justify-between gap-3">
         <div>
-          {accent && <p className="eyebrow first-letter:uppercase">{accent}</p>}
-          <h1 className="title mt-1 text-[32px]">{title}</h1>
+          {accent && <p className="text-[13px] font-semibold text-muted uppercase">{accent}</p>}
+          <h1 className="title text-[34px]">{title}</h1>
         </div>
         {action}
       </div>

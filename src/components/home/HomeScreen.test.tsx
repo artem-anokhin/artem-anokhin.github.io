@@ -21,16 +21,17 @@ const seedDays = async (n: number) => {
 };
 
 describe("HomeScreen", () => {
-  it("offers check-in and focus session before today's check-in", async () => {
+  it("offers check-in, test and focus session before today's check-in", async () => {
     await consent();
     render(<HomeScreen />);
-    expect(await screen.findByRole("link", { name: /Чек-ин.*1 минута/ })).toHaveAttribute("href", expect.stringMatching(/^\/checkin\/?$/));
+    expect(await screen.findByRole("link", { name: /Отметить день/ })).toHaveAttribute("href", expect.stringMatching(/^\/checkin\/?$/));
     expect(screen.getByRole("link", { name: /Фокус-сессия/ })).toHaveAttribute("href", expect.stringMatching(/^\/focus\/?$/));
     expect(screen.getByRole("link", { name: /Focus Score сегодня ещё нет/ })).toHaveAttribute("href", expect.stringMatching(/^\/test\/?$/));
-    expect(screen.getByText("До инсайтов: 7 дней")).toBeInTheDocument();
+    expect(screen.getByText("До инсайтов 7 дней")).toBeInTheDocument();
+    expect(screen.getByText("Не сделан")).toBeInTheDocument();
   });
 
-  it("after check-in shows the day's spheres, a sourced tip and today's score", async () => {
+  it("after check-in shows done state, a sourced tip and today's score", async () => {
     await consent();
     const d = { ...emptyCheckIn(), date: dayKey(), createdAt: 1, updatedAt: 1 };
     d.food.breakfast = false;
@@ -38,7 +39,8 @@ describe("HomeScreen", () => {
     await db.focusTests.add({ date: dayKey(), takenAt: 1, score: 77 });
     render(<HomeScreen />);
     expect(await screen.findByText("Чек-ин готов")).toBeInTheDocument();
-    expect(screen.getByText("Ваш день")).toBeInTheDocument();
+    expect(screen.getByText("Готов")).toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: /Отметить день/ })).not.toBeInTheDocument();
     expect(screen.getByRole("link", { name: /Focus Score сегодня: 77 из 100/ })).toBeInTheDocument();
     expect(screen.getByText(/Источник:/).closest("a")).toHaveAttribute("href");
     expect(Object.values(TIPS).some((t) => screen.queryByText(t.title))).toBe(true);
@@ -48,11 +50,11 @@ describe("HomeScreen", () => {
     await consent();
     await seedDays(6);
     const { unmount } = render(<HomeScreen />);
-    expect(await screen.findByText("До инсайтов: 1 день")).toBeInTheDocument();
+    expect(await screen.findByText("До инсайтов 1 день")).toBeInTheDocument();
     unmount();
     await seedDays(7);
     render(<HomeScreen />);
-    await screen.findByText(/Чек-ин/);
+    await screen.findByText("Действия");
     expect(screen.queryByText(/До инсайтов/)).not.toBeInTheDocument();
   });
 });

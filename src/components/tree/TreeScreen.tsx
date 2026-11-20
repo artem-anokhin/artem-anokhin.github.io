@@ -62,24 +62,23 @@ export function TreeScreen() {
   const title = `Дерево: ${tree.stageName}${tree.wilting ? ", отдыхает" : ""}`;
 
   return (
-    <div className="-mx-5 -mt-6 md:mx-0 md:mt-0">
-      {/* Full-bleed garden scene */}
-      <section id="tree-card" aria-labelledby="stage-title" className="relative">
-        <TreeScene stage={tree.stage} wilting={tree.wilting} title={title} className="h-[440px] md:rounded-card-lg" lift={28} />
-        <div className="absolute inset-x-0 top-0 px-5 pt-6">
-          <p className="eyebrow text-navy/70">Стадия {tree.stage + 1} из {STAGES.length}</p>
-          <h1 id="stage-title" className="title mt-1 text-[36px] first-letter:uppercase">
-            {tree.stageName}
-          </h1>
-          <p className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-white/80 px-3 py-1.5 text-[14px] font-semibold text-ink backdrop-blur">
-            <DropIcon /> {tree.drops} {plural(tree.drops, ["капля", "капли", "капель"])}
-          </p>
-        </div>
+    <div className="space-y-6">
+      <header className="pt-2">
+        <p className="text-[13px] font-semibold text-muted uppercase">Стадия {tree.stage + 1} из {STAGES.length}</p>
+        <h1 id="stage-title" className="title text-[34px] first-letter:uppercase">
+          {tree.stageName}
+        </h1>
+      </header>
+
+      <section id="tree-card" aria-labelledby="stage-title" className="relative overflow-hidden rounded-card-lg bg-surface">
+        <TreeScene stage={tree.stage} wilting={tree.wilting} title={title} className="h-72" />
+        <p className="absolute top-3 left-3 inline-flex items-center gap-1.5 rounded-full bg-surface/90 px-3 py-1 text-[13px] font-semibold text-ink">
+          <DropIcon /> {tree.drops} {plural(tree.drops, ["капля", "капли", "капель"])}
+        </p>
       </section>
 
-      {/* Bottom sheet */}
-      <div className="relative -mt-9 space-y-7 rounded-t-sheet bg-bg px-5 pt-7 md:mt-4 md:rounded-sheet">
-        <section aria-label="Рост">
+      <div className="space-y-6">
+        <section aria-label="Рост" className="rounded-card-lg bg-surface p-4">
           {next && tree.nextAt !== null ? (
             <>
               <div
@@ -88,23 +87,23 @@ export function TreeScreen() {
                 aria-valuemin={0}
                 aria-valuemax={tree.nextAt}
                 aria-valuenow={tree.drops}
-                className="h-3 overflow-hidden rounded-full bg-soft"
+                className="h-2 overflow-hidden rounded-full bg-[#e9e9ee]"
               >
-                <div className="h-full rounded-full bg-gradient-to-r from-leaf-light to-leaf transition-[width] duration-700" style={{ width: `${tree.progress * 100}%` }} />
+                <div className="h-full rounded-full bg-leaf transition-[width] duration-700" style={{ width: `${tree.progress * 100}%` }} />
               </div>
               <p className="mt-2 text-[15px] text-muted">
                 До стадии «{next}»: {tree.drops} из {tree.nextAt}
               </p>
             </>
           ) : (
-            <p className="text-[15px] font-semibold text-s-activity-ink">Дерево в полном цвету</p>
+            <p className="text-[15px] font-semibold text-ink">Дерево в полном цвету</p>
           )}
           <ol className="mt-4 flex items-center justify-between" aria-label="Стадии">
             {STAGES.map((name, i) => (
               <li key={name} className="flex flex-col items-center gap-1">
                 <span
                   className={`grid size-10 place-items-center rounded-full ${
-                    i < tree.stage ? "bg-s-activity-tint text-s-activity-ink" : i === tree.stage ? "bg-navy text-white shadow-lift ring-4 ring-soft" : "bg-soft text-muted"
+                    i < tree.stage ? "bg-leaf text-white" : i === tree.stage ? "bg-accent text-white" : "bg-[#e9e9ee] text-muted"
                   }`}
                 >
                   {(() => {
@@ -128,7 +127,7 @@ export function TreeScreen() {
             <p key={m.text} className="rounded-card bg-sand p-4 text-ink">
               {m.text}
               {m.source && (
-                <a href={m.source.url} target="_blank" rel="noopener noreferrer" className="mt-1 flex min-h-11 items-center text-[13px] text-sand-ink underline">
+                <a href={m.source.url} target="_blank" rel="noopener noreferrer" className="mt-1 flex min-h-11 items-center text-[13px] text-muted underline">
                   Источник: {m.source.name}
                   <span className="sr-only"> (откроется в новой вкладке)</span>
                 </a>
@@ -141,7 +140,7 @@ export function TreeScreen() {
           <h2 id="week-title" className="eyebrow mb-3">
             Эта неделя
           </h2>
-          <dl className="grid grid-cols-4 divide-x divide-line rounded-card-lg bg-surface py-4 text-center shadow-soft">
+          <dl className="grid grid-cols-4 divide-x divide-line rounded-card-lg bg-surface py-4 text-center">
             {[
               ["Чек-ины", String(tree.week.checkins)],
               ["Тесты", String(tree.week.tests)],
@@ -162,7 +161,7 @@ export function TreeScreen() {
           <h2 id="how-title" className="eyebrow mb-3">
             Откуда капли
           </h2>
-          <ul className="divide-y divide-line overflow-hidden rounded-card-lg bg-surface shadow-soft">
+          <ul className="group-list">
             {[
               ["Чек-ин", "+1 в день", "bg-navy"],
               ["Тест реакции", "+1 в день", "bg-accent"],

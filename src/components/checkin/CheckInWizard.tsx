@@ -83,16 +83,16 @@ export function CheckInWizard({
 
   return (
     <form
-      className={`flex min-h-dvh flex-col transition-colors duration-500 ${theme.tint}`}
+      className="flex min-h-dvh flex-col bg-bg"
       onSubmit={(e) => {
         e.preventDefault();
         if (isNote) void save();
         else setStep(step + 1);
       }}
     >
-      <div className="mx-auto w-full max-w-xl flex-1 px-5 pt-[calc(12px+env(safe-area-inset-top))]">
+      <div className="mx-auto w-full max-w-xl flex-1 px-4 pt-[calc(8px+env(safe-area-inset-top))]">
         <div className="flex items-center gap-3">
-          <Link href="/" aria-label="Закрыть чек-ин" className="pressable grid size-11 shrink-0 place-items-center rounded-full bg-white/70 text-ink">
+          <Link href="/" aria-label="Закрыть чек-ин" className="pressable grid size-11 shrink-0 place-items-center text-accent">
             <X aria-hidden size={22} />
           </Link>
           <div
@@ -106,24 +106,24 @@ export function CheckInWizard({
             {[...SPHERES.map((x) => x.key), "note" as const].map((k, i) => (
               <span
                 key={k}
-                className={`h-1.5 rounded-full transition-colors ${
-                  i < step ? (k === "note" ? "bg-navy" : SPHERE_STYLE[k].base) : i === step ? `${theme.base} animate-breathe` : "bg-white/70"
+                className={`h-1 rounded-full transition-colors ${
+                  i < step ? (k === "note" ? "bg-accent" : SPHERE_STYLE[k].base) : i === step ? theme.base : "bg-[#d1d1d6]"
                 }`}
               />
             ))}
           </div>
         </div>
 
-        <section key={step} className="stagger mt-8 space-y-7 pb-6" aria-labelledby="sphere-title">
+        <section key={step} className="stagger mt-6 space-y-6 pb-6" aria-labelledby="sphere-title">
           <div>
-            <span className={`grid size-20 place-items-center rounded-full bg-white shadow-soft ${st?.text ?? "text-navy"}`}>
-              <Icon aria-hidden size={40} strokeWidth={2.2} />
+            <span className={`grid size-14 place-items-center rounded-[14px] text-white ${st?.base ?? "bg-accent"}`}>
+              <Icon aria-hidden size={28} strokeWidth={2.2} />
             </span>
-            <p className={`eyebrow mt-5 ${theme.ink}`}>{isNote ? "Последний шаг" : `Сфера ${step + 1} из ${SPHERES.length}`}</p>
-            <h2 id="sphere-title" ref={headingRef} tabIndex={-1} className="title mt-1 text-[30px] focus:outline-none">
+            <p className="mt-4 text-[13px] font-semibold text-muted">{isNote ? "Последний шаг" : `Сфера ${step + 1} из ${SPHERES.length}`}</p>
+            <h2 id="sphere-title" ref={headingRef} tabIndex={-1} className="title text-[34px] focus:outline-none">
               {title}
             </h2>
-            <p className="mt-1 text-[17px] text-muted">{question}</p>
+            <p className="mt-0.5 text-[17px] text-muted">{question}</p>
           </div>
 
           {step === 0 && (
@@ -132,7 +132,7 @@ export function CheckInWizard({
                 <TimeField label="Отход ко сну" value={d.sleep.bedtime} onChange={(v) => patch("sleep", { bedtime: v })} />
                 <TimeField label="Пробуждение" value={d.sleep.wake} onChange={(v) => patch("sleep", { wake: v })} />
               </div>
-              <p className={`-mt-3 text-[15px] ${theme.ink}`} aria-live="polite">
+              <p className="-mt-3 text-[15px] text-muted" aria-live="polite">
                 Сон: <b>{safeHours(d.sleep.bedtime, d.sleep.wake)}</b>
               </p>
               <ScaleField legend="Качество сна" name="sleepq" value={d.sleep.quality} onChange={(v) => patch("sleep", { quality: v })} low="плохо" high="отлично" theme={theme} glyph="face" words={["Плохо", "Так себе", "Нормально", "Хорошо", "Отлично"]} />
@@ -178,7 +178,7 @@ export function CheckInWizard({
                   onKeyDown={(e) => e.key === "Enter" && e.preventDefault()}
                   enterKeyHint="done"
                   placeholder="Например: прогулка 30 минут"
-                  className="h-14 w-full rounded-[18px] bg-white px-4 text-ink shadow-soft placeholder:text-muted"
+                  className="h-[50px] w-full rounded-[12px] bg-surface px-4 text-ink ring-1 ring-line ring-inset placeholder:text-muted"
                 />
               </label>
             </>
@@ -207,7 +207,7 @@ export function CheckInWizard({
                   value={d.note}
                   onChange={(e) => setD({ ...d, note: e.target.value })}
                   placeholder="Что получилось, что мешало… Заметка хранится только на этом устройстве."
-                  className="w-full rounded-[18px] bg-white p-4 text-ink shadow-soft placeholder:text-muted"
+                  className="w-full rounded-[12px] bg-surface p-4 text-ink ring-1 ring-line ring-inset placeholder:text-muted"
                 />
               </label>
               {hasCrisisWording(`${d.note} ${d.activity.note}`) && <CrisisCard />}
@@ -222,19 +222,17 @@ export function CheckInWizard({
         </section>
       </div>
 
-      <div className="sticky bottom-0 bg-gradient-to-t from-black/[0.03] to-transparent">
+      <div className="sticky bottom-0 border-t border-line bg-[#f9f9f9]/90 backdrop-blur-xl">
         <div className="mx-auto flex max-w-xl gap-3 px-5 pt-3 pb-[calc(16px+env(safe-area-inset-bottom))]">
           {step > 0 && (
-            <button type="button" className="pressable inline-flex min-h-14 items-center justify-center rounded-[18px] bg-white/80 px-5 text-[17px] font-semibold text-ink" onClick={() => setStep(step - 1)}>
+            <button type="button" className="pressable inline-flex min-h-[50px] items-center justify-center rounded-[14px] bg-soft px-5 text-[17px] font-semibold text-accent" onClick={() => setStep(step - 1)}>
               Назад
             </button>
           )}
           <button
             type="submit"
             disabled={saving}
-            className={`pressable inline-flex min-h-14 flex-1 items-center justify-center rounded-[18px] text-[17px] font-semibold text-white shadow-lift disabled:opacity-60 ${
-              isNote ? "bg-navy" : SPHERE_INK_BG[sphereKey!]
-            }`}
+            className="pressable inline-flex min-h-[50px] flex-1 items-center justify-center rounded-[14px] bg-accent text-[17px] font-semibold text-white disabled:opacity-60"
           >
             {isNote ? (saving ? "Сохраняем…" : "Сохранить") : "Далее"}
           </button>
@@ -254,16 +252,6 @@ const QUESTIONS: Record<SphereKey, string> = {
   rest: "Как вы отдыхали?",
 };
 
-/** Dark sphere color for the main button (white text ≥ 4.5:1). */
-const SPHERE_INK_BG: Record<SphereKey, string> = {
-  sleep: "bg-s-sleep-ink",
-  food: "bg-s-food-ink",
-  caffeine: "bg-s-caffeine-ink",
-  mind: "bg-s-mind-ink",
-  activity: "bg-s-activity-ink",
-  work: "bg-s-work-ink",
-  rest: "bg-s-rest-ink",
-};
 
 function safeHours(bed: string, wake: string): string {
   try {

@@ -89,16 +89,16 @@ function ExperimentCard({
   const finished = experiment !== null && day > EXPERIMENT_DAYS;
 
   return (
-    <article className="rounded-card-lg bg-sand p-5 md:p-6" aria-labelledby="exp-title">
-      <h2 id="exp-title" className="eyebrow flex items-center gap-1.5 text-sand-ink">
+    <article className="rounded-card-lg bg-surface p-4" aria-labelledby="exp-title">
+      <h2 id="exp-title" className="flex items-center gap-1.5 text-[13px] font-semibold text-muted">
         <FlaskConical aria-hidden size={16} /> Эксперимент недели
       </h2>
       {tip && (
         <>
-          <h3 className="title mt-2 text-[22px]">{tip.title}</h3>
+          <h3 className="mt-1.5 text-[20px] font-semibold tracking-[-0.01em] text-ink">{tip.title}</h3>
           <p className="mt-1 text-ink">{tip.text}</p>
           <p className="mt-1 text-sm font-medium text-navy">Пробуйте {EXPERIMENT_DAYS} дней подряд.</p>
-          <a href={tip.url} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-11 items-center text-[13px] text-sand-ink underline">
+          <a href={tip.url} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-11 items-center text-[13px] text-muted underline">
             Источник: {tip.source}
             <span className="sr-only"> (откроется в новой вкладке)</span>
           </a>
@@ -116,7 +116,7 @@ function ExperimentCard({
             aria-valuemin={0}
             aria-valuemax={EXPERIMENT_DAYS}
             aria-valuenow={day}
-            className="mt-2 h-2.5 overflow-hidden rounded-full bg-white/70"
+            className="mt-2 h-2 overflow-hidden rounded-full bg-[#e9e9ee]"
           >
             <div className="h-full rounded-full bg-leaf" style={{ width: `${(day / EXPERIMENT_DAYS) * 100}%` }} />
           </div>
@@ -125,7 +125,7 @@ function ExperimentCard({
       )}
 
       {finished && result && (
-        <div className="mt-3 rounded-[18px] bg-white/70 p-4 text-ink">
+        <div className="mt-3 rounded-[12px] bg-bg p-4 text-ink">
           {result.diff === null ? (
             <p>Мало дней с тестом, чтобы сравнить «до» и «после».</p>
           ) : (
@@ -143,7 +143,7 @@ function ExperimentCard({
       )}
 
       {experiment ? (
-        <button type="button" className={`${btnSecondary} mt-4 w-full bg-white/80`} onClick={onEnd} disabled={busy}>
+        <button type="button" className={`${btnSecondary} mt-4 w-full`} onClick={onEnd} disabled={busy}>
           Завершить эксперимент
         </button>
       ) : (
@@ -231,7 +231,7 @@ export function InsightsScreen() {
       <WeekHero week={week} />
 
       {locked ? (
-        <section className="flex items-center gap-5 rounded-card-lg bg-surface p-5 shadow-soft" aria-labelledby="locked-title">
+        <section className="flex items-center gap-5 rounded-card-lg bg-surface p-4" aria-labelledby="locked-title">
           <ProgressRing value={days / MIN_DAYS} size={96} stroke={10} label={`${days} из ${MIN_DAYS} дней`}>
             <span className="stat text-[26px] text-navy">
               {days}/{MIN_DAYS}
@@ -243,10 +243,10 @@ export function InsightsScreen() {
             </h2>
             <p className="mt-1 text-[15px] text-muted">Нужно 7 дней, в которые есть и чек-ин, и тест фокуса.</p>
             <div className="mt-3 flex flex-wrap gap-2">
-              <Link href="/checkin/" className="pressable inline-flex min-h-11 items-center rounded-full bg-navy px-4 text-[15px] font-semibold text-white">
+              <Link href="/checkin/" className="pressable inline-flex min-h-11 items-center rounded-full bg-accent px-4 text-[15px] font-semibold text-white">
                 Чек-ин
               </Link>
-              <Link href="/test/" className="pressable inline-flex min-h-11 items-center rounded-full bg-soft px-4 text-[15px] font-semibold text-navy">
+              <Link href="/test/" className="pressable inline-flex min-h-11 items-center rounded-full bg-soft px-4 text-[15px] font-semibold text-accent">
                 Тест фокуса
               </Link>
             </div>
@@ -256,9 +256,12 @@ export function InsightsScreen() {
         <p className="rounded-card-lg bg-surface p-5 text-ink shadow-soft">Явных связей пока нет. Это нормально, продолжайте отмечать дни.</p>
       ) : (
         <section aria-labelledby="links-h" className="space-y-3">
-          <h2 id="links-h" className="eyebrow">
-            Что связано с вашим фокусом · по {days} {plural(days, DAYS_GEN)}
+          <h2 id="links-h" className="title text-[22px]">
+            Что связано с фокусом
           </h2>
+          <p className="-mt-2 text-[13px] text-muted">
+            По {days} {plural(days, DAYS_GEN)} ваших данных
+          </p>
           {insights.map((i) => (
             <InsightCard key={i.metric.key} insight={i} split={splits[i.metric.key] ?? null} />
           ))}
@@ -299,27 +302,27 @@ function WeekHero({ week }: { week: (number | null)[] }) {
   return (
     <Link
       href="/week/"
-      className="pressable block overflow-hidden rounded-card-lg bg-gradient-to-br from-accent to-deep p-5 text-white shadow-lift"
+      className="pressable block overflow-hidden rounded-card-lg bg-surface p-4"
     >
-      <p className="eyebrow text-white/75">Итоги недели</p>
-      <div className="mt-1 flex items-end justify-between gap-4">
-        <p className="title max-w-[60%] text-[22px] text-white">Как прошли ваши 7 дней</p>
-        <span className="inline-flex items-center gap-1 text-[15px] font-semibold">
-          Смотреть <ArrowRight aria-hidden size={18} />
+      <div className="flex items-center justify-between gap-4">
+        <p className="text-[17px] font-semibold text-ink">Итоги недели</p>
+        <span className="inline-flex items-center gap-0.5 text-[15px] text-accent">
+          Смотреть <ArrowRight aria-hidden size={16} />
         </span>
       </div>
+      <p className="text-[13px] text-muted">Focus Score за 7 дней</p>
       <div aria-hidden className="mt-4 flex h-20 items-end gap-2">
         {week.map((v, i) => (
           <div key={i} className="flex flex-1 flex-col items-center gap-1">
             <div
-              className={`w-full origin-bottom animate-grow rounded-t-[8px] rounded-b-[4px] ${v === null ? "bg-white/15" : i === 6 ? "bg-white" : "bg-white/55"}`}
+              className={`w-full origin-bottom animate-grow rounded-[5px] ${v === null ? "bg-[#e9e9ee]" : i === 6 ? "bg-accent" : "bg-accent/45"}`}
               style={{ height: `${v === null ? 8 : Math.max(12, (v / 100) * 64)}px`, animationDelay: `${i * 40}ms` }}
             />
-            <span className="text-[11px] text-white/70">{WD[new Date(now.getFullYear(), now.getMonth(), now.getDate() - (6 - i)).getDay()]}</span>
+            <span className="text-[11px] text-muted">{WD[new Date(now.getFullYear(), now.getMonth(), now.getDate() - (6 - i)).getDay()]}</span>
           </div>
         ))}
       </div>
-      {!has && <p className="mt-2 text-[13px] text-white/80">Пройдите тест, чтобы появились столбики.</p>}
+      {!has && <p className="mt-2 text-[13px] text-muted">Пройдите тест, чтобы появились столбики.</p>}
     </Link>
   );
 }
@@ -330,8 +333,8 @@ function InsightCard({ insight: i, split }: { insight: Insight; split: SplitMean
   const sphereTitle = SPHERES.find((s) => s.key === i.metric.sphere)?.title ?? "";
   const max = split ? Math.max(split.high, split.low, 1) : 1;
   return (
-    <article className="rounded-card-lg bg-surface p-5 shadow-soft">
-      <p className={`eyebrow flex items-center gap-1.5 ${st.ink}`}>
+    <article className="rounded-card-lg bg-surface p-4">
+      <p className={`flex items-center gap-1.5 text-[13px] font-semibold ${st.text}`}>
         <Icon aria-hidden size={16} /> {sphereTitle}
       </p>
       <p className="mt-2 text-[17px] leading-snug font-semibold text-ink">{i.text}</p>
@@ -359,7 +362,7 @@ function InsightCard({ insight: i, split }: { insight: Insight; split: SplitMean
         <StrengthChip strength={i.strength} days={i.days} />
       </div>
       {METRIC_CARD[i.metric.key] && (
-        <a href={cardHref(METRIC_CARD[i.metric.key]!)} className="mt-1 flex min-h-11 items-center text-[15px] font-semibold text-navy underline underline-offset-4">
+        <a href={cardHref(METRIC_CARD[i.metric.key]!)} className="mt-1 flex min-h-11 items-center text-[15px] text-accent">
           Подробнее в библиотеке
         </a>
       )}

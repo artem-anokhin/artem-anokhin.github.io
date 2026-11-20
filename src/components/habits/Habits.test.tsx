@@ -31,7 +31,7 @@ describe("habits UI", () => {
     const box = await screen.findByRole("checkbox", { name: /Прогулка/ });
     expect(box).toHaveAttribute("aria-checked", "false");
     fireEvent.click(box);
-    expect(await screen.findByText("Привычки · 1 из 1")).toBeInTheDocument();
+    expect(await screen.findByText("1/1")).toBeInTheDocument();
     expect(await db.habitLogs.get([id, dayKey()])).toBeTruthy();
   });
 

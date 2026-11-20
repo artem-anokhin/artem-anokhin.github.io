@@ -52,11 +52,11 @@ export function WeekScreen() {
   }, []);
 
   return (
-    <div className="min-h-dvh bg-gradient-to-b from-sand via-bg to-sky-bottom">
+    <div className="min-h-dvh bg-bg">
       <div className="mx-auto max-w-xl px-5 pt-[calc(12px+env(safe-area-inset-top))] pb-[calc(24px+env(safe-area-inset-bottom))]">
         <div className="flex items-center justify-between">
-          <p className="eyebrow">Итоги недели</p>
-          <Link href="/insights/" aria-label="Закрыть итоги" className="pressable grid size-11 place-items-center rounded-full bg-white/80 text-ink shadow-soft">
+          <p className="text-[13px] font-semibold text-muted uppercase">Итоги недели</p>
+          <Link href="/insights/" aria-label="Закрыть итоги" className="pressable grid size-11 place-items-center text-accent">
             <X aria-hidden size={22} />
           </Link>
         </div>
@@ -76,12 +76,12 @@ function Story({ data }: { data: Data }) {
     <div className="stagger mt-4 space-y-8">
       {/* 1. Average Focus Score */}
       <section aria-labelledby="avg-h">
-        <h1 id="avg-h" className="title text-[30px]">
+        <h1 id="avg-h" className="title text-[34px]">
           {c.avgScore === null ? "Неделя без теста" : "Средний Focus Score"}
         </h1>
         {c.avgScore !== null ? (
           <div className="mt-3 flex items-baseline gap-3">
-            <span className="stat text-[88px] text-navy">{c.avgScore}</span>
+            <span className="stat text-[72px] text-ink">{c.avgScore}</span>
             {scoreDelta !== null && scoreDelta !== 0 && (
               <span
                 className={`rounded-full px-3 py-1 text-[14px] font-semibold ${scoreDelta > 0 ? "bg-s-activity-tint text-s-activity-ink" : "bg-[#FDECEC] text-danger"}`}
@@ -97,7 +97,7 @@ function Story({ data }: { data: Data }) {
       </section>
 
       {/* 2. 7-day bars */}
-      <section aria-label="Focus Score по дням" className="rounded-card-lg bg-surface p-5 shadow-soft">
+      <section aria-label="Focus Score по дням" className="rounded-card-lg bg-surface p-4">
         <div className="flex h-40 items-end gap-2" role="img" aria-label={scores.map((s, i) => `${weekday(review.days[i]!.date)}: ${s ?? "нет теста"}`).join(", ")}>
           {scores.map((s, i) => {
             const d = review.days[i]!;
@@ -124,7 +124,7 @@ function Story({ data }: { data: Data }) {
           [String(c.focusMinutes), "мин", "фокуса"],
           [c.avgSleep === null ? "—" : String(c.avgSleep).replace(".", ","), "ч", "сон в среднем"],
         ].map(([v, u, l]) => (
-          <div key={l} className="rounded-card bg-surface p-3 shadow-soft">
+          <div key={l} className="rounded-card bg-surface p-3">
             <p className="stat text-[30px] text-ink">
               {v}
               <span className="ml-1 font-sans text-[13px] font-semibold tracking-normal text-muted">{u}</span>
@@ -146,7 +146,7 @@ function Story({ data }: { data: Data }) {
           </p>
         </section>
       ) : (
-        <section className="rounded-card-lg bg-surface p-5 shadow-soft">
+        <section className="rounded-card-lg bg-surface p-4">
           <p className="font-semibold text-ink">
             Инсайты откроются через {MIN_DAYS - usable} {plural(MIN_DAYS - usable, ["день", "дня", "дней"])}
           </p>
@@ -155,7 +155,7 @@ function Story({ data }: { data: Data }) {
       )}
 
       {/* 5. Tree */}
-      <section aria-label="Сад" className="flex items-center gap-4 rounded-card-lg bg-surface p-4 shadow-soft">
+      <section aria-label="Сад" className="flex items-center gap-4 rounded-card-lg bg-surface p-4">
         <div className="w-24 shrink-0">
           <TreeSvg stage={tree.stage} wilting={tree.wilting} title={`Дерево: ${tree.stageName}`} />
         </div>

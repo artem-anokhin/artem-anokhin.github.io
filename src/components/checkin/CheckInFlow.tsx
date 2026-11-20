@@ -80,17 +80,17 @@ export function CheckInFlow() {
 
 function Done({ isEdit, stage }: { isEdit: boolean; stage: number }) {
   return (
-    <div className="flex min-h-dvh flex-col bg-gradient-to-b from-sky-top to-sand px-5 pt-16 pb-[calc(24px+env(safe-area-inset-bottom))] text-center">
+    <div className="flex min-h-dvh flex-col bg-bg px-4 pt-16 pb-[calc(16px+env(safe-area-inset-bottom))] text-center">
       <div className="mx-auto w-full max-w-md flex-1">
         {!isEdit && (
-          <p className="inline-flex animate-drop items-center gap-2 rounded-full bg-white/85 px-4 py-2 text-[15px] font-semibold text-ink shadow-soft">
+          <p className="inline-flex animate-drop items-center gap-2 rounded-full bg-surface px-4 py-2 text-[15px] font-semibold text-ink">
             <DropIcon size={20} /> +1 капля
           </p>
         )}
         <div className="mx-auto mt-6 w-56 origin-bottom animate-grow">
           <TreeSvg stage={stage} wilting={false} title={`Дерево: ${STAGES[stage]}`} />
         </div>
-        <h1 className="title mt-6 text-[30px]" role="status">
+        <h1 className="title mt-6 text-[28px]" role="status">
           {isEdit ? "Чек-ин обновлён" : "День отмечен"}
         </h1>
         <p className="mt-2 text-[17px] text-muted">

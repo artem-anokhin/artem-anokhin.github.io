@@ -43,6 +43,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   if (onWelcome) return <main>{children}</main>;
 
   const immersive = IMMERSIVE.some((h) => isActive(pathname, h));
+  // The Focus tab is a dark («night») screen: dark tab bar there.
+  const dark = isActive(pathname, "/focus/");
   const content = ready ? children : <div aria-busy="true" className="card h-48 animate-pulse" />;
 
   // Check-in, test and weekly review: full-screen, no chrome.
@@ -51,8 +53,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-dvh md:flex">
       {/* Desktop sidebar */}
-      <aside className="hidden md:sticky md:top-0 md:flex md:h-dvh md:w-64 md:shrink-0 md:flex-col md:gap-8 md:bg-surface md:p-6 md:shadow-soft">
-        <Link href="/" className="font-display text-2xl font-black text-navy">
+      <aside className="hidden md:sticky md:top-0 md:flex md:h-dvh md:w-64 md:shrink-0 md:flex-col md:gap-8 md:border-r md:border-line md:bg-[#f9f9f9] md:p-6">
+        <Link href="/" className="text-[22px] font-bold tracking-[-0.02em] text-ink">
           Focus<span className="text-accent">AI</span>
         </Link>
         <nav aria-label="Основная навигация" className="flex flex-col gap-1">
@@ -64,8 +66,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 key={href}
                 href={href}
                 aria-current={active ? "page" : undefined}
-                className={`flex min-h-12 items-center gap-3 rounded-[18px] px-4 font-semibold transition-colors ${
-                  active ? "bg-soft text-navy" : "text-muted hover:bg-soft/60 hover:text-ink"
+                className={`flex min-h-11 items-center gap-3 rounded-[10px] px-3 font-medium transition-colors ${
+                  active ? "bg-accent text-white" : "text-ink hover:bg-black/5"
                 }`}
               >
                 <Icon aria-hidden size={20} />
@@ -77,9 +79,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         <p className="mt-auto text-[13px] text-muted">Не является медицинской консультацией</p>
       </aside>
 
-      <main className="mx-auto w-full max-w-3xl px-5 pt-6 pb-32 md:px-10 md:pt-10 md:pb-12">
+      <main className="mx-auto w-full max-w-2xl px-4 pt-4 pb-28 md:px-10 md:pt-10 md:pb-12">
         {demo && (
-          <p role="note" className="mb-6 inline-flex items-center gap-2 rounded-full bg-sand px-4 py-2 text-[13px] font-semibold text-sand-ink">
+          <p role="note" className="mb-4 inline-flex items-center gap-1.5 text-[13px] text-muted">
             <Info aria-hidden size={16} />
             <span>
               <strong>Демо-данные.</strong> Пример ·{" "}
@@ -96,9 +98,11 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       {/* Mobile floating bottom navigation */}
       <nav
         aria-label="Основная навигация"
-        className="fixed inset-x-3 bottom-[calc(12px+env(safe-area-inset-bottom))] z-20 rounded-full bg-white/80 shadow-[0_8px_30px_-10px_rgba(10,42,158,.25)] ring-1 ring-white/60 backdrop-blur-xl md:hidden"
+        className={`fixed inset-x-0 bottom-0 z-20 border-t pb-[env(safe-area-inset-bottom)] backdrop-blur-xl md:hidden ${
+          dark ? "border-white/10 bg-[#121212]/90" : "border-line bg-[#f9f9f9]/90"
+        }`}
       >
-        <ul className="grid grid-cols-4 p-1.5">
+        <ul className="grid grid-cols-4">
           {NAV_ITEMS.map((item) => {
             const { href, label, icon: Icon } = item;
             const active = isTabActive(pathname, item);
@@ -107,13 +111,11 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 <Link
                   href={href}
                   aria-current={active ? "page" : undefined}
-                  className={`pressable flex min-h-14 flex-col items-center justify-center gap-1 rounded-full text-[12px] leading-tight ${
-                    active ? "font-semibold text-navy" : "font-medium text-muted"
+                  className={`flex min-h-[52px] flex-col items-center justify-center gap-0.5 pt-1 text-[11px] leading-tight font-medium ${
+                    active ? (dark ? "text-[#6e95ff]" : "text-accent") : "text-[#8a8a8e]"
                   }`}
                 >
-                  <span className={`grid h-8 w-11 place-items-center rounded-full transition-colors ${active ? "bg-navy text-white" : ""}`}>
-                    <Icon aria-hidden size={20} strokeWidth={active ? 2.4 : 2} />
-                  </span>
+                  <Icon aria-hidden size={24} strokeWidth={active ? 2.2 : 1.8} />
                   {label}
                 </Link>
               </li>

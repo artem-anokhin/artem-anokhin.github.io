@@ -57,7 +57,7 @@ export function Onboarding({ onDone }: { onDone: () => void }) {
   }
 
   return (
-    <div className="min-h-dvh bg-gradient-to-b from-bg to-sky-bottom">
+    <div className="min-h-dvh bg-bg">
       <div className="mx-auto flex min-h-dvh w-full max-w-md flex-col px-5 pt-[calc(12px+env(safe-area-inset-top))] pb-[calc(20px+env(safe-area-inset-bottom))]">
         <div className="flex min-h-11 items-center justify-between">
           {step > 0 ? (
@@ -69,7 +69,7 @@ export function Onboarding({ onDone }: { onDone: () => void }) {
               <ChevronLeft aria-hidden size={20} /> Назад
             </button>
           ) : (
-            <p className="font-display text-[22px] font-black text-navy">
+            <p className="text-[20px] font-bold tracking-[-0.02em] text-ink">
               Focus<span className="text-accent">AI</span>
             </p>
           )}
@@ -79,7 +79,7 @@ export function Onboarding({ onDone }: { onDone: () => void }) {
             </span>
             <span aria-hidden className="flex gap-1.5">
               {Array.from({ length: STEPS }, (_, i) => (
-                <span key={i} className={`h-2 rounded-full transition-all ${i === step ? "w-6 bg-navy" : i < step ? "w-2 bg-navy/40" : "w-2 bg-line"}`} />
+                <span key={i} className={`h-1.5 rounded-full transition-all ${i === step ? "w-5 bg-accent" : i < step ? "w-1.5 bg-accent/40" : "w-1.5 bg-[#d1d1d6]"}`} />
               ))}
             </span>
           </div>
@@ -89,7 +89,7 @@ export function Onboarding({ onDone }: { onDone: () => void }) {
           {step === 0 && (
             <>
               <WelcomeArt />
-              <h1 className="title mt-8 text-[32px] text-balance">
+              <h1 className="title mt-8 text-[34px] text-balance">
                 Фокус растёт, <span className="text-accent">как сад</span>
               </h1>
               <p className="mt-3 text-[17px] text-muted">Узнайте, что связано с вашей концентрацией — по вашим же данным.</p>
@@ -100,7 +100,7 @@ export function Onboarding({ onDone }: { onDone: () => void }) {
                   ["7 дней", "и вы увидите, что с ним связано"],
                 ].map(([a, b]) => (
                   <li key={a} className="flex items-baseline gap-3">
-                    <span className="stat w-28 shrink-0 text-[22px] text-navy">{a}</span>
+                    <span className="w-24 shrink-0 text-[17px] font-semibold text-ink tabular-nums">{a}</span>
                     <span className="text-[15px] text-ink">{b}</span>
                   </li>
                 ))}
@@ -114,7 +114,7 @@ export function Onboarding({ onDone }: { onDone: () => void }) {
 
           {step === 1 && (
             <>
-              <div className="grid h-44 place-items-center rounded-card-lg bg-soft">
+              <div className="grid h-44 place-items-center rounded-card-lg bg-surface">
                 <ProgressRing value={0.72} size={140} stroke={13}>
                   <span>
                     <span className="stat block text-[40px] text-navy">72</span>
@@ -122,7 +122,7 @@ export function Onboarding({ onDone }: { onDone: () => void }) {
                   </span>
                 </ProgressRing>
               </div>
-              <h1 className="title mt-8 text-[32px]">Как вы проводите день?</h1>
+              <h1 className="title mt-8 text-[34px]">Как вы проводите день?</h1>
               <p className="mt-2 mb-6 text-[17px] text-muted">От этого зависят вопросы в чек-ине.</p>
               <ChoiceField
                 legend="Выберите режим"
@@ -144,7 +144,7 @@ export function Onboarding({ onDone }: { onDone: () => void }) {
               <span className="grid size-20 place-items-center rounded-full bg-s-mind-tint text-s-mind-ink">
                 <HeartHandshake aria-hidden size={40} />
               </span>
-              <h1 className="title mt-6 text-[32px]">Важно знать</h1>
+              <h1 className="title mt-6 text-[34px]">Важно знать</h1>
               <p className="mt-4 inline-flex self-start rounded-full bg-sand px-4 py-2 text-[15px] font-semibold text-sand-ink">
                 Не является медицинской консультацией
               </p>
@@ -152,7 +152,7 @@ export function Onboarding({ onDone }: { onDone: () => void }) {
                 FocusAI помогает замечать связи между привычками и концентрацией. Приложение не ставит диагнозов и не заменяет
                 врача.
               </p>
-              <div className="mt-6 rounded-card-lg bg-surface p-4 shadow-soft">
+              <div className="mt-6 rounded-card-lg bg-surface p-4">
                 <p className="text-[15px] text-muted">Если станет тяжело, поговорить можно бесплатно:</p>
                 <ul className="mt-2 space-y-1">
                   {HELP_LINES.map((l) => (
@@ -178,7 +178,7 @@ export function Onboarding({ onDone }: { onDone: () => void }) {
               <span className="grid size-20 place-items-center rounded-full bg-s-activity-tint text-s-activity-ink">
                 <ShieldCheck aria-hidden size={40} />
               </span>
-              <h1 className="title mt-6 text-[32px] text-balance">
+              <h1 className="title mt-6 text-[34px] text-balance">
                 Ваши данные — <span className="text-accent">только у вас</span>
               </h1>
               <ul className="mt-5 space-y-3 text-[16px] text-ink">
@@ -193,7 +193,7 @@ export function Onboarding({ onDone }: { onDone: () => void }) {
                   </li>
                 ))}
               </ul>
-              <label className="mt-6 flex min-h-11 cursor-pointer items-start gap-3 rounded-card bg-surface p-4 shadow-soft has-[:checked]:ring-2 has-[:checked]:ring-navy">
+              <label className="mt-6 flex min-h-11 cursor-pointer items-start gap-3 rounded-card bg-surface p-4 has-[:checked]:ring-2 has-[:checked]:ring-accent">
                 <input type="checkbox" checked={consent} onChange={(e) => setConsent(e.target.checked)} className="mt-0.5 size-6 shrink-0 accent-navy" />
                 <span className="text-ink">Я согласен(на) хранить свои ответы на этом устройстве для личной статистики</span>
               </label>

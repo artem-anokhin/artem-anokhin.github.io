@@ -7,8 +7,8 @@ export default function Page() {
   return (
     <div className="space-y-6">
       <header>
-        <p className="eyebrow">Знания с источниками</p>
-        <h1 className="title mt-1 text-[32px]">Библиотека</h1>
+        <p className="text-[13px] font-semibold text-muted uppercase">Знания с источниками</p>
+        <h1 className="title text-[34px]">Библиотека</h1>
       </header>
       <InsightsTabs current="library" />
       <LibraryScreen />

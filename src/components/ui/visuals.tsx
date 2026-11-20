@@ -32,11 +32,11 @@ export function ProgressRing({
       <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} className="-rotate-90" aria-hidden>
         <defs>
           <linearGradient id={id} x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0" stopColor={night ? "#8FB0FF" : "#1E5BFF"} />
-            <stop offset="1" stopColor={night ? "#5B8CFF" : "#0A2A9E"} />
+            <stop offset="0" stopColor={night ? "#6E95FF" : "#3D73FF"} />
+            <stop offset="1" stopColor={night ? "#4D7DFF" : "#1E5BFF"} />
           </linearGradient>
         </defs>
-        <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke={night ? "rgba(255,255,255,.12)" : "#E7EEFF"} strokeWidth={stroke} />
+        <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke={night ? "rgba(255,255,255,.14)" : "#E9EEFB"} strokeWidth={stroke} />
         <circle
           cx={size / 2}
           cy={size / 2}
@@ -66,17 +66,13 @@ export function WeekStrip({ days }: { days: { date: string; done: boolean; today
         const wd = WD[new Date(y!, m! - 1, dd!).getDay()];
         return (
           <li key={d.date} className="flex flex-col items-center gap-1.5">
-            <span className={`text-[13px] ${d.today ? "font-bold text-navy" : "font-medium text-muted"}`}>{wd}</span>
+            <span className={`text-[12px] ${d.today ? "font-semibold text-ink" : "font-medium text-muted"}`}>{wd}</span>
             <span
-              className={`grid size-9 place-items-center rounded-full text-[13px] font-semibold tabular-nums ${
-                d.done
-                  ? "bg-s-activity-tint text-s-activity-ink"
-                  : d.today
-                    ? "bg-surface text-navy shadow-lift ring-2 ring-accent"
-                    : "border border-dashed border-line text-muted"
+              className={`grid size-8 place-items-center rounded-full text-[13px] font-semibold tabular-nums ${
+                d.done ? "bg-accent text-white" : d.today ? "text-accent ring-2 ring-accent ring-inset" : "bg-[#e9e9ee] text-muted"
               }`}
             >
-              {d.done ? <Check aria-hidden size={16} strokeWidth={3} /> : dd}
+              {d.done ? <Check aria-hidden size={15} strokeWidth={3} /> : dd}
             </span>
             <span className="sr-only">{d.done ? "активность была" : "без активности"}</span>
           </li>
@@ -96,7 +92,7 @@ export function DropIcon({ size = 16 }: { size?: number }) {
   );
 }
 
-/** Sky + sun + two hills + the tree. Day scene used on Today and Сад. */
+/** Calm backdrop + the tree (Apple-clean: no sky, sun or hills). */
 export function TreeScene({
   stage,
   wilting,
@@ -110,48 +106,13 @@ export function TreeScene({
   title: string;
   className?: string;
   night?: boolean;
-  /** Extra space under the tree in px (e.g. when a sheet overlaps the scene bottom). */
+  /** Extra space under the tree in px (e.g. when something overlaps the bottom). */
   lift?: number;
 }) {
-  const sky = useId();
   return (
-    <div className={`relative overflow-hidden ${className}`}>
-      <svg aria-hidden viewBox="0 0 400 300" preserveAspectRatio="xMidYMax slice" className="absolute inset-0 h-full w-full">
-        <defs>
-          <linearGradient id={sky} x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0" stopColor={night ? "#13215A" : "#BFD4FF"} />
-            <stop offset=".55" stopColor={night ? "#0F1B4D" : "#E4EDFF"} />
-            <stop offset="1" stopColor={night ? "#0B1640" : "#FBF5EA"} />
-          </linearGradient>
-          <radialGradient id={`${sky}-sun`}>
-            <stop offset="0" stopColor="#FFE3A0" stopOpacity=".9" />
-            <stop offset="1" stopColor="#FFE3A0" stopOpacity="0" />
-          </radialGradient>
-        </defs>
-        <rect width="400" height="300" fill={`url(#${sky})`} />
-        {night ? (
-          <>
-            {[
-              [40, 40], [90, 80], [160, 30], [250, 60], [320, 36], [360, 96], [210, 110], [60, 130],
-            ].map(([x, y], i) => (
-              <circle key={i} cx={x} cy={y} r={i % 3 ? 1.4 : 2.2} fill="#EEF2FF" opacity={i % 2 ? 0.6 : 0.9} />
-            ))}
-            <circle cx="290" cy="74" r="22" fill="#EEF2FF" opacity=".9" />
-            <circle cx="300" cy="66" r="20" fill="#13215A" />
-          </>
-        ) : (
-          <>
-            <circle cx="290" cy="74" r="60" fill={`url(#${sky}-sun)`} />
-            <circle cx="290" cy="74" r="22" fill="#FFC75A" />
-            <ellipse cx="200" cy="56" rx="38" ry="12" fill="#fff" opacity=".75" />
-            <ellipse cx="226" cy="48" rx="24" ry="12" fill="#fff" opacity=".75" />
-          </>
-        )}
-        <path d="M0 230 C 80 190, 160 200, 230 220 C 300 238, 350 205, 400 210 V300 H0 Z" fill={night ? "#1B2C6E" : "#B9E0B0"} stroke="#fff" strokeOpacity={night ? 0.08 : 0.35} strokeWidth="1.5" />
-        <path d="M0 262 C 90 238, 200 236, 290 252 C 340 260, 370 254, 400 248 V300 H0 Z" fill={night ? "#22357F" : "#83CF6E"} stroke="#fff" strokeOpacity={night ? 0.08 : 0.35} strokeWidth="1.5" />
-      </svg>
-      <div className="relative flex h-full items-end justify-center" style={{ paddingBottom: lift }}>
-        <div className="w-[62%] max-w-[260px] translate-y-[6%]">
+    <div className={`relative overflow-hidden ${night ? "bg-night-2" : "bg-gradient-to-b from-white to-[#eef6ec]"} ${className}`}>
+      <div className="relative flex h-full items-end justify-center" style={{ paddingBottom: lift + 8 }}>
+        <div className="w-[52%] max-w-[220px]">
           <TreeSvg stage={stage} wilting={wilting} title={title} />
         </div>
       </div>

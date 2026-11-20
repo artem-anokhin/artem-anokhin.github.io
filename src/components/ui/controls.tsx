@@ -5,24 +5,24 @@ import type { Scale5 } from "@/lib/checkin";
 import type { SphereStyle } from "@/lib/spheres";
 
 export const btnPrimary =
-  "pressable inline-flex min-h-14 items-center justify-center gap-2 text-center rounded-[18px] bg-navy px-6 text-[17px] font-semibold text-white shadow-lift transition-colors hover:bg-deep disabled:cursor-not-allowed disabled:bg-soft disabled:text-muted disabled:shadow-none";
+  "pressable inline-flex min-h-[50px] items-center justify-center gap-2 text-center rounded-[14px] bg-accent px-5 text-[17px] font-semibold text-white transition-colors hover:bg-deep disabled:cursor-not-allowed disabled:bg-[#E5E5EA] disabled:text-muted";
 export const btnSecondary =
-  "pressable inline-flex min-h-14 items-center justify-center gap-2 text-center rounded-[18px] bg-soft px-6 text-[17px] font-semibold text-navy transition-colors hover:bg-[#dbe5ff]";
+  "pressable inline-flex min-h-[50px] items-center justify-center gap-2 text-center rounded-[14px] bg-soft px-5 text-[17px] font-semibold text-accent transition-colors hover:bg-[#dde6ff]";
 /** Primary button on night (dark) surfaces. */
 export const btnNight =
-  "pressable inline-flex min-h-14 items-center justify-center gap-2 text-center rounded-[18px] bg-white px-6 text-[17px] font-semibold text-navy shadow-glow transition-colors hover:bg-night-ink disabled:opacity-50";
+  "pressable inline-flex min-h-[50px] items-center justify-center gap-2 text-center rounded-[14px] bg-accent px-5 text-[17px] font-semibold text-white transition-colors hover:bg-deep disabled:opacity-50";
 export const btnNightGhost =
-  "pressable inline-flex min-h-14 items-center justify-center gap-2 text-center rounded-[18px] bg-white/10 px-6 text-[17px] font-semibold text-night-ink transition-colors hover:bg-white/15";
+  "pressable inline-flex min-h-[50px] items-center justify-center gap-2 text-center rounded-[14px] bg-night-2 px-5 text-[17px] font-semibold text-night-ink transition-colors hover:bg-[#2c2c2e]";
 
 /** Default look when no sphere is given (onboarding, settings). */
-const NEUTRAL: Pick<SphereStyle, "base" | "tint" | "ink"> = { base: "bg-navy", tint: "bg-surface", ink: "text-navy" };
+const NEUTRAL: Pick<SphereStyle, "base" | "tint" | "ink"> = { base: "bg-accent", tint: "bg-surface", ink: "text-accent" };
 type Theme = Pick<SphereStyle, "base" | "tint" | "ink">;
 
 const focusRing = "has-[:focus-visible]:outline-3 has-[:focus-visible]:outline-accent has-[:focus-visible]:outline-offset-2";
 
 function Legend({ children, hint }: { children: React.ReactNode; hint?: string }) {
   return (
-    <legend className="mb-3 text-[17px] font-semibold text-ink">
+    <legend className="mb-2.5 text-[15px] font-semibold text-ink">
       {children}
       {hint && <span className="ml-2 text-sm font-normal text-muted">{hint}</span>}
     </legend>
@@ -57,8 +57,8 @@ export function ChoiceField<T extends string>({
           return (
             <label
               key={o.value}
-              className={`pressable flex min-h-14 cursor-pointer items-center justify-center rounded-[18px] px-3 text-center text-[15px] font-semibold shadow-soft transition-colors ${
-                on ? `${theme.base} animate-pop text-white` : "bg-white text-ink hover:bg-white/80"
+              className={`pressable flex min-h-[50px] cursor-pointer items-center justify-center rounded-[12px] px-3 text-center text-[15px] font-semibold transition-colors ${
+                on ? `${theme.base} text-white` : "bg-surface text-ink ring-1 ring-line ring-inset hover:bg-[#fafafa]"
               } ${focusRing}`}
             >
               <input type="radio" name={name} value={o.value} checked={on} onChange={() => onChange(o.value)} className="sr-only" />
@@ -158,8 +158,8 @@ export function ScaleField({
           return (
             <label
               key={n}
-              className={`pressable flex h-16 cursor-pointer items-center justify-center rounded-[18px] shadow-soft transition-colors ${
-                on ? `${theme.base} animate-pop text-white` : `bg-white ${theme.ink}`
+              className={`pressable flex h-14 cursor-pointer items-center justify-center rounded-[12px] transition-colors ${
+                on ? `${theme.base} text-white` : `bg-surface ring-1 ring-line ring-inset ${theme.ink}`
               } ${focusRing}`}
             >
               <input
@@ -207,15 +207,15 @@ export function Stepper({
 }) {
   const set = (v: number) => onChange(Math.min(max, Math.max(min, Math.round(v * 100) / 100)));
   const shown = String(value).replace(".", ",");
-  const btn = `pressable grid size-14 place-items-center rounded-full bg-white shadow-soft ${theme.ink} disabled:opacity-40`;
+  const btn = `pressable grid size-11 place-items-center rounded-full bg-soft ${theme.ink} disabled:opacity-40`;
   return (
     <div role="group" aria-label={label}>
-      <p className="mb-3 text-[17px] font-semibold text-ink">{label}</p>
-      <div className="flex items-center justify-between rounded-[24px] bg-white/60 p-2">
+      <p className="mb-2.5 text-[15px] font-semibold text-ink">{label}</p>
+      <div className="flex items-center justify-between rounded-[14px] bg-surface p-2 ring-1 ring-line ring-inset">
         <button type="button" className={btn} onClick={() => set(value - step)} disabled={value <= min} aria-label={`Уменьшить: ${label}`}>
           <Minus aria-hidden size={22} />
         </button>
-        <output aria-live="polite" className={`stat text-[40px] ${theme.ink}`}>
+        <output aria-live="polite" className="stat text-[32px] text-ink">
           {shown}
           {unit && <span className="ml-1.5 font-sans text-[15px] font-semibold tracking-normal text-muted">{unit}</span>}
         </output>
@@ -230,7 +230,7 @@ export function Stepper({
 const HOURS = Array.from({ length: 24 }, (_, h) => String(h).padStart(2, "0"));
 const MINUTES = Array.from({ length: 12 }, (_, m) => String(m * 5).padStart(2, "0"));
 const selectCls =
-  "stat h-16 min-w-0 flex-1 appearance-none rounded-[18px] bg-white text-center text-[26px] text-ink shadow-soft focus-visible:outline-3 focus-visible:outline-accent";
+  "stat h-14 min-w-0 flex-1 appearance-none rounded-[12px] bg-surface text-center text-[24px] text-ink ring-1 ring-line ring-inset focus-visible:outline-3 focus-visible:outline-accent";
 
 /** 24-hour time picker (hours + 5-minute steps), independent of the phone's 12/24 h setting. */
 export function TimeField({ label, value, onChange }: { label: string; value: string; onChange: (v: string) => void }) {
@@ -239,7 +239,7 @@ export function TimeField({ label, value, onChange }: { label: string; value: st
   const minutes = MINUTES.includes(m) ? MINUTES : [...MINUTES, m].sort();
   return (
     <div role="group" aria-label={label}>
-      <span className="mb-2 block text-[15px] font-semibold text-ink">{label}</span>
+      <span className="mb-2.5 block text-[15px] font-semibold text-ink">{label}</span>
       <div className="flex items-center gap-1">
         <select aria-label={`${label}: часы`} value={h} onChange={(e) => onChange(`${e.target.value}:${m}`)} className={selectCls}>
           {HOURS.map((x) => (

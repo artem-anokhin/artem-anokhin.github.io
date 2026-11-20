@@ -6,15 +6,15 @@ export function InsightsTabs({ current }: { current: "insights" | "library" }) {
     <Link
       href={href}
       aria-current={on ? "page" : undefined}
-      className={`pressable flex min-h-11 flex-1 items-center justify-center rounded-full text-[15px] font-semibold transition-colors ${
-        on ? "bg-surface text-navy shadow-soft" : "text-muted"
+      className={`flex min-h-11 flex-1 items-center justify-center rounded-[8px] text-[15px] font-semibold transition-colors ${
+        on ? "bg-surface text-ink shadow-[0_3px_8px_rgba(0,0,0,.12),0_3px_1px_rgba(0,0,0,.04)]" : "text-ink"
       }`}
     >
       {label}
     </Link>
   );
   return (
-    <nav aria-label="Раздел" className="flex gap-1 rounded-full bg-soft p-1">
+    <nav aria-label="Раздел" className="flex gap-0.5 rounded-[9px] bg-[#e3e3e8] p-0.5">
       {item("/insights/", "Инсайты", current === "insights")}
       {item("/library/", "Библиотека", current === "library")}
     </nav>

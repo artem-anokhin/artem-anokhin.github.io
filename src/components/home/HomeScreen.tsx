@@ -2,22 +2,22 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { BellRing, CalendarRange, ChartLine, Check, ChevronRight, ClipboardCheck, Lightbulb, Settings, Timer, Zap } from "lucide-react";
-import { SPHERES, type CheckInData } from "@/lib/checkin";
+import { BellRing, CalendarRange, ChartLine, Check, ChevronRight, ClipboardCheck, Lightbulb, Settings, Sprout, Timer, Zap } from "lucide-react";
+import type { CheckInData } from "@/lib/checkin";
 import { db, dayKey, type CheckIn } from "@/lib/db";
 import { MIN_DAYS, pairDays, usableDays } from "@/lib/insights";
 import { TIP_CARD, cardHref } from "@/lib/libraryLinks";
 import { plural } from "@/lib/plural";
 import { getProfile } from "@/lib/settings";
+import { activeHabits } from "@/lib/habits";
 import { loadTree } from "@/lib/garden";
 import { HabitsToday } from "@/components/habits/HabitsToday";
-import { SPHERE_STYLE } from "@/lib/spheres";
 import { TIPS } from "@/lib/tips";
-import { latestTestByDay, pickTip, sphereStatus } from "@/lib/today";
-import { STAGES, type TreeState } from "@/lib/tree";
+import { latestTestByDay, pickTip } from "@/lib/today";
+import type { TreeState } from "@/lib/tree";
 import { weeklyReview, type WeeklyReview } from "@/lib/weekly";
 import { btnPrimary } from "@/components/ui/controls";
-import { DropIcon, ProgressRing, TreeScene, WeekStrip } from "@/components/ui/visuals";
+import { ProgressRing, WeekStrip } from "@/components/ui/visuals";
 
 type Data = {
   today: CheckIn | null;
@@ -26,6 +26,8 @@ type Data = {
   week: WeeklyReview;
   usable: number;
   focusToday: number;
+  habitsDone: number;
+  habitsTotal: number;
 };
 
 const dateFmt = new Intl.DateTimeFormat("ru-RU", { weekday: "short", day: "numeric", month: "long" });
@@ -48,12 +50,13 @@ export function HomeScreen() {
     (async () => {
       if (!(await getProfile())) return; // AppShell redirects to onboarding
       const key = dayKey();
-      const [checkins, tests, sessions, tree, habitLogs] = await Promise.all([
+      const [checkins, tests, sessions, tree, habitLogs, habits] = await Promise.all([
         db.checkins.toArray(),
         db.focusTests.toArray(),
         db.sessions.toArray(),
         loadTree(),
         db.habitLogs.toArray(),
+        activeHabits(),
       ]);
       if (!alive) return;
       setData({
@@ -63,6 +66,8 @@ export function HomeScreen() {
         week: weeklyReview(checkins, tests, sessions, key, habitLogs),
         usable: usableDays(pairDays(checkins, tests)),
         focusToday: sessions.filter((s) => s.date === key).reduce((a, s) => a + s.minutes, 0),
+        habitsTotal: habits.length,
+        habitsDone: habits.filter((h) => habitLogs.some((l) => l.habitId === h.id && l.date === key)).length,
       });
     })().catch(() => alive && setFailed(true));
     return () => {
@@ -86,18 +91,14 @@ export function HomeScreen() {
   const now = new Date();
 
   return (
-    <div className="stagger space-y-7">
-      <header className="flex items-start justify-between gap-3">
+    <div className="stagger space-y-6">
+      <header className="flex items-end justify-between gap-3 pt-2">
         <div>
-          <p className="eyebrow first-letter:uppercase">{dateFmt.format(now)}</p>
-          <h1 className="title mt-1 text-[32px]">{greeting(now.getHours())}</h1>
+          <p className="text-[13px] font-semibold text-muted uppercase first-letter:uppercase">{dateFmt.format(now)}</p>
+          <h1 className="title text-[34px]">{greeting(now.getHours())}</h1>
         </div>
-        <Link
-          href="/settings/"
-          aria-label="Настройки"
-          className="pressable grid size-11 shrink-0 place-items-center rounded-full bg-surface text-navy shadow-soft md:hidden"
-        >
-          <Settings aria-hidden size={22} />
+        <Link href="/settings/" aria-label="Настройки" className="pressable grid size-11 shrink-0 place-items-center text-accent md:hidden">
+          <Settings aria-hidden size={24} />
         </Link>
       </header>
 
@@ -109,7 +110,7 @@ export function HomeScreen() {
           </button>
         </section>
       ) : !data ? (
-        <div aria-busy="true" className="h-[420px] animate-pulse rounded-card-lg bg-soft" />
+        <div aria-busy="true" className="h-[420px] animate-pulse rounded-card-lg bg-surface" />
       ) : (
         <Loaded data={data} onChange={() => setReload((n) => n + 1)} />
       )}
@@ -118,123 +119,124 @@ export function HomeScreen() {
 }
 
 function Loaded({ data, onChange }: { data: Data; onChange: () => void }) {
-  const { today, score, tree, week, usable, focusToday } = data;
+  const { today, score, tree, week, usable, focusToday, habitsDone, habitsTotal } = data;
   const strip = week.days.map((d, i) => ({ date: d.date, done: d.checkin || d.test || d.session || d.habit, today: i === 6 }));
-  const next = tree.nextAt === null ? null : STAGES[tree.stage + 1];
 
   return (
     <>
-      <WeekStrip days={strip} />
-
-      {/* Hero: the garden + today's Focus Score */}
-      <section aria-label="Ваш сад и фокус сегодня" className="relative overflow-hidden rounded-card-lg shadow-soft">
-        <Link href="/tree/" aria-label={`Сад: ${tree.stageName}`} className="block">
-          <TreeScene stage={tree.stage} wilting={tree.wilting} title={`Дерево: ${tree.stageName}`} className="h-[260px]" lift={30} />
-        </Link>
-        <span className="absolute top-4 left-4 inline-flex items-center gap-1.5 rounded-full bg-white/95 px-3 py-1.5 text-[13px] font-semibold text-ink">
-          <DropIcon />
-          {tree.drops} {plural(tree.drops, ["капля", "капли", "капель"])}
-        </span>
-        <Link
-          href={score === null ? "/test/" : "/history/"}
-          className="pressable absolute top-3 right-3 rounded-full bg-white/75 p-1.5 shadow-[0_12px_32px_-8px_rgba(30,91,255,.45)] backdrop-blur-md"
-          aria-label={score === null ? "Focus Score сегодня ещё нет. Пройти тест" : `Focus Score сегодня: ${score} из 100. История`}
-        >
-          <ProgressRing value={(score ?? 0) / 100} size={88} stroke={8}>
-            {score === null ? (
-              <span className="text-[12px] leading-tight font-semibold text-navy">
-                Тест
-                <br />
-                90 сек
-              </span>
-            ) : (
-              <span>
-                <span className="stat block text-[28px] text-navy">{score}</span>
-                <span className="text-[12px] font-semibold text-ink/80">фокус</span>
-              </span>
-            )}
-          </ProgressRing>
-        </Link>
-        <p className="absolute bottom-3 left-4 rounded-full bg-white/95 px-3 py-1 text-[13px] font-semibold text-ink first-letter:uppercase">
-          {tree.stageName}
-          {next && tree.nextAt !== null && <span className="font-medium text-ink/80"> · до «{next}» ещё {tree.nextAt - tree.drops}</span>}
-        </p>
+      {/* Summary: Focus Score ring + three facts (Apple Health style) */}
+      <section aria-label="Сводка за сегодня" className="rounded-card-lg bg-surface p-4">
+        <div className="flex items-center gap-5">
+          <Link
+            href={score === null ? "/test/" : "/history/"}
+            aria-label={score === null ? "Focus Score сегодня ещё нет. Пройти тест" : `Focus Score сегодня: ${score} из 100. История`}
+            className="pressable shrink-0"
+          >
+            <ProgressRing value={(score ?? 0) / 100} size={112} stroke={12}>
+              {score === null ? (
+                <span className="text-[13px] leading-tight font-semibold text-accent">
+                  Пройти
+                  <br />
+                  тест
+                </span>
+              ) : (
+                <span>
+                  <span className="stat block text-[34px] text-ink">{score}</span>
+                  <span className="text-[12px] font-medium text-muted">фокус</span>
+                </span>
+              )}
+            </ProgressRing>
+          </Link>
+          <dl className="min-w-0 flex-1 space-y-2.5">
+            <Fact label="Чек-ин" value={today ? "Готов" : "Не сделан"} dot={today ? "bg-leaf" : "bg-[#d1d1d6]"} />
+            <Fact label="Фокус" value={focusToday ? `${focusToday} мин` : "0 мин"} dot="bg-s-sleep" />
+            <Fact label="Привычки" value={habitsTotal ? `${habitsDone} из ${habitsTotal}` : "—"} dot="bg-s-activity" />
+          </dl>
+        </div>
+        <div className="mt-4 border-t border-line pt-3">
+          <WeekStrip days={strip} />
+        </div>
       </section>
 
-      {/* Two primary actions */}
-      <div className="grid grid-cols-2 gap-3">
-        {today ? (
-          <Link href="/checkin/" className="pressable flex min-h-28 flex-col justify-between rounded-card bg-s-activity-tint p-4 text-s-activity-ink">
-            <span className="grid size-10 place-items-center rounded-full bg-leaf text-white">
-              <Check aria-hidden size={22} strokeWidth={3} />
-            </span>
-            <span>
-              <span className="block text-[17px] font-semibold">Чек-ин готов</span>
-              <span className="text-[13px] font-medium">Изменить</span>
-            </span>
-          </Link>
-        ) : (
-          <Link href="/checkin/" className="pressable flex min-h-28 flex-col justify-between rounded-card bg-navy p-4 text-white shadow-lift">
-            <span className="grid size-10 place-items-center rounded-full bg-white/15">
-              <ClipboardCheck aria-hidden size={22} />
-            </span>
-            <span>
-              <span className="block text-[17px] font-semibold">Чек-ин</span>
-              <span className="text-[13px] text-white/75">1 минута · +1 капля</span>
-            </span>
-          </Link>
-        )}
-        <Link href="/focus/" className="pressable night flex min-h-28 flex-col justify-between rounded-card p-4 shadow-lift">
-          <span className="grid size-10 place-items-center rounded-full bg-white/12 text-night-ink">
-            <Timer aria-hidden size={22} />
-          </span>
-          <span>
-            <span className="block text-[17px] font-semibold">Фокус-сессия</span>
-            <span className="text-[13px] text-night-muted">{focusToday ? `Сегодня ${focusToday} мин` : "25 или 50 минут"}</span>
-          </span>
-        </Link>
-      </div>
-
-      {score === null && (
-        <Link href="/test/" className="pressable -mt-3 flex min-h-16 items-center gap-4 rounded-card bg-surface p-4 shadow-soft">
-          <span className="grid size-10 shrink-0 place-items-center rounded-full bg-soft text-accent">
-            <Zap aria-hidden size={22} />
-          </span>
-          <span className="min-w-0 flex-1">
-            <span className="block font-semibold text-ink">Тест реакции · 90 сек</span>
-            <span className="block text-[14px] text-muted">Узнайте свой Focus Score на сегодня</span>
-          </span>
-          <ChevronRight aria-hidden size={20} className="text-muted" />
+      {!today && (
+        <Link href="/checkin/" className={`${btnPrimary} w-full`}>
+          <ClipboardCheck aria-hidden size={20} /> Отметить день · 1 минута
         </Link>
       )}
 
+      <section aria-labelledby="actions-h">
+        <h2 id="actions-h" className="title mb-2 text-[22px]">
+          Действия
+        </h2>
+        <nav aria-label="Действия" className="group-list">
+          {today && (
+            <Row href="/checkin/" icon={<ClipboardCheck aria-hidden size={18} />} tint="bg-accent text-white" title="Чек-ин готов" sub="Изменить ответы" done />
+          )}
+          <Row href="/test/" icon={<Zap aria-hidden size={18} />} tint="bg-[#ff9f0a] text-white" title="Тест реакции" sub={score === null ? "90 секунд · Focus Score" : `Сегодня ${score} из 100`} done={score !== null} />
+          <Row href="/focus/" icon={<Timer aria-hidden size={18} />} tint="bg-s-sleep text-white" title="Фокус-сессия" sub={focusToday ? `Сегодня ${focusToday} мин` : "15, 25 или 50 минут"} />
+        </nav>
+      </section>
+
       <HabitsToday onChange={onChange} />
 
-      {today && <TodaySpheres data={today} />}
       {usable < MIN_DAYS && <Countdown days={usable} />}
       {today && <Tip data={today} />}
 
-      <nav aria-label="Ещё" className="divide-y divide-line overflow-hidden rounded-card-lg bg-surface shadow-soft">
-        <Row href="/settings/#reminder" icon={<BellRing aria-hidden size={20} />} tint="bg-s-rest-tint text-s-rest-ink" title="Напоминание" sub="Каждый день в удобное время" plain />
-        <Row href="/week/" icon={<CalendarRange aria-hidden size={20} />} tint="bg-s-sleep-tint text-s-sleep-ink" title="Итоги недели" sub="Как прошли ваши 7 дней" />
-        <Row href="/history/" icon={<ChartLine aria-hidden size={20} />} tint="bg-soft text-navy" title="История" sub="Focus Score за 30 дней" />
-      </nav>
+      <section aria-labelledby="more-h">
+        <h2 id="more-h" className="title mb-2 text-[22px]">
+          Обзор
+        </h2>
+        <nav aria-label="Обзор" className="group-list">
+          <Row href="/tree/" icon={<Sprout aria-hidden size={18} />} tint="bg-leaf text-white" title="Сад" sub={`${tree.stageName[0]!.toUpperCase()}${tree.stageName.slice(1)} · ${tree.drops} ${plural(tree.drops, ["капля", "капли", "капель"])}`} />
+          <Row href="/week/" icon={<CalendarRange aria-hidden size={18} />} tint="bg-s-mind text-white" title="Итоги недели" sub="Как прошли ваши 7 дней" />
+          <Row href="/history/" icon={<ChartLine aria-hidden size={18} />} tint="bg-accent text-white" title="История" sub="Focus Score за 30 дней" />
+          <Row href="/settings/#reminder" icon={<BellRing aria-hidden size={18} />} tint="bg-[#ff3b30] text-white" title="Напоминание" sub="Каждый день в удобное время" plain />
+        </nav>
+      </section>
     </>
   );
 }
 
-function Row({ href, icon, tint, title, sub, plain }: { href: string; icon: React.ReactNode; tint: string; title: string; sub: string; plain?: boolean }) {
+function Fact({ label, value, dot }: { label: string; value: string; dot: string }) {
+  return (
+    <div className="flex items-center justify-between gap-2">
+      <dt className="flex items-center gap-2 text-[15px] text-muted">
+        <span aria-hidden className={`size-2 rounded-full ${dot}`} />
+        {label}
+      </dt>
+      <dd className="text-[15px] font-semibold text-ink tabular-nums">{value}</dd>
+    </div>
+  );
+}
+
+function Row({
+  href,
+  icon,
+  tint,
+  title,
+  sub,
+  plain,
+  done,
+}: {
+  href: string;
+  icon: React.ReactNode;
+  tint: string;
+  title: string;
+  sub: string;
+  plain?: boolean;
+  done?: boolean;
+}) {
   const inner = (
     <>
-      <span className={`grid size-10 shrink-0 place-items-center rounded-full ${tint}`}>{icon}</span>
+      <span className={`grid size-8 shrink-0 place-items-center rounded-[8px] ${tint}`}>{icon}</span>
       <span className="min-w-0 flex-1">
-        <span className="block font-semibold text-ink">{title}</span>
-        <span className="block text-[14px] text-muted">{sub}</span>
+        <span className="block text-[17px] text-ink">{title}</span>
+        <span className="block text-[13px] text-muted">{sub}</span>
       </span>
-      <ChevronRight aria-hidden size={20} className="text-muted" />
+      {done ? <Check aria-hidden size={20} className="text-leaf" strokeWidth={2.6} /> : <ChevronRight aria-hidden size={18} className="text-[#c4c4c7]" />}
     </>
   );
-  const cls = "flex min-h-16 items-center gap-4 px-4 py-3 hover:bg-bg";
+  const cls = "flex min-h-[60px] items-center gap-3 px-4 py-2 active:bg-[#e5e5ea]";
   // Hash deep links need a full load so the target section can scroll into view.
   return plain ? (
     <a href={href} className={cls}>
@@ -247,52 +249,22 @@ function Row({ href, icon, tint, title, sub, plain }: { href: string; icon: Reac
   );
 }
 
-function TodaySpheres({ data }: { data: CheckInData }) {
-  const status = sphereStatus(data);
-  return (
-    <section aria-labelledby="spheres-h">
-      <h2 id="spheres-h" className="eyebrow mb-3">
-        Ваш день
-      </h2>
-      <ul className="flex flex-wrap gap-2">
-        {SPHERES.map(({ key, title }) => {
-          const st = SPHERE_STYLE[key];
-          const Icon = st.icon;
-          const attention = status[key] === "attention";
-          return (
-            <li key={key} className={`inline-flex min-h-9 items-center gap-1.5 rounded-full px-3 text-[14px] font-semibold ${st.tint} ${st.ink}`}>
-              <Icon aria-hidden size={16} />
-              {title}
-              {attention && (
-                <>
-                  <span aria-hidden className="size-2 rounded-full bg-sun" />
-                  <span className="sr-only"> — обратите внимание</span>
-                </>
-              )}
-            </li>
-          );
-        })}
-      </ul>
-      <p className="mt-2 text-[13px] text-muted">Жёлтая точка — на что обратить внимание. Это ваши отметки, а не оценка.</p>
-    </section>
-  );
-}
-
 function Countdown({ days }: { days: number }) {
   const left = MIN_DAYS - days;
   return (
-    <Link href="/insights/" className="pressable flex items-center gap-4 rounded-card-lg bg-surface p-4 shadow-soft">
-      <ProgressRing value={days / MIN_DAYS} size={64} stroke={7}>
-        <span className="stat text-[18px] text-navy">
+    <Link href="/insights/" className="pressable flex items-center gap-4 rounded-card-lg bg-surface p-4">
+      <ProgressRing value={days / MIN_DAYS} size={52} stroke={6}>
+        <span className="text-[13px] font-semibold text-ink tabular-nums">
           {days}/{MIN_DAYS}
         </span>
       </ProgressRing>
       <span className="min-w-0 flex-1">
-        <span className="block font-semibold text-ink">
-          До инсайтов: {left} {plural(left, ["день", "дня", "дней"])}
+        <span className="block text-[17px] font-semibold text-ink">
+          До инсайтов {left} {plural(left, ["день", "дня", "дней"])}
         </span>
-        <span className="block text-[14px] text-muted">Дни, где есть и чек-ин, и тест.</span>
+        <span className="block text-[13px] text-muted">Дни, где есть и чек-ин, и тест</span>
       </span>
+      <ChevronRight aria-hidden size={18} className="text-[#c4c4c7]" />
     </Link>
   );
 }
@@ -301,19 +273,19 @@ function Tip({ data }: { data: CheckInData }) {
   const key = pickTip(data);
   const tip = TIPS[key];
   return (
-    <section aria-labelledby="tip-h" className="rounded-card-lg bg-sand p-5">
-      <p className="eyebrow flex items-center gap-1.5 text-sand-ink">
-        <Lightbulb aria-hidden size={16} /> Совет на завтра
+    <section aria-labelledby="tip-h" className="rounded-card-lg bg-surface p-4">
+      <p className="flex items-center gap-1.5 text-[13px] font-semibold text-muted">
+        <Lightbulb aria-hidden size={15} className="text-[#ff9f0a]" /> Совет на завтра
       </p>
-      <h2 id="tip-h" className="title mt-2 text-[20px]">
+      <h2 id="tip-h" className="mt-1.5 text-[17px] font-semibold text-ink">
         {tip.title}
       </h2>
-      <p className="mt-2 text-ink">{tip.text}</p>
-      <div className="mt-3 flex flex-wrap items-center gap-x-4">
-        <a href={cardHref(TIP_CARD[key])} className="inline-flex min-h-11 items-center font-semibold text-navy underline underline-offset-4">
+      <p className="mt-1 text-[15px] leading-relaxed text-ink/90">{tip.text}</p>
+      <div className="mt-2 flex flex-wrap items-center gap-x-4">
+        <a href={cardHref(TIP_CARD[key])} className="inline-flex min-h-11 items-center text-[15px] font-medium text-accent">
           Подробнее
         </a>
-        <a href={tip.url} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-11 items-center text-[13px] text-sand-ink underline">
+        <a href={tip.url} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-11 items-center text-[13px] text-muted underline">
           Источник: {tip.source}
           <span className="sr-only"> (откроется в новой вкладке)</span>
         </a>
