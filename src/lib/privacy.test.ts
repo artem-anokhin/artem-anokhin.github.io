@@ -67,10 +67,10 @@ describe("importData", () => {
     await dst.settings.put({ key: "profile", value: { mode: "study", consentAt: 1 } });
     expect(await importData({ hello: 1 }, dst)).toBeNull();
     const res = await importData(
-      { format: "focusai-export", version: 1, checkins: [{ date: "bad" }, null], focusTests: [{ date: "2026-11-20", takenAt: 1, score: 500 }], settings: [{ key: "profile", value: { mode: "x" } }] },
+      { format: "focusai-export", version: 1, checkins: [{ date: "bad" }, null], focusTests: [{ date: "2026-11-20", takenAt: 1, score: 500 }, { date: "2026-02-30", takenAt: 1, score: 50 }, { date: "2026-11-20", takenAt: 1, score: 50, medianRt: 0 }], settings: [{ key: "profile", value: { mode: "x" } }] },
       dst,
     );
-    expect(res).toEqual({ checkins: 0, focusTests: 0, skipped: 3 });
+    expect(res).toEqual({ checkins: 0, focusTests: 0, skipped: 5 });
     expect((await dst.settings.get("profile"))?.value).toEqual({ mode: "study", consentAt: 1 });
     await dst.delete();
   });

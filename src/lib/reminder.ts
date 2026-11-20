@@ -47,11 +47,12 @@ function firstStart(time: string, now: Date): string {
 }
 
 function plus5min(start: string): string {
-  const h = Number(start.slice(9, 11));
-  const m = Number(start.slice(11, 13)) + 5;
-  // Same day is fine for a 5-minute event except right before midnight; clamp to 23:59.
-  return m >= 60 ? (h === 23 ? `${start.slice(0, 9)}235900` : `${start.slice(0, 9)}${pad(h + 1)}${pad(m - 60)}00`) : `${start.slice(0, 11)}${pad(m)}00`;
+  const d = new Date(+start.slice(0, 4), +start.slice(4, 6) - 1, +start.slice(6, 8), +start.slice(9, 11), +start.slice(11, 13) + 5);
+  return `${d.getFullYear()}${pad(d.getMonth() + 1)}${pad(d.getDate())}T${pad(d.getHours())}${pad(d.getMinutes())}00`;
 }
+
+/** RFC 5545 TEXT escaping. */
+const icsText = (s: string) => s.replace(/[\\;,]/g, (c) => `\\${c}`).replace(/\r?\n/g, "\\n");
 
 /** iCalendar file text (RFC 5545), daily, with an alarm at the start time. */
 export function buildIcs(time: string, appUrl: string, now = new Date()): string {
@@ -70,7 +71,7 @@ export function buildIcs(time: string, appUrl: string, now = new Date()): string
     `DTEND:${plus5min(start)}`,
     "RRULE:FREQ=DAILY",
     `SUMMARY:${REMINDER_TITLE}`,
-    `DESCRIPTION:Отметьте день и пройдите тест${url ? `: ${url}` : "."}`,
+    `DESCRIPTION:${icsText(`Отметьте день и пройдите тест${url ? `: ${url}` : "."}`)}`,
     ...(url ? [`URL:${url}`] : []),
     "BEGIN:VALARM",
     "ACTION:DISPLAY",

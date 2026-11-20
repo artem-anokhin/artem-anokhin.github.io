@@ -1,5 +1,6 @@
 import { render, screen } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
+import { db } from "@/lib/db";
 import { emptyCheckIn } from "@/lib/checkin";
 import { TIPS } from "@/lib/tips";
 import { TodayOverview } from "./TodayOverview";
@@ -17,6 +18,33 @@ describe("TodayOverview", () => {
     expect(screen.getByText(/Источник:/).closest("a")).toHaveAttribute("href");
     expect(await screen.findByRole("link", { name: "Пройти тест" })).toHaveAttribute("href", expect.stringMatching(/^\/test\/?$/));
     expect(Object.values(TIPS).some((t) => screen.queryByText(t.title))).toBe(true);
+  });
+});
+
+describe("InsightsCountdown", () => {
+  afterEach(async () => {
+    await Promise.all([db.checkins.clear(), db.focusTests.clear()]);
+  });
+
+  const seedDays = async (n: number) => {
+    for (let i = 1; i <= n; i++) {
+      const date = `2026-11-${String(i).padStart(2, "0")}`;
+      await db.checkins.put({ ...emptyCheckIn(), date, createdAt: 1, updatedAt: 1 });
+      await db.focusTests.add({ date, takenAt: 1, score: 60 });
+    }
+  };
+
+  it("counts down to day 7 with Russian plurals", async () => {
+    await seedDays(6);
+    render(<TodayOverview data={emptyCheckIn()} mode="study" onEdit={vi.fn()} />);
+    expect(await screen.findByText("До ваших инсайтов: 1 день")).toBeInTheDocument();
+  });
+
+  it("is hidden once insights are unlocked", async () => {
+    await seedDays(7);
+    render(<TodayOverview data={emptyCheckIn()} mode="study" onEdit={vi.fn()} />);
+    await screen.findByRole("link", { name: "Пройти тест" });
+    expect(screen.queryByText(/До ваших инсайтов/)).not.toBeInTheDocument();
   });
 });
 

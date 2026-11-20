@@ -20,7 +20,8 @@ describe("reminder", () => {
   });
 
   it("handles end near midnight and hour rollover", () => {
-    expect(buildIcs("23:58", "x", now)).toContain("DTEND:20261121T235900");
+    expect(buildIcs("23:58", "x", now)).toContain("DTEND:20261122T000300");
+    expect(buildIcs("23:59", "x", now)).toContain("DTEND:20261122T000400");
     expect(buildIcs("22:57", "x", now)).toContain("DTEND:20261121T230200");
   });
 
@@ -32,6 +33,12 @@ describe("reminder", () => {
     const bad = buildIcs("21:00", "javascript:alert(1)\r\nX:1", now);
     expect(bad).not.toContain("javascript");
     expect(bad).not.toContain("URL:");
+  });
+
+  it("rejects bad time and escapes TEXT values", () => {
+    expect(() => buildIcs("bad", "x", now)).toThrow();
+    const ics = buildIcs("21:00", "https://a.app/?x=1,2;3", now).replace(/\r\n /g, "");
+    expect(ics).toContain("https://a.app/?x=1\\,2\\;3");
   });
 
   it("builds a Google Calendar link with only time and fixed text", () => {
