@@ -14,7 +14,7 @@ export function PageHeader({
     <header className="mb-6">
       <div className="flex items-start justify-between gap-3">
         <div>
-          {accent && <p className="text-[13px] font-semibold text-muted uppercase">{accent}</p>}
+          {accent && <p className="text-[15px] font-medium text-muted first-letter:uppercase">{accent}</p>}
           <h1 className="title text-[34px]">{title}</h1>
         </div>
         {action}

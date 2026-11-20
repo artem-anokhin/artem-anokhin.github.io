@@ -94,7 +94,7 @@ export function HomeScreen() {
     <div className="stagger space-y-6">
       <header className="flex items-end justify-between gap-3 pt-2">
         <div>
-          <p className="text-[13px] font-semibold text-muted uppercase first-letter:uppercase">{dateFmt.format(now)}</p>
+          <p className="text-[15px] font-medium text-muted first-letter:uppercase">{dateFmt.format(now)}</p>
           <h1 className="title text-[34px]">{greeting(now.getHours())}</h1>
         </div>
         <Link href="/settings/" aria-label="Настройки" className="pressable grid size-11 shrink-0 place-items-center text-link md:hidden">
@@ -142,7 +142,7 @@ function Loaded({ data, onChange }: { data: Data; onChange: () => void }) {
               ) : (
                 <span>
                   <span className="stat block text-[34px] text-ink">{score}</span>
-                  <span className="text-[12px] font-medium text-muted">фокус</span>
+                  <span className="text-[13px] font-medium text-muted">фокус</span>
                 </span>
               )}
             </ProgressRing>

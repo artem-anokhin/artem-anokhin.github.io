@@ -254,7 +254,7 @@ export function SettingsScreen() {
       <Group id="s-about" title="Поддержка" footer="Не является медицинской консультацией.">
         {HELP_LINES.map((l) => (
           <a key={l.phone} href={`tel:${l.phone}`} className={row}>
-            <span className="w-12 text-[20px] font-bold text-link tabular-nums">{l.phone}</span>
+            <span className="w-12 text-[22px] font-bold text-link tabular-nums">{l.phone}</span>
             <span className="flex-1 text-[15px] text-ink">{l.label}</span>
           </a>
         ))}

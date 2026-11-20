@@ -44,8 +44,8 @@ export function shareCardSvg({ treeSvg, stageName, activeDays, url }: ShareCardI
 <text x="96" y="210" font-family="${font}" font-weight="600" font-size="40" fill="#6C6C70">FOCUSAI · НЕДЕЛЯ</text>
 <text x="96" y="300" font-family="${font}" font-weight="700" font-size="92" letter-spacing="-2" fill="#1C1C1E">Моя неделя фокуса</text>
 <rect x="72" y="380" width="936" height="900" rx="56" fill="#FFFFFF"/>
-<defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFFFFF"/><stop offset="1" stop-color="#EEF6EC"/></linearGradient></defs>
-<rect x="72" y="380" width="936" height="900" rx="56" fill="url(#g)"/>
+<defs><linearGradient id="focusai-card-bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFFFFF"/><stop offset="1" stop-color="#EEF6EC"/></linearGradient></defs>
+<rect x="72" y="380" width="936" height="900" rx="56" fill="url(#focusai-card-bg)"/>
 ${placeTree(treeSvg)}
 <text x="540" y="1250" text-anchor="middle" font-family="${font}" font-weight="600" font-size="44" fill="#1C1C1E">Стадия дерева: ${esc(stageName)}</text>
 <text x="540" y="1440" text-anchor="middle" font-family="${font}" font-weight="700" font-size="120" letter-spacing="-3" fill="#1C1C1E">${days} из 7</text>

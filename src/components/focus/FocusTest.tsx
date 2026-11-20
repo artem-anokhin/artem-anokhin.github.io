@@ -158,7 +158,7 @@ export function FocusTest() {
               Тест прерван: вкладка была свёрнута. Начните заново, когда будет удобно.
             </p>
           )}
-          <span aria-hidden className="grid size-44 animate-breathe place-items-center rounded-full bg-accent/25 shadow-glow">
+          <span aria-hidden className="grid size-44 animate-breathe place-items-center rounded-full bg-accent/25 ">
             <span className="size-24 rounded-full bg-accent" />
           </span>
           <div>
@@ -208,7 +208,7 @@ export function FocusTest() {
           <span
             aria-hidden
             className={`grid size-52 place-items-center rounded-full transition-all duration-75 ${
-              stimulus ? "scale-100 bg-accent shadow-glow" : "scale-90 border-2 border-white/15"
+              stimulus ? "scale-100 bg-accent " : "scale-90 border-2 border-white/15"
             }`}
           >
             {stimulus && <span className="font-display text-2xl font-extrabold text-white">Жми!</span>}

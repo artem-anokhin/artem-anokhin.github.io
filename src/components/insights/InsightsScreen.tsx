@@ -95,7 +95,7 @@ function ExperimentCard({
       </h2>
       {tip && (
         <>
-          <h3 className="mt-1.5 text-[20px] font-semibold tracking-[-0.01em] text-ink">{tip.title}</h3>
+          <h3 className="mt-1.5 text-[22px] font-bold tracking-[-0.02em] text-ink">{tip.title}</h3>
           <p className="mt-1 text-ink">{tip.text}</p>
           <p className="mt-1 text-sm font-medium text-link">Пробуйте {EXPERIMENT_DAYS} дней подряд.</p>
           <a href={tip.url} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-11 items-center text-[13px] text-muted underline">
@@ -238,7 +238,7 @@ export function InsightsScreen() {
             </span>
           </ProgressRing>
           <div className="min-w-0 flex-1">
-            <h2 id="locked-title" className="title text-[20px]">
+            <h2 id="locked-title" className="title text-[22px]">
               {days} из {MIN_DAYS} дней
             </h2>
             <p className="mt-1 text-[15px] text-muted">Нужно 7 дней, в которые есть и чек-ин, и тест фокуса.</p>
@@ -318,7 +318,7 @@ function WeekHero({ week }: { week: (number | null)[] }) {
               className={`w-full origin-bottom animate-grow rounded-[5px] ${v === null ? "bg-fill" : i === 6 ? "bg-accent" : "bg-accent/45"}`}
               style={{ height: `${v === null ? 8 : Math.max(12, (v / 100) * 64)}px`, animationDelay: `${i * 40}ms` }}
             />
-            <span className="text-[11px] text-muted">{WD[new Date(now.getFullYear(), now.getMonth(), now.getDate() - (6 - i)).getDay()]}</span>
+            <span className="text-[13px] text-muted">{WD[new Date(now.getFullYear(), now.getMonth(), now.getDate() - (6 - i)).getDay()]}</span>
           </div>
         ))}
       </div>

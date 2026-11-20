@@ -64,22 +64,22 @@ export function HabitsScreen() {
       </p>
 
       <section aria-labelledby="mine-h">
-        <h2 id="mine-h" className="eyebrow mb-3">
+        <h2 id="mine-h" className="px-4 pb-1.5 text-[13px] text-muted uppercase">
           Мои привычки · {habits.length} из {MAX_HABITS}
         </h2>
         {habits.length === 0 ? (
-          <p className="rounded-card-lg bg-surface p-5 text-ink shadow-soft">Пока пусто. Выберите 1–3 идеи ниже — начать с малого проще.</p>
+          <p className="rounded-card-lg bg-surface p-4 text-ink">Пока пусто. Выберите 1–3 идеи ниже — начать с малого проще.</p>
         ) : (
-          <ul className="divide-y divide-line overflow-hidden rounded-card-lg bg-surface shadow-soft">
+          <ul className="group-list">
             {habits.map((h) => {
               const st = SPHERE_STYLE[h.sphere];
               const Icon = st.icon;
               return (
                 <li key={h.id} className="flex min-h-16 items-center gap-3 px-4 py-2">
-                  <span className={`grid size-10 shrink-0 place-items-center rounded-[14px] ${st.tint} ${st.ink}`}>
-                    <Icon aria-hidden size={20} />
+                  <span className={`grid size-[30px] shrink-0 place-items-center rounded-[7px] text-white ${st.base}`}>
+                    <Icon aria-hidden size={18} />
                   </span>
-                  <span className="min-w-0 flex-1 font-semibold text-ink">{h.title}</span>
+                  <span className="min-w-0 flex-1 text-[17px] text-ink">{h.title}</span>
                   <button
                     type="button"
                     onClick={() => remove(h)}
@@ -96,23 +96,23 @@ export function HabitsScreen() {
       </section>
 
       <section aria-labelledby="ideas-h">
-        <h2 id="ideas-h" className="eyebrow mb-3">
+        <h2 id="ideas-h" className="px-4 pb-1.5 text-[13px] text-muted uppercase">
           Идеи с источниками
         </h2>
-        <ul className="space-y-3">
+        <ul className="group-list">
           {HABIT_IDEAS.map((idea) => {
             const st = SPHERE_STYLE[idea.sphere];
             const Icon = st.icon;
             const has = taken.has(idea.id);
             return (
-              <li key={idea.id} className="rounded-card-lg bg-surface p-4 shadow-soft">
+              <li key={idea.id} className="px-4 py-3">
                 <div className="flex items-start gap-3">
-                  <span className={`grid size-10 shrink-0 place-items-center rounded-[14px] ${st.tint} ${st.ink}`}>
-                    <Icon aria-hidden size={20} />
+                  <span className={`mt-0.5 grid size-[30px] shrink-0 place-items-center rounded-[7px] text-white ${st.base}`}>
+                    <Icon aria-hidden size={18} />
                   </span>
                   <div className="min-w-0 flex-1">
-                    <p className="font-semibold text-ink">{idea.title}</p>
-                    <p className="mt-1 text-[14px] text-muted">{idea.why}</p>
+                    <p className="text-[17px] text-ink">{idea.title}</p>
+                    <p className="mt-0.5 text-[13px] leading-snug text-muted">{idea.why}</p>
                     <a href={idea.url} target="_blank" rel="noopener noreferrer" className="mt-1 inline-flex min-h-11 items-center text-[13px] text-muted underline">
                       Источник: {idea.source}
                       <span className="sr-only"> (откроется в новой вкладке)</span>
@@ -134,8 +134,8 @@ export function HabitsScreen() {
         </ul>
       </section>
 
-      <section aria-labelledby="own-h" className="rounded-card-lg bg-surface p-5 shadow-soft">
-        <h2 id="own-h" className="title text-[20px]">
+      <section aria-labelledby="own-h" className="rounded-card-lg bg-surface p-4">
+        <h2 id="own-h" className="title text-[22px]">
           Своя привычка
         </h2>
         <form
@@ -152,7 +152,7 @@ export function HabitsScreen() {
               maxLength={HABIT_TITLE_MAX}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="Например: 20 минут чтения"
-              className="h-14 w-full rounded-[18px] bg-bg px-4 text-ink placeholder:text-muted"
+              className="h-[50px] w-full rounded-[12px] bg-bg px-4 text-ink placeholder:text-muted"
             />
           </label>
           <fieldset>

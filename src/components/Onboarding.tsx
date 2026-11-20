@@ -52,7 +52,7 @@ export function Onboarding({ onDone }: { onDone: () => void }) {
               <ChevronLeft aria-hidden size={20} /> Назад
             </button>
           ) : (
-            <p className="text-[20px] font-bold tracking-[-0.02em] text-ink">
+            <p className="text-[17px] font-bold tracking-[-0.01em] text-ink">
               Focus<span className="text-link">AI</span>
             </p>
           )}
@@ -101,7 +101,7 @@ export function Onboarding({ onDone }: { onDone: () => void }) {
                 <ProgressRing value={0.72} size={140} stroke={13}>
                   <span>
                     <span className="stat block text-[40px] text-link">72</span>
-                    <span className="text-[12px] font-semibold text-muted">Focus Score</span>
+                    <span className="text-[13px] font-semibold text-muted">Focus Score</span>
                   </span>
                 </ProgressRing>
               </div>

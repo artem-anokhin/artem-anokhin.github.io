@@ -1,5 +1,5 @@
 // Minimal offline cache: network-first for pages, cache fallback offline.
-const CACHE = "focusai-v1";
+const CACHE = "focusai-v2";
 self.addEventListener("install", (e) => {
   const urls = ["/", "/test/", "/insights/", "/tree/", "/library/", "/manifest.webmanifest", "/icon.svg"];
   // Tolerant precache: one missing URL must not fail the whole install.

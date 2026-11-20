@@ -55,7 +55,7 @@ export function WeekScreen() {
     <div className="min-h-dvh bg-bg">
       <div className="mx-auto max-w-xl px-5 pt-[calc(12px+env(safe-area-inset-top))] pb-[calc(24px+env(safe-area-inset-bottom))]">
         <div className="flex items-center justify-between">
-          <p className="text-[13px] font-semibold text-muted uppercase">Итоги недели</p>
+          <p className="text-[15px] font-medium text-muted first-letter:uppercase">Итоги недели</p>
           <Link href="/insights/" aria-label="Закрыть итоги" className="pressable grid size-11 place-items-center text-link">
             <X aria-hidden size={22} />
           </Link>
@@ -104,12 +104,12 @@ function Story({ data }: { data: Data }) {
             const best = d.date === bestDate;
             return (
               <div key={d.date} className="flex flex-1 flex-col items-center gap-1.5">
-                <span className="text-[12px] font-semibold text-ink tabular-nums">{s ?? ""}</span>
+                <span className="text-[13px] font-semibold text-ink tabular-nums">{s ?? ""}</span>
                 <div
                   className={`w-full origin-bottom animate-grow rounded-t-[10px] rounded-b-[4px] ${s === null ? "bg-soft" : best ? "bg-accent" : "bg-accent-weak"}`}
                   style={{ height: `${s === null ? 8 : Math.max(14, (s / max) * 110)}px`, animationDelay: `${i * 50}ms` }}
                 />
-                <span className={`text-[12px] ${best ? "font-bold text-link" : "text-muted"}`}>{weekday(d.date)}</span>
+                <span className={`text-[13px] ${best ? "font-bold text-link" : "text-muted"}`}>{weekday(d.date)}</span>
               </div>
             );
           })}

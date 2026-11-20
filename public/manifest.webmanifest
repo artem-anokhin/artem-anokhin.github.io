@@ -1,13 +1,13 @@
 {
   "name": "FocusAI",
   "short_name": "FocusAI",
-  "description": "Узнайте, что мешает вашей концентрации, и улучшайте её за минуту в день.",
+  "description": "Чек-ин за минуту, тест реакции, фокус-сессии и привычки. Узнайте, что связано с вашей концентрацией.",
   "lang": "ru",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
-  "background_color": "#F4F7FE",
-  "theme_color": "#0A2A9E",
+  "background_color": "#F2F2F7",
+  "theme_color": "#F2F2F7",
   "icons": [
     {
       "src": "/icon.svg",

@@ -54,7 +54,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     <div className="min-h-dvh md:flex">
       {/* Desktop sidebar */}
       <aside className="hidden md:sticky md:top-0 md:flex md:h-dvh md:w-64 md:shrink-0 md:flex-col md:gap-8 md:border-r md:border-line md:bg-chrome md:p-6">
-        <Link href="/" className="text-[22px] font-bold tracking-[-0.02em] text-ink">
+        <Link href="/" className="text-[17px] font-bold tracking-[-0.01em] text-ink">
           Focus<span className="text-link">AI</span>
         </Link>
         <nav aria-label="Основная навигация" className="flex flex-col gap-1">

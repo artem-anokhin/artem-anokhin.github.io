@@ -64,7 +64,7 @@ export function TreeScreen() {
   return (
     <div className="space-y-6">
       <header className="pt-2">
-        <p className="text-[13px] font-semibold text-muted uppercase">Стадия {tree.stage + 1} из {STAGES.length}</p>
+        <p className="text-[15px] font-medium text-muted first-letter:uppercase">Стадия {tree.stage + 1} из {STAGES.length}</p>
         <h1 id="stage-title" className="title text-[34px] first-letter:uppercase">
           {tree.stageName}
         </h1>
@@ -111,7 +111,7 @@ export function TreeScreen() {
                     return <Icon aria-hidden size={20} />;
                   })()}
                 </span>
-                <span className={`text-[12px] ${i === tree.stage ? "font-semibold text-ink" : "text-muted"}`}>{name}</span>
+                <span className={`text-[13px] ${i === tree.stage ? "font-semibold text-ink" : "text-muted"}`}>{name}</span>
               </li>
             ))}
           </ol>
@@ -149,7 +149,7 @@ export function TreeScreen() {
             ].map(([k, v]) => (
               <div key={k} className="px-1">
                 <dd className="stat text-[26px] text-ink">{v}</dd>
-                <dt className="mt-1 text-[12px] text-muted">{k}</dt>
+                <dt className="mt-1 text-[13px] text-muted">{k}</dt>
               </div>
             ))}
           </dl>
