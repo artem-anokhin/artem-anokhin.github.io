@@ -32,7 +32,8 @@
   --color-garden: #eef6ec;
   --color-orange: #f08a00;
   --color-red: #d70015;
-  --color-tab-off: #8a8a8e;
+  --color-tab-off: #6c6c70;
+  --color-link-night: #7ea2ff;
 
   /* «Спокойный сад фокуса» (docs/DESIGN.md) */
   --color-surface: #ffffff;
@@ -214,6 +215,7 @@ html[data-immersive] nav[aria-label="Основная навигация"] {
     --color-danger-tint: #3a1414;
     --color-accent-weak: #2a3f80;
     --color-garden: #10241a;
+    --color-tab-off: #98989f;
     --color-sand: #1c1c1e;
     --color-sand-ink: #98989f;
     --color-s-sleep-tint: #23234a;

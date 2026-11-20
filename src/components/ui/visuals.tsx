@@ -69,7 +69,7 @@ export function WeekStrip({ days }: { days: { date: string; done: boolean; today
             <span className={`text-[13px] ${d.today ? "font-semibold text-ink" : "font-medium text-muted"}`}>{wd}</span>
             <span
               className={`grid size-8 place-items-center rounded-full text-[13px] font-semibold tabular-nums ${
-                d.done ? "bg-accent text-white" : d.today ? "text-link ring-2 ring-accent ring-inset" : "bg-fill text-muted"
+                d.done ? "bg-accent text-white" : d.today ? "text-link ring-2 ring-accent ring-inset" : "bg-fill font-medium text-ink"
               }`}
             >
               {d.done ? <Check aria-hidden size={15} strokeWidth={3} /> : dd}

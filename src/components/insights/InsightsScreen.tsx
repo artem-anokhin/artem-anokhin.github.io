@@ -337,7 +337,7 @@ function InsightCard({ insight: i, split }: { insight: Insight; split: SplitMean
   const max = split ? Math.max(split.high, split.low, 1) : 1;
   return (
     <article className="rounded-card-lg bg-surface p-4">
-      <p className={`flex items-center gap-1.5 text-[13px] font-semibold ${st.text}`}>
+      <p className={`flex items-center gap-1.5 text-[13px] font-semibold ${st.ink}`}>
         <Icon aria-hidden size={16} /> {sphereTitle}
       </p>
       <p className="mt-2 text-[17px] leading-snug font-semibold text-ink">{i.text}</p>
@@ -378,8 +378,8 @@ function PreviewInsight() {
   return (
     <section aria-labelledby="preview-h" className="relative rounded-card-lg bg-surface p-4">
       <p className="flex items-center justify-between">
-        <span className="flex items-center gap-1.5 text-[13px] font-semibold text-s-sleep">Сон</span>
-        <span className="rounded-full bg-fill px-2 py-0.5 text-[13px] font-medium text-muted">пример</span>
+        <span className="flex items-center gap-1.5 text-[13px] font-semibold text-s-sleep-ink">Сон</span>
+        <span className="rounded-full bg-fill px-2 py-0.5 text-[13px] font-medium text-ink">пример</span>
       </p>
       <h2 id="preview-h" className="mt-2 text-[17px] leading-snug font-semibold text-ink">
         Так будет выглядеть инсайт: «В ваших данных Focus Score чаще был выше в дни, когда вы…»
