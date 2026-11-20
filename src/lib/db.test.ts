@@ -1,4 +1,5 @@
-import { FocusDB, dayKey } from "./db";
+import { FocusDB, dayKey, saveCheckIn } from "./db";
+import { emptyCheckIn } from "./checkin";
 
 describe("dayKey", () => {
   it("formats local date as YYYY-MM-DD", () => {
@@ -11,10 +12,14 @@ describe("dayKey", () => {
 describe("FocusDB", () => {
   it("stores one check-in per day (upsert by date)", async () => {
     const db = new FocusDB("test-db");
-    await db.checkins.put({ date: "2026-11-20", createdAt: 1, updatedAt: 1 });
-    await db.checkins.put({ date: "2026-11-20", createdAt: 1, updatedAt: 2 });
+    await saveCheckIn(emptyCheckIn(), "2026-11-20", db, 1);
+    const edited = { ...emptyCheckIn(), note: "  второй раз  " };
+    await saveCheckIn(edited, "2026-11-20", db, 2);
     expect(await db.checkins.count()).toBe(1);
-    expect((await db.checkins.get("2026-11-20"))?.updatedAt).toBe(2);
+    const row = await db.checkins.get("2026-11-20");
+    expect(row?.createdAt).toBe(1);
+    expect(row?.updatedAt).toBe(2);
+    expect(row?.note).toBe("второй раз");
     await db.delete();
   });
 });

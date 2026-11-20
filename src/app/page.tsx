@@ -1,5 +1,5 @@
 import { PageHeader } from "@/components/PageHeader";
-import { Placeholder } from "@/components/Placeholder";
+import { TodayScreen } from "@/components/checkin/TodayScreen";
 
 export default function TodayPage() {
   return (
@@ -9,7 +9,7 @@ export default function TodayPage() {
         accent="ваш фокус"
         lead="Минута в день, чтобы понять, что влияет на вашу концентрацию."
       />
-      <Placeholder text="Ежедневная отметка появится здесь." />
+      <TodayScreen />
     </>
   );
 }

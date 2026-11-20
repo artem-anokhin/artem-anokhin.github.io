@@ -1,11 +1,37 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import { useEffect } from "react";
 import { NAV_ITEMS, isActive } from "@/lib/nav";
+import { getProfile } from "@/lib/settings";
+
+const WELCOME = "/welcome/";
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname() ?? "/";
+  const router = useRouter();
+  const onWelcome = isActive(pathname, WELCOME);
+
+  // Send first-time users (no consent yet) to onboarding.
+  useEffect(() => {
+    if (onWelcome) return;
+    let alive = true;
+    getProfile()
+      .then((p) => {
+        if (alive && !p) router.replace(WELCOME);
+      })
+      // Fail closed: if storage can't be read, go to onboarding rather than the app.
+      .catch(() => {
+        if (alive) router.replace(WELCOME);
+      });
+    return () => {
+      alive = false;
+    };
+  }, [onWelcome, router]);
+
+  // Onboarding is full-screen, without navigation.
+  if (onWelcome) return <main>{children}</main>;
 
   return (
     <div className="min-h-dvh md:flex">
