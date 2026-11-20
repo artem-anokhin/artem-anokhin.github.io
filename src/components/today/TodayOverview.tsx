@@ -58,7 +58,7 @@ function FocusScoreCard() {
         </>
       ) : (
         <>
-          <p className="mt-1 text-ink">Теста сегодня ещё не было. Займёт 90 секунд.</p>
+          <p className="mt-1 text-ink">Теста сегодня ещё не было. 90 секунд — и вы увидите свой Focus Score от 0 до 100.</p>
           <Link href="/test/" className={`${btnPrimary} mt-4 w-full`}>
             Пройти тест
           </Link>

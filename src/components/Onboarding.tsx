@@ -61,6 +61,9 @@ export function Onboarding({ onDone }: { onDone: () => void }) {
 
         {step === 0 && (
           <>
+            <p className="mb-4 rounded-2xl bg-soft px-4 py-3 text-sm font-medium text-navy">
+              Узнайте, что помогает вашей концентрации: чек-ин за 1 минуту, тест за 90 секунд, данные только у вас.
+            </p>
             <h1 className="title mb-6 text-2xl">
               Как вы
               <span className="block text-accent">проводите день?</span>

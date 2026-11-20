@@ -14,6 +14,8 @@ export interface CheckIn extends CheckInData {
   date: DayKey;
   createdAt: number;
   updatedAt: number;
+  /** Synthetic demo row (see demo.ts); real saves never set it. */
+  demo?: true;
 }
 
 export interface FocusTestResult {
@@ -26,6 +28,8 @@ export interface FocusTestResult {
   lapses?: number;
   falseStarts?: number;
   trials?: number;
+  /** Synthetic demo row (see demo.ts). */
+  demo?: true;
 }
 
 export interface Setting {

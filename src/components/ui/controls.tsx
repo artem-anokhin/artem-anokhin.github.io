@@ -4,7 +4,7 @@ import { Minus, Plus } from "lucide-react";
 import type { Scale5 } from "@/lib/checkin";
 
 export const btnPrimary =
-  "inline-flex min-h-12 items-center justify-center rounded-2xl bg-navy px-6 font-semibold text-white transition-colors hover:bg-deep disabled:cursor-not-allowed disabled:bg-muted/50";
+  "inline-flex min-h-12 items-center justify-center rounded-2xl bg-navy px-6 font-semibold text-white transition-colors hover:bg-deep disabled:cursor-not-allowed disabled:bg-soft disabled:text-muted";
 export const btnSecondary =
   "inline-flex min-h-12 items-center justify-center rounded-2xl border-[1.5px] border-line bg-card px-6 font-semibold text-navy transition-colors hover:bg-soft";
 

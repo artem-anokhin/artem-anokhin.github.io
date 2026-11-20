@@ -8,9 +8,11 @@
     "start": "npx serve out",
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
-    "test": "vitest run --reporter=dot"
+    "test": "vitest run --reporter=dot",
+    "e2e": "next build && playwright test"
   },
   "devDependencies": {
+    "@playwright/test": "^1.65.1",
     "@tailwindcss/postcss": "^4.3.5",
     "@testing-library/dom": "^10.4.2",
     "@testing-library/jest-dom": "^8.0.0",

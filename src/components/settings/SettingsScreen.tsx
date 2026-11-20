@@ -1,9 +1,11 @@
 "use client";
 
-import { Download, ShieldCheck, Trash2 } from "lucide-react";
+import { Download, Presentation, ShieldCheck, Trash2 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { ChoiceField, btnSecondary } from "@/components/ui/controls";
 import { HELP_LINES } from "@/lib/crisis";
+import { db } from "@/lib/db";
+import { DEMO_DAYS, clearDemo, isDemo, loadDemo } from "@/lib/demo";
 import { deleteAllData, downloadJson, exportData, exportFileName } from "@/lib/privacy";
 import { MODE_LABEL, getProfile, updateMode, type Mode, type Profile } from "@/lib/settings";
 
@@ -23,6 +25,8 @@ export function SettingsScreen() {
   const [error, setError] = useState<string | null>(null);
   const [confirming, setConfirming] = useState(false);
   const [busy, setBusy] = useState(false);
+  /** "empty" = no data yet (demo can be loaded), "demo" = demo loaded, "real" = user data. */
+  const [dataKind, setDataKind] = useState<"empty" | "demo" | "real" | null>(null);
   const cancelRef = useRef<HTMLButtonElement>(null);
   const deleteRef = useRef<HTMLButtonElement>(null);
   const wasConfirming = useRef(false);
@@ -32,6 +36,9 @@ export function SettingsScreen() {
     getProfile()
       .then((p) => alive && setProfile(p))
       .catch(() => alive && setProfile(null));
+    Promise.all([isDemo(), db.checkins.count(), db.focusTests.count()])
+      .then(([demo, c, t]) => alive && setDataKind(demo ? "demo" : c + t ? "real" : "empty"))
+      .catch(() => alive && setDataKind(null));
     return () => {
       alive = false;
     };
@@ -69,6 +76,21 @@ export function SettingsScreen() {
       downloadJson(await exportData(), exportFileName());
     } catch {
       setError("Не получилось экспортировать. Попробуйте ещё раз.");
+    }
+  }
+
+  async function onDemo() {
+    setError(null);
+    setBusy(true);
+    try {
+      if (dataKind === "demo") await clearDemo();
+      else if (!(await loadDemo())) throw new Error("not empty");
+      // Full reload on purpose: every screen re-reads the new data.
+      // eslint-disable-next-line @next/next/no-location-assign-relative-destination
+      window.location.assign("/");
+    } catch {
+      setBusy(false);
+      setError("Не получилось. Попробуйте ещё раз.");
     }
   }
 
@@ -132,6 +154,23 @@ export function SettingsScreen() {
           Экспорт данных
         </button>
       </section>
+
+      {(dataKind === "empty" || dataKind === "demo") && (
+        <section aria-labelledby="s-demo" className="card p-5">
+          <h2 id="s-demo" className="font-display text-lg font-extrabold text-ink">
+            Демо-режим
+          </h2>
+          <p className="mt-1 text-sm text-muted">
+            {dataKind === "demo"
+              ? "Сейчас показаны демо-данные. Уберите их, чтобы начать вести свои. Ваши собственные отметки останутся."
+              : `Пример за ${DEMO_DAYS} день, чтобы посмотреть инсайты и дерево. Данные будут помечены как «демо-данные».`}
+          </p>
+          <button type="button" disabled={busy} onClick={onDemo} className={`${btnSecondary} mt-4 gap-2 disabled:opacity-50`}>
+            <Presentation aria-hidden size={20} />
+            {dataKind === "demo" ? "Убрать демо-данные" : "Показать демо-данные"}
+          </button>
+        </section>
+      )}
 
       <section aria-labelledby="s-delete" className="card p-5">
         <h2 id="s-delete" className="font-display text-lg font-extrabold text-ink">

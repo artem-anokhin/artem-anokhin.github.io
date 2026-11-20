@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { isDemo } from "@/lib/demo";
 import { NAV_ITEMS, SIDEBAR_EXTRA, isActive } from "@/lib/nav";
 import { getProfile } from "@/lib/settings";
 
@@ -12,6 +13,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname() ?? "/";
   const router = useRouter();
   const onWelcome = isActive(pathname, WELCOME);
+  // Render page content only after consent is confirmed (no first-run flash).
+  const [ready, setReady] = useState(false);
+  const [demo, setDemo] = useState(false);
 
   // Send first-time users (no consent yet) to onboarding.
   useEffect(() => {
@@ -19,7 +23,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     let alive = true;
     getProfile()
       .then((p) => {
-        if (alive && !p) router.replace(WELCOME);
+        if (!alive) return;
+        if (!p) return router.replace(WELCOME);
+        setReady(true);
+        return isDemo().then((d) => alive && setDemo(d));
       })
       // Fail closed: if storage can't be read, go to onboarding rather than the app.
       .catch(() => {
@@ -58,12 +65,21 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             );
           })}
         </nav>
-        <p className="mt-auto text-xs text-muted">Не является медицинской консультацией</p>
+        <p className="mt-auto text-sm text-muted">Не является медицинской консультацией</p>
       </aside>
 
       <main className="mx-auto w-full max-w-3xl px-4 pt-6 pb-28 md:px-10 md:pt-10 md:pb-10">
-        {children}
-        <p className="mt-6 text-center text-xs text-muted md:hidden">
+        {demo && (
+          <p role="note" className="mb-4 rounded-2xl border-[1.5px] border-line bg-soft px-4 py-3 text-sm text-ink">
+            <strong className="font-semibold">Демо-данные.</strong> Это пример, а не ваши результаты. Убрать можно в{" "}
+            <Link href="/settings/" className="font-semibold text-navy underline underline-offset-4">
+              настройках
+            </Link>
+            .
+          </p>
+        )}
+        {ready ? children : <div aria-busy="true" className="card h-48 animate-pulse" />}
+        <p className="mt-6 text-center text-sm text-muted md:hidden">
           Не является медицинской консультацией
         </p>
       </main>
@@ -81,7 +97,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 <Link
                   href={href}
                   aria-current={active ? "page" : undefined}
-                  className={`flex min-h-14 min-w-0 flex-col items-center justify-center gap-0.5 px-0.5 text-[11px] leading-tight font-medium ${
+                  className={`flex min-h-14 min-w-0 flex-col items-center justify-center gap-0.5 px-0.5 text-xs leading-tight tracking-tight font-medium ${
                     active ? "text-accent" : "text-muted"
                   }`}
                 >
