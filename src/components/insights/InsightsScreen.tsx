@@ -231,6 +231,7 @@ export function InsightsScreen() {
       <WeekHero week={week} />
 
       {locked ? (
+        <>
         <section className="flex items-center gap-5 rounded-card-lg bg-surface p-4" aria-labelledby="locked-title">
           <ProgressRing value={days / MIN_DAYS} size={96} stroke={10} label={`${days} из ${MIN_DAYS} дней`}>
             <span className="stat text-[26px] text-link">
@@ -252,8 +253,10 @@ export function InsightsScreen() {
             </div>
           </div>
         </section>
+        <PreviewInsight />
+        </>
       ) : insights.length === 0 ? (
-        <p className="rounded-card-lg bg-surface p-5 text-ink shadow-soft">Явных связей пока нет. Это нормально, продолжайте отмечать дни.</p>
+        <p className="rounded-card-lg bg-surface p-4 text-ink">Явных связей пока нет. Это нормально, продолжайте отмечать дни.</p>
       ) : (
         <section aria-labelledby="links-h" className="space-y-3">
           <h2 id="links-h" className="title text-[22px]">
@@ -367,5 +370,25 @@ function InsightCard({ insight: i, split }: { insight: Insight; split: SplitMean
         </a>
       )}
     </article>
+  );
+}
+
+/** Shown before day 7: what an insight will look like. Clearly marked as an example, no real numbers. */
+function PreviewInsight() {
+  return (
+    <section aria-labelledby="preview-h" className="relative rounded-card-lg bg-surface p-4">
+      <p className="flex items-center justify-between">
+        <span className="flex items-center gap-1.5 text-[13px] font-semibold text-s-sleep">Сон</span>
+        <span className="rounded-full bg-fill px-2 py-0.5 text-[13px] font-medium text-muted">пример</span>
+      </p>
+      <h2 id="preview-h" className="mt-2 text-[17px] leading-snug font-semibold text-ink">
+        Так будет выглядеть инсайт: «В ваших данных Focus Score чаще был выше в дни, когда вы…»
+      </h2>
+      <div aria-hidden className="mt-4 space-y-2 opacity-60">
+        <div className="h-2.5 w-[86%] rounded-full bg-s-sleep" />
+        <div className="h-2.5 w-[58%] rounded-full bg-fill-strong" />
+      </div>
+      <p className="mt-3 text-[13px] text-muted">Здесь появятся ваши настоящие связи — посчитанные только на этом устройстве.</p>
+    </section>
   );
 }

@@ -31,3 +31,16 @@ describe("weeklyReview", () => {
     expect(r.scoreDelta).toBeNull();
   });
 });
+
+describe("weeklyReview habits", () => {
+  it("counts habit marks per week", () => {
+    const r = weeklyReview([], [], [], "2026-11-21", [
+      { habitId: 1, date: "2026-11-21", doneAt: 1 },
+      { habitId: 2, date: "2026-11-21", doneAt: 1 },
+      { habitId: 1, date: "2026-11-10", doneAt: 1 },
+    ]);
+    expect(r.current.habitMarks).toBe(2);
+    expect(r.previous.habitMarks).toBe(1);
+    expect(r.days.at(-1)?.habit).toBe(true);
+  });
+});

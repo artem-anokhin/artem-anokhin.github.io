@@ -13,6 +13,8 @@ import {
   type Session,
 } from "@/lib/focusTest";
 import { saveFocusTest } from "@/lib/focusResults";
+import { db, dayKey } from "@/lib/db";
+import { latestTestByDay } from "@/lib/today";
 import { X } from "lucide-react";
 import { btnNight, btnNightGhost } from "@/components/ui/controls";
 import { DropIcon, ProgressRing } from "@/components/ui/visuals";
@@ -30,6 +32,26 @@ export function FocusTest() {
   const [feedback, setFeedback] = useState("");
   const [summary, setSummary] = useState<FocusSummary | null>(null);
   const [save, setSave] = useState<SaveStatus>("skipped");
+  /** Mean of the latest test per day over the previous 7 days (today excluded). */
+  const [weekAvg, setWeekAvg] = useState<number | null>(null);
+
+  useEffect(() => {
+    if (view !== "result") return;
+    let alive = true;
+    const today = dayKey();
+    const n = new Date();
+    const from = dayKey(new Date(n.getFullYear(), n.getMonth(), n.getDate() - 7));
+    db.focusTests
+      .toArray()
+      .then((all) => {
+        const days = [...latestTestByDay(all.filter((t) => t.date >= from && t.date < today)).values()];
+        if (alive) setWeekAvg(days.length ? Math.round(days.reduce((a, t) => a + t.score, 0) / days.length) : null);
+      })
+      .catch(() => {});
+    return () => {
+      alive = false;
+    };
+  }, [view]);
   const session = useRef<Session | null>(null);
   const zoneRef = useRef<HTMLDivElement>(null);
   const resultRef = useRef<HTMLElement>(null);
@@ -239,6 +261,17 @@ export function FocusTest() {
                 <span className="text-[15px] text-night-muted">из 100</span>
               </span>
             </ProgressRing>
+            {weekAvg !== null && s.score != null && (
+              <p className="text-[15px] text-night-muted">
+                В среднем за прошлые 7 дней: <span className="font-semibold text-night-ink tabular-nums">{weekAvg}</span>
+                {s.score !== weekAvg && (
+                  <span className="ml-1 tabular-nums">
+                    ({s.score > weekAvg ? "+" : "−"}
+                    {Math.abs(s.score - weekAvg)})
+                  </span>
+                )}
+              </p>
+            )}
             {save === "saved" && (
               <p className="inline-flex animate-drop items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-[15px] font-semibold text-night-ink">
                 <DropIcon size={18} /> Сохранено · капля для дерева

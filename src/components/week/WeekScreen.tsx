@@ -31,8 +31,13 @@ export function WeekScreen() {
     let alive = true;
     (async () => {
       const key = dayKey();
-      const [checkins, tests, sessions] = await Promise.all([db.checkins.toArray(), db.focusTests.toArray(), db.sessions.toArray()]);
-      const review = weeklyReview(checkins, tests, sessions, key);
+      const [checkins, tests, sessions, habitLogs] = await Promise.all([
+        db.checkins.toArray(),
+        db.focusTests.toArray(),
+        db.sessions.toArray(),
+        db.habitLogs.toArray(),
+      ]);
+      const review = weeklyReview(checkins, tests, sessions, key, habitLogs);
       const byDay = latestTestByDay(tests);
       const pairs = pairDays(checkins, tests);
       const usable = usableDays(pairs);
@@ -118,11 +123,12 @@ function Story({ data }: { data: Data }) {
       </section>
 
       {/* 3. Habits in numbers */}
-      <section aria-label="Неделя в цифрах" className="grid grid-cols-3 gap-2">
+      <section aria-label="Неделя в цифрах" className="grid grid-cols-2 gap-2">
         {[
           [String(c.checkinDays), plural(c.checkinDays, ["день", "дня", "дней"]), "с чек-ином"],
           [String(c.focusMinutes), "мин", "фокуса"],
           [c.avgSleep === null ? "—" : String(c.avgSleep).replace(".", ","), "ч", "сон в среднем"],
+          [String(c.habitMarks), plural(c.habitMarks, ["отметка", "отметки", "отметок"]), "привычек"],
         ].map(([v, u, l]) => (
           <div key={l} className="rounded-card bg-surface p-3">
             <p className="stat text-[30px] text-ink">

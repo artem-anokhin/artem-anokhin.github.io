@@ -14,6 +14,8 @@ export interface WeekStats {
   /** Mean of the daily Focus Score (latest test per day), rounded; null without tests. */
   avgScore: number | null;
   focusMinutes: number;
+  /** Habit marks in the range (each habit done on each day counts once). */
+  habitMarks: number;
   /** Mean sleep in hours over check-in days, one decimal; null without check-ins. */
   avgSleep: number | null;
   best: { date: DayKey; score: number } | null;
@@ -28,7 +30,13 @@ export interface WeeklyReview {
   days: { date: DayKey; checkin: boolean; test: boolean; session: boolean; habit: boolean }[];
 }
 
-function stats(checkins: CheckIn[], tests: Map<DayKey, FocusTestResult>, sessions: FocusSession[], inRange: (d: DayKey) => boolean): WeekStats {
+function stats(
+  checkins: CheckIn[],
+  tests: Map<DayKey, FocusTestResult>,
+  sessions: FocusSession[],
+  habitLogs: HabitLog[],
+  inRange: (d: DayKey) => boolean,
+): WeekStats {
   const cs = checkins.filter((c) => inRange(c.date));
   const ts = [...tests.values()].filter((t) => inRange(t.date));
   const sleeps = cs.map((c) => {
@@ -45,6 +53,7 @@ function stats(checkins: CheckIn[], tests: Map<DayKey, FocusTestResult>, session
     testDays: ts.length,
     avgScore: ts.length ? Math.round(ts.reduce((a, t) => a + t.score, 0) / ts.length) : null,
     focusMinutes: sessions.filter((s) => inRange(s.date)).reduce((a, s) => a + s.minutes, 0),
+    habitMarks: habitLogs.filter((l) => inRange(l.date)).length,
     avgSleep: sleeps.length ? Math.round((sleeps.reduce((a, b) => a + b, 0) / sleeps.length) * 10) / 10 : null,
     best,
   };
@@ -65,8 +74,8 @@ export function weeklyReview(
 ): WeeklyReview {
   const byDay = latestTestByDay(tests);
   const age = (d: DayKey) => daysBetween(d, today);
-  const current = stats(checkins, byDay, sessions, (d) => age(d) >= 0 && age(d) < 7);
-  const previous = stats(checkins, byDay, sessions, (d) => age(d) >= 7 && age(d) < 14);
+  const current = stats(checkins, byDay, sessions, habitLogs, (d) => age(d) >= 0 && age(d) < 7);
+  const previous = stats(checkins, byDay, sessions, habitLogs, (d) => age(d) >= 7 && age(d) < 14);
   const cDays = new Set(checkins.map((c) => c.date));
   const sDays = new Set(sessions.map((s) => s.date));
   const hDays = new Set(habitLogs.map((l) => l.date));
