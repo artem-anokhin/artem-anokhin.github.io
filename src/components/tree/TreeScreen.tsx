@@ -72,7 +72,7 @@ export function TreeScreen() {
     <div className="-mx-5 -mt-6 md:mx-0 md:mt-0">
       {/* Full-bleed garden scene */}
       <section id="tree-card" aria-labelledby="stage-title" className="relative">
-        <TreeScene stage={tree.stage} wilting={tree.wilting} title={title} className="h-[440px] md:rounded-card-lg" />
+        <TreeScene stage={tree.stage} wilting={tree.wilting} title={title} className="h-[440px] md:rounded-card-lg" lift={28} />
         <div className="absolute inset-x-0 top-0 px-5 pt-6">
           <p className="eyebrow text-navy/70">Стадия {tree.stage + 1} из {STAGES.length}</p>
           <h1 id="stage-title" className="title mt-1 text-[36px] first-letter:uppercase">

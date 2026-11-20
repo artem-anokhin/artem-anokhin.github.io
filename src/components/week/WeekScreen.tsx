@@ -181,7 +181,7 @@ function Story({ data }: { data: Data }) {
       </section>
 
       <Link href="/insights/" className={`${btnPrimary} w-full`}>
-        Выбрать эксперимент на неделю
+        Выбрать эксперимент
       </Link>
       <p className="text-center text-[13px] text-muted">Сравнение последних 7 дней с предыдущими 7. Не является медицинской консультацией.</p>
     </div>

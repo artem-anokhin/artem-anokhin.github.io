@@ -5,14 +5,14 @@ import type { Scale5 } from "@/lib/checkin";
 import type { SphereStyle } from "@/lib/spheres";
 
 export const btnPrimary =
-  "pressable inline-flex min-h-14 items-center justify-center gap-2 rounded-[18px] bg-navy px-6 text-[17px] font-semibold text-white shadow-lift transition-colors hover:bg-deep disabled:cursor-not-allowed disabled:bg-soft disabled:text-muted disabled:shadow-none";
+  "pressable inline-flex min-h-14 items-center justify-center gap-2 text-center rounded-[18px] bg-navy px-6 text-[17px] font-semibold text-white shadow-lift transition-colors hover:bg-deep disabled:cursor-not-allowed disabled:bg-soft disabled:text-muted disabled:shadow-none";
 export const btnSecondary =
-  "pressable inline-flex min-h-14 items-center justify-center gap-2 rounded-[18px] bg-soft px-6 text-[17px] font-semibold text-navy transition-colors hover:bg-[#dbe5ff]";
+  "pressable inline-flex min-h-14 items-center justify-center gap-2 text-center rounded-[18px] bg-soft px-6 text-[17px] font-semibold text-navy transition-colors hover:bg-[#dbe5ff]";
 /** Primary button on night (dark) surfaces. */
 export const btnNight =
-  "pressable inline-flex min-h-14 items-center justify-center gap-2 rounded-[18px] bg-white px-6 text-[17px] font-semibold text-navy shadow-glow transition-colors hover:bg-night-ink disabled:opacity-50";
+  "pressable inline-flex min-h-14 items-center justify-center gap-2 text-center rounded-[18px] bg-white px-6 text-[17px] font-semibold text-navy shadow-glow transition-colors hover:bg-night-ink disabled:opacity-50";
 export const btnNightGhost =
-  "pressable inline-flex min-h-14 items-center justify-center gap-2 rounded-[18px] bg-white/10 px-6 text-[17px] font-semibold text-night-ink transition-colors hover:bg-white/15";
+  "pressable inline-flex min-h-14 items-center justify-center gap-2 text-center rounded-[18px] bg-white/10 px-6 text-[17px] font-semibold text-night-ink transition-colors hover:bg-white/15";
 
 /** Default look when no sphere is given (onboarding, settings). */
 const NEUTRAL: Pick<SphereStyle, "base" | "tint" | "ink"> = { base: "bg-navy", tint: "bg-surface", ink: "text-navy" };

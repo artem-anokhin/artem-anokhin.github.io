@@ -99,12 +99,15 @@ export function TreeScene({
   title,
   className = "",
   night = false,
+  lift = 0,
 }: {
   stage: number;
   wilting: boolean;
   title: string;
   className?: string;
   night?: boolean;
+  /** Extra space under the tree in px (e.g. when a sheet overlaps the scene bottom). */
+  lift?: number;
 }) {
   const sky = useId();
   return (
@@ -124,21 +127,21 @@ export function TreeScene({
             ].map(([x, y], i) => (
               <circle key={i} cx={x} cy={y} r={i % 3 ? 1.4 : 2.2} fill="#EEF2FF" opacity={i % 2 ? 0.6 : 0.9} />
             ))}
-            <circle cx="320" cy="70" r="22" fill="#EEF2FF" opacity=".9" />
-            <circle cx="330" cy="62" r="20" fill="#13215A" />
+            <circle cx="290" cy="74" r="22" fill="#EEF2FF" opacity=".9" />
+            <circle cx="300" cy="66" r="20" fill="#13215A" />
           </>
         ) : (
           <>
-            <circle cx="320" cy="70" r="34" fill="#FFC75A" opacity=".25" />
-            <circle cx="320" cy="70" r="22" fill="#FFC75A" />
-            <ellipse cx="90" cy="70" rx="38" ry="12" fill="#fff" opacity=".8" />
-            <ellipse cx="116" cy="62" rx="24" ry="12" fill="#fff" opacity=".8" />
+            <circle cx="290" cy="74" r="34" fill="#FFC75A" opacity=".25" />
+            <circle cx="290" cy="74" r="22" fill="#FFC75A" />
+            <ellipse cx="120" cy="70" rx="38" ry="12" fill="#fff" opacity=".8" />
+            <ellipse cx="146" cy="62" rx="24" ry="12" fill="#fff" opacity=".8" />
           </>
         )}
         <path d="M0 230 C 80 190, 160 200, 230 220 C 300 238, 350 205, 400 210 V300 H0 Z" fill={night ? "#1B2C6E" : "#B9E0B0"} />
         <path d="M0 262 C 90 238, 200 236, 290 252 C 340 260, 370 254, 400 248 V300 H0 Z" fill={night ? "#22357F" : "#83CF6E"} />
       </svg>
-      <div className="relative flex h-full items-end justify-center">
+      <div className="relative flex h-full items-end justify-center" style={{ paddingBottom: lift }}>
         <div className="w-[62%] max-w-[260px] translate-y-[6%]">
           <TreeSvg stage={stage} wilting={wilting} title={title} />
         </div>

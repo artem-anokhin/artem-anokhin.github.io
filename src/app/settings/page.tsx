@@ -6,7 +6,7 @@ export const metadata = { title: "Настройки · FocusAI" };
 export default function Page() {
   return (
     <>
-      <PageHeader title="Настройки" accent="и приватность" />
+      <PageHeader title="Настройки" accent="Профиль и данные" />
       <SettingsScreen />
     </>
   );

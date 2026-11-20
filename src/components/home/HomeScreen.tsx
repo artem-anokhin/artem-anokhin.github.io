@@ -135,7 +135,7 @@ function Loaded({ data }: { data: Data }) {
       {/* Hero: the garden + today's Focus Score */}
       <section aria-label="Ваш сад и фокус сегодня" className="relative overflow-hidden rounded-card-lg shadow-soft">
         <Link href="/tree/" aria-label={`Сад: ${tree.stageName}`} className="block">
-          <TreeScene stage={tree.stage} wilting={tree.wilting} title={`Дерево: ${tree.stageName}`} className="h-[260px]" />
+          <TreeScene stage={tree.stage} wilting={tree.wilting} title={`Дерево: ${tree.stageName}`} className="h-[260px]" lift={30} />
         </Link>
         <span className="absolute top-4 left-4 inline-flex items-center gap-1.5 rounded-full bg-white/85 px-3 py-1.5 text-[13px] font-semibold text-ink backdrop-blur">
           <DropIcon />
