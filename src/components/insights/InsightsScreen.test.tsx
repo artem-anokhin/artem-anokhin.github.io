@@ -3,7 +3,8 @@ import { afterEach, describe, expect, it } from "vitest";
 import { db, dayKey } from "@/lib/db";
 import { emptyCheckIn } from "@/lib/checkin";
 import { saveProfile } from "@/lib/settings";
-import { InsightsScreen, plural } from "./InsightsScreen";
+import { plural } from "@/lib/plural";
+import { InsightsScreen } from "./InsightsScreen";
 
 afterEach(async () => {
   await Promise.all([db.checkins.clear(), db.focusTests.clear(), db.settings.clear()]);

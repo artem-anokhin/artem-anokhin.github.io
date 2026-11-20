@@ -1,4 +1,4 @@
-import { db as defaultDb, type FocusDB } from "./db";
+import { db as defaultDb, dayKey, type FocusDB } from "./db";
 import { METRICS } from "./insights";
 import { TIPS } from "./tips";
 
@@ -77,6 +77,42 @@ export async function startExperiment(e: Experiment, db: FocusDB = defaultDb): P
   return value;
 }
 
-export async function endExperiment(db: FocusDB = defaultDb): Promise<void> {
-  await db.settings.delete(EXPERIMENT_KEY);
+/** Days of finished experiments, kept so tree drops earned in them are never lost. */
+export interface ExperimentWindow {
+  start: string;
+  end: string;
+}
+
+const HISTORY_KEY = "experimentHistory";
+
+function isWindow(v: unknown): v is ExperimentWindow {
+  if (!v || typeof v !== "object") return false;
+  const w = v as Record<string, unknown>;
+  return typeof w.start === "string" && DAY_RE.test(w.start) && typeof w.end === "string" && DAY_RE.test(w.end) && w.start <= w.end;
+}
+
+export async function getExperimentHistory(db: FocusDB = defaultDb): Promise<ExperimentWindow[]> {
+  const row = await db.settings.get(HISTORY_KEY);
+  return Array.isArray(row?.value) ? row.value.filter(isWindow) : [];
+}
+
+function plusDays(key: string, n: number): string {
+  const [y, m, d] = key.split("-").map(Number);
+  return dayKey(new Date(y!, m! - 1, d! + n));
+}
+
+/** Ends the current experiment and records its window (start … min(start + 6, today)). */
+export async function endExperiment(db: FocusDB = defaultDb, today: string = dayKey()): Promise<void> {
+  await db.transaction("rw", db.settings, async () => {
+    const current = await getExperiment(db);
+    if (current) {
+      const last = plusDays(current.start, 6);
+      const end = today < last ? today : last;
+      if (current.start <= end) {
+        const history = await getExperimentHistory(db);
+        await db.settings.put({ key: HISTORY_KEY, value: [...history, { start: current.start, end }] });
+      }
+    }
+    await db.settings.delete(EXPERIMENT_KEY);
+  });
 }

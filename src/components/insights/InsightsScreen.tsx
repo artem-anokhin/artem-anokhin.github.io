@@ -17,6 +17,7 @@ import {
   type Strength,
 } from "@/lib/insights";
 import { endExperiment, getExperiment, startExperiment, type Experiment } from "@/lib/settings";
+import { plural } from "@/lib/plural";
 import { TIPS, type TipKey } from "@/lib/tips";
 import { btnPrimary, btnSecondary } from "@/components/ui/controls";
 
@@ -33,15 +34,6 @@ type Ready = {
 };
 type State = { kind: "loading" } | { kind: "error" } | Ready;
 
-/** Russian plural: plural(5, ["день", "дня", "дней"]) → "дней". */
-export function plural(n: number, [one, few, many]: [string, string, string]): string {
-  const a = Math.abs(n) % 100;
-  const b = a % 10;
-  if (a > 10 && a < 20) return many;
-  if (b === 1) return one;
-  if (b >= 2 && b <= 4) return few;
-  return many;
-}
 const DAYS: [string, string, string] = ["день", "дня", "дней"];
 const DAYS_GEN: [string, string, string] = ["дню", "дням", "дням"];
 const POINTS: [string, string, string] = ["балл", "балла", "баллов"];

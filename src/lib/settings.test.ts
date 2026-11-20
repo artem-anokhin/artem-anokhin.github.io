@@ -34,3 +34,22 @@ describe("experiment", () => {
     await db.delete();
   });
 });
+
+describe("experiment history", () => {
+  it("records the finished window, capped at 7 days", async () => {
+    const { FocusDB } = await import("./db");
+    const { endExperiment, getExperimentHistory, saveProfile, startExperiment } = await import("./settings");
+    const db = new FocusDB("test-exp-history");
+    await saveProfile("study", true, db, 1);
+    await startExperiment({ metric: "sleepHours", tip: "sleepShort", start: "2026-11-01" }, db);
+    await endExperiment(db, "2026-11-20");
+    await startExperiment({ metric: "stress", tip: "highStress", start: "2026-11-20" }, db);
+    await endExperiment(db, "2026-11-22");
+    expect(await getExperimentHistory(db)).toEqual([
+      { start: "2026-11-01", end: "2026-11-07" },
+      { start: "2026-11-20", end: "2026-11-22" },
+    ]);
+    db.close();
+    await db.delete();
+  });
+});

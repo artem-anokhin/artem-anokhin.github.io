@@ -46,3 +46,15 @@
     @apply font-display font-black uppercase leading-[1.05] tracking-tight text-navy;
   }
 }
+
+/* Respect users who ask for less motion: no pulsing skeletons or transitions. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
