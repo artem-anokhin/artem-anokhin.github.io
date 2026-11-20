@@ -8,7 +8,7 @@ export const metadata = { title: "История · FocusAI" };
 export default function Page() {
   return (
     <>
-      <Link href="/" className="mb-2 inline-flex min-h-11 items-center gap-1 font-semibold text-link">
+      <Link href="/" className="-ml-1.5 flex min-h-11 w-fit items-center gap-0.5 text-[17px] text-link">
         <ChevronLeft aria-hidden size={20} /> Сегодня
       </Link>
       <PageHeader title="История" accent="30 дней" />

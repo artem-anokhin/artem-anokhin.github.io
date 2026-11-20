@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { Check } from "lucide-react";
 import { CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { db } from "@/lib/db";
 import { historyDays, type HistoryDay } from "@/lib/today";
@@ -55,17 +56,18 @@ export function HistoryScreen() {
   return (
     <div className="mx-auto max-w-2xl space-y-4">
       {scores.length < 2 ? (
-        <section className="card p-5 md:p-6">
+        <section className="rounded-card-lg bg-surface p-4">
           <p className="text-ink">Пока мало данных. Пройдите тест в разные дни, и здесь появится график.</p>
           <Link href="/test/" className={`${btnPrimary} mt-4 w-full`}>
             Пройти тест
           </Link>
         </section>
       ) : (
-        <section className="card p-4 md:p-6" aria-labelledby="chart-title">
-          <h2 id="chart-title" className="mb-3 font-display text-lg font-extrabold text-link">
+        <section className="rounded-card-lg bg-surface p-4" aria-labelledby="chart-title">
+          <h2 id="chart-title" className="text-[17px] font-semibold text-ink">
             Focus Score по дням
           </h2>
+          <p className="mb-3 text-[13px] text-muted">Последний тест каждого дня</p>
           <div role="img" aria-label={`${chartLabel} Значения по дням — в списке ниже.`} className="h-[200px]">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart accessibilityLayer={false} data={chartData} margin={{ top: 8, right: 8, bottom: 0, left: -24 }}>
@@ -80,19 +82,28 @@ export function HistoryScreen() {
         </section>
       )}
 
-      <section className="card p-5 md:p-6" aria-labelledby="days-title">
-        <h2 id="days-title" className="font-display text-lg font-extrabold text-link">
+      <section aria-labelledby="days-title">
+        <h2 id="days-title" className="px-4 pb-1.5 text-[13px] text-muted uppercase">
           Дни
         </h2>
-        <ul className="mt-2 divide-y divide-line">
+        <ul className="group-list">
           {[...days].reverse().map((d) => (
-            <li key={d.date} className="flex min-h-11 flex-wrap items-center justify-between gap-x-3 gap-y-1 py-2">
-              <span className="text-ink">{longFmt.format(parseDay(d.date))}</span>
-              <span className="flex gap-4 text-sm">
-                <span className="text-muted">Чек-ин: {d.checkedIn ? "да" : "нет"}</span>
-                <span className="w-10 text-right font-semibold text-link" aria-label={d.score === null ? "нет теста" : `Focus Score ${d.score}`}>
-                  {d.score ?? "—"}
-                </span>
+            <li key={d.date} className="flex min-h-11 items-center gap-3 px-4 py-2.5">
+              <span className="flex-1 text-[17px] text-ink first-letter:uppercase">{longFmt.format(parseDay(d.date))}</span>
+              <span className="text-[13px] text-muted">
+                {d.checkedIn ? (
+                  <span className="inline-flex items-center gap-1 text-s-activity-ink">
+                    <Check aria-hidden size={15} strokeWidth={3} /> Чек-ин: да
+                  </span>
+                ) : (
+                  "Чек-ин: нет"
+                )}
+              </span>
+              <span
+                className={`w-9 text-right text-[17px] font-semibold tabular-nums ${d.score === null ? "text-chevron" : "text-ink"}`}
+                aria-label={d.score === null ? "нет теста" : `Focus Score ${d.score}`}
+              >
+                {d.score ?? "—"}
               </span>
             </li>
           ))}

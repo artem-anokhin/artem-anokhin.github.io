@@ -58,7 +58,7 @@ export function HabitsScreen() {
 
   return (
     <div className="stagger space-y-8">
-      <Link href="/" className="-mt-2 inline-flex min-h-11 items-center gap-1 font-semibold text-link">
+      <Link href="/" className="-mt-2 -ml-1.5 flex min-h-11 w-fit items-center gap-0.5 text-[17px] text-link">
         <ChevronLeft aria-hidden size={20} /> Сегодня
       </Link>
 
