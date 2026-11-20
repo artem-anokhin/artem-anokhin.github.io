@@ -22,3 +22,14 @@ describe("nav edge cases", () => {
     expect(NAV_ITEMS.every((i) => i.href.endsWith("/"))).toBe(true);
   });
 });
+
+describe("isTabActive", () => {
+  it("lights the hub tab for nested sections", async () => {
+    const { isTabActive } = await import("./nav");
+    const focus = NAV_ITEMS.find((i) => i.href === "/focus/")!;
+    const insights = NAV_ITEMS.find((i) => i.href === "/insights/")!;
+    expect(isTabActive("/test/", focus)).toBe(true);
+    expect(isTabActive("/library/", insights)).toBe(true);
+    expect(isTabActive("/tree/", insights)).toBe(false);
+  });
+});

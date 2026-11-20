@@ -5,9 +5,9 @@ const { replace } = vi.hoisted(() => ({ replace: vi.fn() }));
 vi.mock("next/navigation", () => ({ usePathname: () => "/insights/", useRouter: () => ({ replace }) }));
 
 describe("AppShell", () => {
-  it("renders all 5 sections and marks the current one", () => {
+  it("renders the 4 tabs and marks the current one", () => {
     render(<AppShell><p>content</p></AppShell>);
-    for (const label of ["Сегодня", "Тест", "Инсайты", "Дерево", "Библиотека"]) {
+    for (const label of ["Сегодня", "Фокус", "Сад", "Инсайты"]) {
       expect(screen.getAllByRole("link", { name: label }).length).toBeGreaterThan(0);
     }
     const current = screen.getAllByRole("link", { current: "page" });
