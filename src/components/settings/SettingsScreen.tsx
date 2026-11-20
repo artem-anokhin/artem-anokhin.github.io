@@ -152,7 +152,7 @@ export function SettingsScreen() {
     }
   }
 
-  const row = "flex min-h-[50px] w-full items-center gap-3 px-4 py-2.5 text-left text-[17px] active:bg-[#e5e5ea]";
+  const row = "flex min-h-[50px] w-full items-center gap-3 px-4 py-2.5 text-left text-[17px] active:bg-pressed";
   const icon = (bg: string) => `grid size-[30px] shrink-0 place-items-center rounded-[7px] text-white ${bg}`;
 
   return (
@@ -166,7 +166,7 @@ export function SettingsScreen() {
       <Group id="s-profile" title="Профиль" footer={`Согласие дано: ${consentDate(profile.consentAt)}`}>
         <div className="p-4">
           <ChoiceField legend="Сейчас я" name="mode" value={profile.mode} options={MODES} onChange={changeMode} columns={2} />
-          <p role="status" className="text-[13px] text-accent empty:hidden">
+          <p role="status" className="text-[13px] text-link empty:hidden">
             {saved ? "Сохранено" : ""}
           </p>
         </div>
@@ -254,7 +254,7 @@ export function SettingsScreen() {
       <Group id="s-about" title="Поддержка" footer="Не является медицинской консультацией.">
         {HELP_LINES.map((l) => (
           <a key={l.phone} href={`tel:${l.phone}`} className={row}>
-            <span className="w-12 text-[20px] font-bold text-accent tabular-nums">{l.phone}</span>
+            <span className="w-12 text-[20px] font-bold text-link tabular-nums">{l.phone}</span>
             <span className="flex-1 text-[15px] text-ink">{l.label}</span>
           </a>
         ))}

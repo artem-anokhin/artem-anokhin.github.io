@@ -63,15 +63,15 @@ export function HistoryScreen() {
         </section>
       ) : (
         <section className="card p-4 md:p-6" aria-labelledby="chart-title">
-          <h2 id="chart-title" className="mb-3 font-display text-lg font-extrabold text-navy">
+          <h2 id="chart-title" className="mb-3 font-display text-lg font-extrabold text-link">
             Focus Score по дням
           </h2>
           <div role="img" aria-label={`${chartLabel} Значения по дням — в списке ниже.`} className="h-[200px]">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart accessibilityLayer={false} data={chartData} margin={{ top: 8, right: 8, bottom: 0, left: -24 }}>
-                <CartesianGrid stroke="#DCE5FA" vertical={false} />
-                <XAxis dataKey="label" tick={{ fill: "#55658A", fontSize: 12 }} interval="preserveStartEnd" minTickGap={24} />
-                <YAxis domain={[0, 100]} ticks={[0, 50, 100]} tick={{ fill: "#55658A", fontSize: 12 }} />
+                <CartesianGrid stroke="var(--color-line)" vertical={false} />
+                <XAxis dataKey="label" tick={{ fill: "var(--color-muted)", fontSize: 12 }} interval="preserveStartEnd" minTickGap={24} />
+                <YAxis domain={[0, 100]} ticks={[0, 50, 100]} tick={{ fill: "var(--color-muted)", fontSize: 12 }} />
                 <Tooltip formatter={(v) => [v, "Focus Score"]} />
                 <Line type="monotone" dataKey="score" stroke="#1E5BFF" strokeWidth={2.5} dot={{ r: 3 }} connectNulls={false} isAnimationActive={false} />
               </LineChart>
@@ -81,7 +81,7 @@ export function HistoryScreen() {
       )}
 
       <section className="card p-5 md:p-6" aria-labelledby="days-title">
-        <h2 id="days-title" className="font-display text-lg font-extrabold text-navy">
+        <h2 id="days-title" className="font-display text-lg font-extrabold text-link">
           Дни
         </h2>
         <ul className="mt-2 divide-y divide-line">
@@ -90,7 +90,7 @@ export function HistoryScreen() {
               <span className="text-ink">{longFmt.format(parseDay(d.date))}</span>
               <span className="flex gap-4 text-sm">
                 <span className="text-muted">Чек-ин: {d.checkedIn ? "да" : "нет"}</span>
-                <span className="w-10 text-right font-semibold text-navy" aria-label={d.score === null ? "нет теста" : `Focus Score ${d.score}`}>
+                <span className="w-10 text-right font-semibold text-link" aria-label={d.score === null ? "нет теста" : `Focus Score ${d.score}`}>
                   {d.score ?? "—"}
                 </span>
               </span>

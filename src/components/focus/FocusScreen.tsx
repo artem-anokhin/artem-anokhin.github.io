@@ -173,7 +173,7 @@ export function FocusScreen() {
                     <label
                       key={m}
                       className={`pressable flex min-h-12 cursor-pointer items-center justify-center rounded-full text-[17px] font-semibold transition-colors has-[:focus-visible]:outline-3 has-[:focus-visible]:outline-glow ${
-                        on ? "bg-white text-navy" : "text-night-ink/85"
+                        on ? "bg-white text-accent" : "text-night-ink/85"
                       }`}
                     >
                       <input type="radio" name="len" value={m} checked={on} onChange={() => setLength(m)} className="sr-only" />

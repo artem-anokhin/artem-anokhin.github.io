@@ -47,13 +47,13 @@ export function Onboarding({ onDone }: { onDone: () => void }) {
             <button
               type="button"
               onClick={() => setStep(step - 1)}
-              className="pressable -ml-2 inline-flex min-h-11 items-center gap-1 rounded-full px-3 font-semibold text-navy hover:bg-soft"
+              className="pressable -ml-2 inline-flex min-h-11 items-center gap-1 rounded-full px-3 font-semibold text-link hover:bg-soft"
             >
               <ChevronLeft aria-hidden size={20} /> Назад
             </button>
           ) : (
             <p className="text-[20px] font-bold tracking-[-0.02em] text-ink">
-              Focus<span className="text-accent">AI</span>
+              Focus<span className="text-link">AI</span>
             </p>
           )}
           <div className="flex items-center gap-2">
@@ -62,7 +62,7 @@ export function Onboarding({ onDone }: { onDone: () => void }) {
             </span>
             <span aria-hidden className="flex gap-1.5">
               {Array.from({ length: STEPS }, (_, i) => (
-                <span key={i} className={`h-1.5 rounded-full transition-all ${i === step ? "w-5 bg-accent" : i < step ? "w-1.5 bg-accent/40" : "w-1.5 bg-[#d1d1d6]"}`} />
+                <span key={i} className={`h-1.5 rounded-full transition-all ${i === step ? "w-5 bg-accent" : i < step ? "w-1.5 bg-accent/40" : "w-1.5 bg-fill-strong"}`} />
               ))}
             </span>
           </div>
@@ -73,7 +73,7 @@ export function Onboarding({ onDone }: { onDone: () => void }) {
             <>
               <WelcomeArt />
               <h1 className="title mt-8 text-[34px] text-balance">
-                Фокус растёт, <span className="text-accent">как сад</span>
+                Фокус растёт, <span className="text-link">как сад</span>
               </h1>
               <p className="mt-3 text-[17px] text-muted">Узнайте, что связано с вашей концентрацией — по вашим же данным.</p>
               <ul className="mt-6 space-y-3">
@@ -100,7 +100,7 @@ export function Onboarding({ onDone }: { onDone: () => void }) {
               <div className="grid h-44 place-items-center rounded-card-lg bg-surface">
                 <ProgressRing value={0.72} size={140} stroke={13}>
                   <span>
-                    <span className="stat block text-[40px] text-navy">72</span>
+                    <span className="stat block text-[40px] text-link">72</span>
                     <span className="text-[12px] font-semibold text-muted">Focus Score</span>
                   </span>
                 </ProgressRing>
@@ -140,7 +140,7 @@ export function Onboarding({ onDone }: { onDone: () => void }) {
                 <ul className="mt-2 space-y-1">
                   {HELP_LINES.map((l) => (
                     <li key={l.phone}>
-                      <a href={`tel:${l.phone}`} className="inline-flex min-h-11 items-center gap-3 text-navy">
+                      <a href={`tel:${l.phone}`} className="inline-flex min-h-11 items-center gap-3 text-link">
                         <span className="stat text-[24px]">{l.phone}</span>
                         <span className="text-[14px] text-ink underline underline-offset-4">{l.label}</span>
                       </a>
@@ -162,7 +162,7 @@ export function Onboarding({ onDone }: { onDone: () => void }) {
                 <ShieldCheck aria-hidden size={40} />
               </span>
               <h1 className="title mt-6 text-[34px] text-balance">
-                Ваши данные — <span className="text-accent">только у вас</span>
+                Ваши данные — <span className="text-link">только у вас</span>
               </h1>
               <ul className="mt-5 space-y-3 text-[16px] text-ink">
                 {[
@@ -180,7 +180,7 @@ export function Onboarding({ onDone }: { onDone: () => void }) {
                 <input type="checkbox" checked={consent} onChange={(e) => setConsent(e.target.checked)} className="mt-0.5 size-6 shrink-0 accent-navy" />
                 <span className="text-ink">Я согласен(на) хранить свои ответы на этом устройстве для личной статистики</span>
               </label>
-              <a href="/privacy/" target="_blank" rel="noopener" className="mt-3 inline-flex min-h-11 items-center text-[15px] font-semibold text-navy underline underline-offset-4">
+              <a href="/privacy/" target="_blank" rel="noopener" className="mt-3 inline-flex min-h-11 items-center text-[15px] font-semibold text-link underline underline-offset-4">
                 Политика конфиденциальности
               </a>
               {error && (

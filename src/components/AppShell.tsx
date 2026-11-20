@@ -53,9 +53,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-dvh md:flex">
       {/* Desktop sidebar */}
-      <aside className="hidden md:sticky md:top-0 md:flex md:h-dvh md:w-64 md:shrink-0 md:flex-col md:gap-8 md:border-r md:border-line md:bg-[#f9f9f9] md:p-6">
+      <aside className="hidden md:sticky md:top-0 md:flex md:h-dvh md:w-64 md:shrink-0 md:flex-col md:gap-8 md:border-r md:border-line md:bg-chrome md:p-6">
         <Link href="/" className="text-[22px] font-bold tracking-[-0.02em] text-ink">
-          Focus<span className="text-accent">AI</span>
+          Focus<span className="text-link">AI</span>
         </Link>
         <nav aria-label="Основная навигация" className="flex flex-col gap-1">
           {[...NAV_ITEMS, ...SIDEBAR_EXTRA].map((item) => {
@@ -99,7 +99,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       <nav
         aria-label="Основная навигация"
         className={`fixed inset-x-0 bottom-0 z-20 border-t pb-[env(safe-area-inset-bottom)] backdrop-blur-xl md:hidden ${
-          dark ? "border-white/10 bg-[#121212]/90" : "border-line bg-[#f9f9f9]/90"
+          dark ? "border-white/10 bg-[#121212]/90" : "border-line bg-chrome/90"
         }`}
       >
         <ul className="grid grid-cols-4">
@@ -112,7 +112,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                   href={href}
                   aria-current={active ? "page" : undefined}
                   className={`flex min-h-[52px] flex-col items-center justify-center gap-0.5 pt-1 text-[11px] leading-tight font-medium ${
-                    active ? (dark ? "text-[#6e95ff]" : "text-accent") : "text-[#8a8a8e]"
+                    active ? (dark ? "text-[#6e95ff]" : "text-link") : "text-[#8a8a8e]"
                   }`}
                 >
                   <Icon aria-hidden size={24} strokeWidth={active ? 2.2 : 1.8} />

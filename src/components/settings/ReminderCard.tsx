@@ -26,7 +26,7 @@ export function ReminderCard() {
     setDone(true);
   }
 
-  const row = "flex min-h-[50px] w-full items-center gap-3 px-4 py-2.5 text-left text-[17px] active:bg-[#e5e5ea]";
+  const row = "flex min-h-[50px] w-full items-center gap-3 px-4 py-2.5 text-left text-[17px] active:bg-pressed";
   return (
     <section id="reminder" aria-labelledby="s-reminder" className="scroll-mt-6">
       <h2 id="s-reminder" className="px-4 pb-1.5 text-[13px] text-muted uppercase">
@@ -47,13 +47,13 @@ export function ReminderCard() {
           target="_blank"
           rel="noopener noreferrer"
           onClick={() => ok && setDone(true)}
-          className={`${row} text-accent ${ok ? "" : "pointer-events-none opacity-50"}`}
+          className={`${row} text-link ${ok ? "" : "pointer-events-none opacity-50"}`}
         >
           <CalendarPlus aria-hidden size={20} />
           Google Календарь
           <span className="sr-only"> (откроется в новой вкладке)</span>
         </a>
-        <button type="button" disabled={!ok} onClick={downloadIcs} className={`${row} text-accent disabled:opacity-50`}>
+        <button type="button" disabled={!ok} onClick={downloadIcs} className={`${row} text-link disabled:opacity-50`}>
           <CalendarPlus aria-hidden size={20} />
           Другой календарь (.ics)
         </button>

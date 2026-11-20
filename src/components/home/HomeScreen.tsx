@@ -97,7 +97,7 @@ export function HomeScreen() {
           <p className="text-[13px] font-semibold text-muted uppercase first-letter:uppercase">{dateFmt.format(now)}</p>
           <h1 className="title text-[34px]">{greeting(now.getHours())}</h1>
         </div>
-        <Link href="/settings/" aria-label="Настройки" className="pressable grid size-11 shrink-0 place-items-center text-accent md:hidden">
+        <Link href="/settings/" aria-label="Настройки" className="pressable grid size-11 shrink-0 place-items-center text-link md:hidden">
           <Settings aria-hidden size={24} />
         </Link>
       </header>
@@ -134,7 +134,7 @@ function Loaded({ data, onChange }: { data: Data; onChange: () => void }) {
           >
             <ProgressRing value={(score ?? 0) / 100} size={112} stroke={12}>
               {score === null ? (
-                <span className="text-[13px] leading-tight font-semibold text-accent">
+                <span className="text-[13px] leading-tight font-semibold text-link">
                   Пройти
                   <br />
                   тест
@@ -148,7 +148,7 @@ function Loaded({ data, onChange }: { data: Data; onChange: () => void }) {
             </ProgressRing>
           </Link>
           <dl className="min-w-0 flex-1 space-y-2.5">
-            <Fact label="Чек-ин" value={today ? "Готов" : "Не сделан"} dot={today ? "bg-leaf" : "bg-[#d1d1d6]"} />
+            <Fact label="Чек-ин" value={today ? "Готов" : "Не сделан"} dot={today ? "bg-leaf" : "bg-fill-strong"} />
             <Fact label="Фокус" value={focusToday ? `${focusToday} мин` : "0 мин"} dot="bg-s-sleep" />
             <Fact label="Привычки" value={habitsTotal ? `${habitsDone} из ${habitsTotal}` : "—"} dot="bg-s-activity" />
           </dl>
@@ -233,10 +233,10 @@ function Row({
         <span className="block text-[17px] text-ink">{title}</span>
         <span className="block text-[13px] text-muted">{sub}</span>
       </span>
-      {done ? <Check aria-hidden size={20} className="text-leaf" strokeWidth={2.6} /> : <ChevronRight aria-hidden size={18} className="text-[#c4c4c7]" />}
+      {done ? <Check aria-hidden size={20} className="text-leaf" strokeWidth={2.6} /> : <ChevronRight aria-hidden size={18} className="text-chevron" />}
     </>
   );
-  const cls = "flex min-h-[60px] items-center gap-3 px-4 py-2 active:bg-[#e5e5ea]";
+  const cls = "flex min-h-[60px] items-center gap-3 px-4 py-2 active:bg-pressed";
   // Hash deep links need a full load so the target section can scroll into view.
   return plain ? (
     <a href={href} className={cls}>
@@ -264,7 +264,7 @@ function Countdown({ days }: { days: number }) {
         </span>
         <span className="block text-[13px] text-muted">Дни, где есть и чек-ин, и тест</span>
       </span>
-      <ChevronRight aria-hidden size={18} className="text-[#c4c4c7]" />
+      <ChevronRight aria-hidden size={18} className="text-chevron" />
     </Link>
   );
 }
@@ -282,7 +282,7 @@ function Tip({ data }: { data: CheckInData }) {
       </h2>
       <p className="mt-1 text-[15px] leading-relaxed text-ink/90">{tip.text}</p>
       <div className="mt-2 flex flex-wrap items-center gap-x-4">
-        <a href={cardHref(TIP_CARD[key])} className="inline-flex min-h-11 items-center text-[15px] font-medium text-accent">
+        <a href={cardHref(TIP_CARD[key])} className="inline-flex min-h-11 items-center text-[15px] font-medium text-link">
           Подробнее
         </a>
         <a href={tip.url} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-11 items-center text-[13px] text-muted underline">

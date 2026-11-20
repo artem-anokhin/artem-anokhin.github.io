@@ -5,9 +5,9 @@ import type { Scale5 } from "@/lib/checkin";
 import type { SphereStyle } from "@/lib/spheres";
 
 export const btnPrimary =
-  "pressable inline-flex min-h-[50px] items-center justify-center gap-2 text-center rounded-[14px] bg-accent px-5 text-[17px] font-semibold text-white transition-colors hover:bg-deep disabled:cursor-not-allowed disabled:bg-[#E5E5EA] disabled:text-muted";
+  "pressable inline-flex min-h-[50px] items-center justify-center gap-2 text-center rounded-[14px] bg-accent px-5 text-[17px] font-semibold text-white transition-colors hover:bg-deep disabled:cursor-not-allowed disabled:bg-pressed disabled:text-muted";
 export const btnSecondary =
-  "pressable inline-flex min-h-[50px] items-center justify-center gap-2 text-center rounded-[14px] bg-soft px-5 text-[17px] font-semibold text-accent transition-colors hover:bg-[#dde6ff]";
+  "pressable inline-flex min-h-[50px] items-center justify-center gap-2 text-center rounded-[14px] bg-soft px-5 text-[17px] font-semibold text-link transition-colors hover:bg-soft-hover";
 /** Primary button on night (dark) surfaces. */
 export const btnNight =
   "pressable inline-flex min-h-[50px] items-center justify-center gap-2 text-center rounded-[14px] bg-accent px-5 text-[17px] font-semibold text-white transition-colors hover:bg-deep disabled:opacity-50";
@@ -15,7 +15,7 @@ export const btnNightGhost =
   "pressable inline-flex min-h-[50px] items-center justify-center gap-2 text-center rounded-[14px] bg-night-2 px-5 text-[17px] font-semibold text-night-ink transition-colors hover:bg-[#2c2c2e]";
 
 /** Default look when no sphere is given (onboarding, settings). */
-const NEUTRAL: Pick<SphereStyle, "base" | "tint" | "ink"> = { base: "bg-accent", tint: "bg-surface", ink: "text-accent" };
+const NEUTRAL: Pick<SphereStyle, "base" | "tint" | "ink"> = { base: "bg-accent", tint: "bg-surface", ink: "text-link" };
 type Theme = Pick<SphereStyle, "base" | "tint" | "ink">;
 
 const focusRing = "has-[:focus-visible]:outline-3 has-[:focus-visible]:outline-accent has-[:focus-visible]:outline-offset-2";
@@ -58,7 +58,7 @@ export function ChoiceField<T extends string>({
             <label
               key={o.value}
               className={`pressable flex min-h-[50px] cursor-pointer items-center justify-center rounded-[12px] px-3 text-center text-[15px] font-semibold transition-colors ${
-                on ? `${theme.base} text-white` : "bg-surface text-ink ring-1 ring-line ring-inset hover:bg-[#fafafa]"
+                on ? `${theme.base} text-white` : "bg-surface text-ink ring-1 ring-line ring-inset hover:bg-pressed"
               } ${focusRing}`}
             >
               <input type="radio" name={name} value={o.value} checked={on} onChange={() => onChange(o.value)} className="sr-only" />

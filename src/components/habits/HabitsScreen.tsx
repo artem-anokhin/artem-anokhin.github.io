@@ -55,11 +55,11 @@ export function HabitsScreen() {
 
   return (
     <div className="stagger space-y-8">
-      <Link href="/" className="-mt-2 inline-flex min-h-11 items-center gap-1 font-semibold text-navy">
+      <Link href="/" className="-mt-2 inline-flex min-h-11 items-center gap-1 font-semibold text-link">
         <ChevronLeft aria-hidden size={20} /> Сегодня
       </Link>
 
-      <p role="status" className="min-h-0 text-[15px] font-medium text-navy empty:hidden">
+      <p role="status" className="min-h-0 text-[15px] font-medium text-link empty:hidden">
         {msg}
       </p>
 
@@ -123,7 +123,7 @@ export function HabitsScreen() {
                     disabled={has || full}
                     onClick={() => add(idea.title, idea.sphere, idea.id)}
                     aria-label={has ? `Уже добавлено: ${idea.title}` : `Добавить: ${idea.title}`}
-                    className={`pressable grid size-11 shrink-0 place-items-center rounded-full ${has ? "bg-leaf text-white" : "bg-soft text-navy disabled:opacity-40"}`}
+                    className={`pressable grid size-11 shrink-0 place-items-center rounded-full ${has ? "bg-leaf text-white" : "bg-soft text-link disabled:opacity-40"}`}
                   >
                     <Plus aria-hidden size={22} className={has ? "rotate-45" : ""} />
                   </button>
@@ -181,7 +181,7 @@ export function HabitsScreen() {
         </form>
       </section>
 
-      <p className="rounded-card-lg bg-sand p-4 text-[15px] text-ink">
+      <p className="rounded-card-lg bg-surface p-4 text-[15px] text-ink">
         {HABIT_FORMATION.text}{" "}
         <a href={HABIT_FORMATION.url} target="_blank" rel="noopener noreferrer" className="text-sand-ink underline">
           {HABIT_FORMATION.source}

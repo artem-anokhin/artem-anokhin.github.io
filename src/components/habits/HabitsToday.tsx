@@ -41,7 +41,7 @@ export function HabitsToday({ onChange }: { onChange?: () => void }) {
 
   if (habits.length === 0) {
     return (
-      <Link href="/habits/" className="flex min-h-[60px] items-center gap-3 rounded-card-lg bg-surface px-4 py-2 active:bg-[#e5e5ea]">
+      <Link href="/habits/" className="flex min-h-[60px] items-center gap-3 rounded-card-lg bg-surface px-4 py-2 active:bg-pressed">
         <span className="grid size-8 shrink-0 place-items-center rounded-[8px] bg-s-activity text-white">
           <Plus aria-hidden size={18} />
         </span>
@@ -61,7 +61,7 @@ export function HabitsToday({ onChange }: { onChange?: () => void }) {
         <h2 id="habits-h" className="title text-[22px]">
           Привычки <span className="text-[17px] font-medium text-muted tabular-nums">{done}/{habits.length}</span>
         </h2>
-        <Link href="/habits/" className="inline-flex min-h-11 items-center text-[17px] text-accent">
+        <Link href="/habits/" className="inline-flex min-h-11 items-center text-[17px] text-link">
           Изменить
         </Link>
       </div>
@@ -78,11 +78,11 @@ export function HabitsToday({ onChange }: { onChange?: () => void }) {
                 role="checkbox"
                 aria-checked={on}
                 onClick={() => toggle(h.id!)}
-                className="flex min-h-[60px] w-full items-center gap-3 px-4 py-2 text-left active:bg-[#e5e5ea]"
+                className="flex min-h-[60px] w-full items-center gap-3 px-4 py-2 text-left active:bg-pressed"
               >
                 <span
                   aria-hidden
-                  className={`grid size-6 shrink-0 place-items-center rounded-full transition-colors ${on ? "animate-pop bg-accent text-white" : "ring-[1.5px] ring-[#c4c4c7] ring-inset"}`}
+                  className={`grid size-6 shrink-0 place-items-center rounded-full transition-colors ${on ? "animate-pop bg-accent text-white" : "ring-[1.5px] ring-chevron ring-inset"}`}
                 >
                   {on && <Check size={15} strokeWidth={3} />}
                 </span>

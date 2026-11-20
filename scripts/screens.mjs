@@ -1,11 +1,12 @@
-// Screenshots of every screen at 375px with demo data: `node scripts/screens.mjs [baseUrl]`.
+// Screenshots of every screen at 375px with demo data: `node scripts/screens.mjs [baseUrl] [light|dark]`.
 // Needs a running build (`npm run build && npx serve out -l 4173`). Output: test-results/screens/.
 import { chromium } from "@playwright/test";
 
 const base = process.argv[2] ?? "http://localhost:4173";
-const out = "test-results/screens";
+const scheme = process.argv[3] === "dark" ? "dark" : "light";
+const out = scheme === "dark" ? "test-results/screens-dark" : "test-results/screens";
 const b = await chromium.launch();
-const page = await b.newPage({ viewport: { width: 375, height: 812 }, deviceScaleFactor: 2, locale: "ru-RU" });
+const page = await b.newPage({ viewport: { width: 375, height: 812 }, deviceScaleFactor: 2, locale: "ru-RU", colorScheme: scheme });
 await page.goto(`${base}/welcome/`);
 await page.screenshot({ path: `${out}/01-welcome.png` });
 await page.getByRole("button", { name: "Далее" }).click();

@@ -10,16 +10,16 @@ const UPDATED = "21 ноября 2026";
 export default function PrivacyPage() {
   return (
     <article className="mx-auto max-w-2xl px-4 py-8 md:py-12">
-      <Link href="/" className="inline-flex min-h-11 items-center font-semibold text-navy underline underline-offset-4">
+      <Link href="/" className="inline-flex min-h-11 items-center font-semibold text-link underline underline-offset-4">
         ← FocusAI
       </Link>
       <h1 className="title mt-4 text-3xl">
         Политика
-        <span className="block text-accent">конфиденциальности</span>
+        <span className="block text-link">конфиденциальности</span>
       </h1>
       <p className="mt-2 text-sm text-muted">Обновлено: {UPDATED}</p>
 
-      <div className="card mt-6 space-y-5 p-5 text-ink md:p-6 [&_h2]:font-display [&_h2]:text-lg [&_h2]:font-extrabold [&_h2]:text-navy">
+      <div className="card mt-6 space-y-5 p-5 text-ink md:p-6 [&_h2]:font-display [&_h2]:text-lg [&_h2]:font-extrabold [&_h2]:text-link">
         <section>
           <h2>Коротко</h2>
           <p className="mt-1">
@@ -86,7 +86,7 @@ export default function PrivacyPage() {
           <section>
             <h2>Связь</h2>
             <p className="mt-1">
-              Вопросы о приватности: <a href={`mailto:${CONTACT}`} className="font-semibold text-navy underline">{CONTACT}</a>
+              Вопросы о приватности: <a href={`mailto:${CONTACT}`} className="font-semibold text-link underline">{CONTACT}</a>
             </p>
           </section>
         )}

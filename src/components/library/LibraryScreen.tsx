@@ -11,7 +11,7 @@ const TOPIC_STYLE: Record<Topic, { icon: LucideIcon; tint: string; ink: string; 
   "Питание и вода": { icon: Apple, tint: "bg-s-food-tint", ink: "text-s-food-ink", on: "bg-s-food-ink", base: "bg-s-food" },
   "Движение и стресс": { icon: Activity, tint: "bg-s-activity-tint", ink: "text-s-activity-ink", on: "bg-s-activity-ink", base: "bg-s-activity" },
   "Перерывы и телефон": { icon: Smartphone, tint: "bg-s-rest-tint", ink: "text-s-rest-ink", on: "bg-s-rest-ink", base: "bg-s-rest" },
-  "Как работает FocusAI": { icon: Sparkles, tint: "bg-soft", ink: "text-accent", on: "bg-accent", base: "bg-accent" },
+  "Как работает FocusAI": { icon: Sparkles, tint: "bg-soft", ink: "text-link", on: "bg-accent", base: "bg-accent" },
 };
 
 const TOPICS: Topic[] = ["Сон", "Кофеин", "Питание и вода", "Движение и стресс", "Перерывы и телефон", "Как работает FocusAI"];
@@ -26,7 +26,7 @@ function Card({ card, highlighted }: { card: KnowledgeCard; highlighted: boolean
       id={card.id}
       className={`group scroll-mt-6 bg-surface ${highlighted ? "outline-3 -outline-offset-3 outline-accent" : ""}`}
     >
-      <summary className="flex min-h-[60px] cursor-pointer list-none items-start gap-3 px-4 py-3 active:bg-[#e5e5ea] [&::-webkit-details-marker]:hidden">
+      <summary className="flex min-h-[60px] cursor-pointer list-none items-start gap-3 px-4 py-3 active:bg-pressed [&::-webkit-details-marker]:hidden">
         <span className={`mt-0.5 grid size-[30px] shrink-0 place-items-center rounded-[7px] text-white ${st.base}`}>
           <Icon aria-hidden size={18} />
         </span>
@@ -34,7 +34,7 @@ function Card({ card, highlighted }: { card: KnowledgeCard; highlighted: boolean
           <span className="block text-[17px] leading-snug text-ink">{card.title}</span>
           <span className="mt-0.5 block text-[13px] leading-snug text-muted">{card.summary}</span>
         </span>
-        <ChevronDown aria-hidden size={18} className="mt-1 shrink-0 text-[#c4c4c7] transition-transform group-open:rotate-180" />
+        <ChevronDown aria-hidden size={18} className="mt-1 shrink-0 text-chevron transition-transform group-open:rotate-180" />
       </summary>
       <div className="space-y-3 px-4 pb-4 pl-[58px] text-[15px] leading-relaxed text-ink">
         {card.body.map((p) => (

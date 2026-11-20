@@ -17,6 +17,20 @@
   --color-bloom: #f49ac1;
   --color-danger: #b42318;
 
+  /* Semantic tokens (light values; dark values below). */
+  --color-link: #1e5bff;
+  --color-fill: #e9e9ee;
+  --color-fill-strong: #d1d1d6;
+  --color-pressed: #e5e5ea;
+  --color-chevron: #c4c4c7;
+  --color-chrome: #f9f9f9;
+  --color-seg: #e3e3e8;
+  --color-seg-on: #ffffff;
+  --color-soft-hover: #dde6ff;
+  --color-danger-tint: #fdecec;
+  --color-accent-weak: #c9d7ff;
+  --color-garden: #eef6ec;
+
   /* «Спокойный сад фокуса» (docs/DESIGN.md) */
   --color-surface: #ffffff;
   --color-sand: #f2f2f7;
@@ -171,4 +185,47 @@
 /* Focus session running: hide app navigation (set by FocusScreen). */
 html[data-immersive] nav[aria-label="Основная навигация"] {
   display: none;
+}
+
+/* Dark appearance — follows the system setting, like Apple apps. */
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: dark;
+    --color-bg: #000000;
+    --color-surface: #1c1c1e;
+    --color-card: #1c1c1e;
+    --color-line: #38383a;
+    --color-ink: #ffffff;
+    --color-muted: #98989f;
+    --color-soft: #1a2547;
+    --color-link: #7ea2ff;
+    --color-fill: #2c2c2e;
+    --color-fill-strong: #48484a;
+    --color-pressed: #2c2c2e;
+    --color-chevron: #5a5a5e;
+    --color-chrome: #161618;
+    --color-seg: #2c2c2e;
+    --color-seg-on: #636366;
+    --color-soft-hover: #22306a;
+    --color-danger: #ff6961;
+    --color-danger-tint: #3a1414;
+    --color-accent-weak: #2a3f80;
+    --color-garden: #10241a;
+    --color-sand: #1c1c1e;
+    --color-sand-ink: #98989f;
+    --color-s-sleep-tint: #23234a;
+    --color-s-sleep-ink: #a5a7ff;
+    --color-s-food-tint: #3a2410;
+    --color-s-food-ink: #ffb77a;
+    --color-s-caffeine-tint: #0d2e33;
+    --color-s-caffeine-ink: #6fd6e6;
+    --color-s-mind-tint: #3a1626;
+    --color-s-mind-ink: #ff9cc2;
+    --color-s-activity-tint: #12301b;
+    --color-s-activity-ink: #7fdc93;
+    --color-s-work-tint: #1a2547;
+    --color-s-work-ink: #8fb0ff;
+    --color-s-rest-tint: #332608;
+    --color-s-rest-ink: #ffd36b;
+  }
 }

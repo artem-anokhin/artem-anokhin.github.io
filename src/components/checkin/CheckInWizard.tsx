@@ -77,7 +77,7 @@ export function CheckInWizard({
 
   const sphereKey = isNote ? null : SPHERES[step]!.key;
   const st = sphereKey ? SPHERE_STYLE[sphereKey] : null;
-  const theme = st ?? { base: "bg-navy", tint: "bg-bg", ink: "text-navy" };
+  const theme = st ?? { base: "bg-navy", tint: "bg-bg", ink: "text-link" };
   const Icon = st?.icon ?? PenLine;
   const question = isNote ? "Как прошёл день?" : QUESTIONS[sphereKey!];
 
@@ -92,7 +92,7 @@ export function CheckInWizard({
     >
       <div className="mx-auto w-full max-w-xl flex-1 px-4 pt-[calc(8px+env(safe-area-inset-top))]">
         <div className="flex items-center gap-3">
-          <Link href="/" aria-label="Закрыть чек-ин" className="pressable grid size-11 shrink-0 place-items-center text-accent">
+          <Link href="/" aria-label="Закрыть чек-ин" className="pressable grid size-11 shrink-0 place-items-center text-link">
             <X aria-hidden size={22} />
           </Link>
           <div
@@ -107,7 +107,7 @@ export function CheckInWizard({
               <span
                 key={k}
                 className={`h-1 rounded-full transition-colors ${
-                  i < step ? (k === "note" ? "bg-accent" : SPHERE_STYLE[k].base) : i === step ? theme.base : "bg-[#d1d1d6]"
+                  i < step ? (k === "note" ? "bg-accent" : SPHERE_STYLE[k].base) : i === step ? theme.base : "bg-fill-strong"
                 }`}
               />
             ))}
@@ -222,10 +222,10 @@ export function CheckInWizard({
         </section>
       </div>
 
-      <div className="sticky bottom-0 border-t border-line bg-[#f9f9f9]/90 backdrop-blur-xl">
+      <div className="sticky bottom-0 border-t border-line bg-chrome/90 backdrop-blur-xl">
         <div className="mx-auto flex max-w-xl gap-3 px-5 pt-3 pb-[calc(16px+env(safe-area-inset-bottom))]">
           {step > 0 && (
-            <button type="button" className="pressable inline-flex min-h-[50px] items-center justify-center rounded-[14px] bg-soft px-5 text-[17px] font-semibold text-accent" onClick={() => setStep(step - 1)}>
+            <button type="button" className="pressable inline-flex min-h-[50px] items-center justify-center rounded-[14px] bg-soft px-5 text-[17px] font-semibold text-link" onClick={() => setStep(step - 1)}>
               Назад
             </button>
           )}

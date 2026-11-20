@@ -97,7 +97,7 @@ function ExperimentCard({
         <>
           <h3 className="mt-1.5 text-[20px] font-semibold tracking-[-0.01em] text-ink">{tip.title}</h3>
           <p className="mt-1 text-ink">{tip.text}</p>
-          <p className="mt-1 text-sm font-medium text-navy">Пробуйте {EXPERIMENT_DAYS} дней подряд.</p>
+          <p className="mt-1 text-sm font-medium text-link">Пробуйте {EXPERIMENT_DAYS} дней подряд.</p>
           <a href={tip.url} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-11 items-center text-[13px] text-muted underline">
             Источник: {tip.source}
             <span className="sr-only"> (откроется в новой вкладке)</span>
@@ -107,7 +107,7 @@ function ExperimentCard({
 
       {experiment && !finished && (
         <div className="mt-3">
-          <p className="font-medium text-navy">
+          <p className="font-medium text-link">
             День {day} из {EXPERIMENT_DAYS}
           </p>
           <div
@@ -116,7 +116,7 @@ function ExperimentCard({
             aria-valuemin={0}
             aria-valuemax={EXPERIMENT_DAYS}
             aria-valuenow={day}
-            className="mt-2 h-2 overflow-hidden rounded-full bg-[#e9e9ee]"
+            className="mt-2 h-2 overflow-hidden rounded-full bg-fill"
           >
             <div className="h-full rounded-full bg-leaf" style={{ width: `${(day / EXPERIMENT_DAYS) * 100}%` }} />
           </div>
@@ -233,7 +233,7 @@ export function InsightsScreen() {
       {locked ? (
         <section className="flex items-center gap-5 rounded-card-lg bg-surface p-4" aria-labelledby="locked-title">
           <ProgressRing value={days / MIN_DAYS} size={96} stroke={10} label={`${days} из ${MIN_DAYS} дней`}>
-            <span className="stat text-[26px] text-navy">
+            <span className="stat text-[26px] text-link">
               {days}/{MIN_DAYS}
             </span>
           </ProgressRing>
@@ -246,7 +246,7 @@ export function InsightsScreen() {
               <Link href="/checkin/" className="pressable inline-flex min-h-11 items-center rounded-full bg-accent px-4 text-[15px] font-semibold text-white">
                 Чек-ин
               </Link>
-              <Link href="/test/" className="pressable inline-flex min-h-11 items-center rounded-full bg-soft px-4 text-[15px] font-semibold text-accent">
+              <Link href="/test/" className="pressable inline-flex min-h-11 items-center rounded-full bg-soft px-4 text-[15px] font-semibold text-link">
                 Тест фокуса
               </Link>
             </div>
@@ -306,7 +306,7 @@ function WeekHero({ week }: { week: (number | null)[] }) {
     >
       <div className="flex items-center justify-between gap-4">
         <p className="text-[17px] font-semibold text-ink">Итоги недели</p>
-        <span className="inline-flex items-center gap-0.5 text-[15px] text-accent">
+        <span className="inline-flex items-center gap-0.5 text-[15px] text-link">
           Смотреть <ArrowRight aria-hidden size={16} />
         </span>
       </div>
@@ -315,7 +315,7 @@ function WeekHero({ week }: { week: (number | null)[] }) {
         {week.map((v, i) => (
           <div key={i} className="flex flex-1 flex-col items-center gap-1">
             <div
-              className={`w-full origin-bottom animate-grow rounded-[5px] ${v === null ? "bg-[#e9e9ee]" : i === 6 ? "bg-accent" : "bg-accent/45"}`}
+              className={`w-full origin-bottom animate-grow rounded-[5px] ${v === null ? "bg-fill" : i === 6 ? "bg-accent" : "bg-accent/45"}`}
               style={{ height: `${v === null ? 8 : Math.max(12, (v / 100) * 64)}px`, animationDelay: `${i * 40}ms` }}
             />
             <span className="text-[11px] text-muted">{WD[new Date(now.getFullYear(), now.getMonth(), now.getDate() - (6 - i)).getDay()]}</span>
@@ -362,7 +362,7 @@ function InsightCard({ insight: i, split }: { insight: Insight; split: SplitMean
         <StrengthChip strength={i.strength} days={i.days} />
       </div>
       {METRIC_CARD[i.metric.key] && (
-        <a href={cardHref(METRIC_CARD[i.metric.key]!)} className="mt-1 flex min-h-11 items-center text-[15px] text-accent">
+        <a href={cardHref(METRIC_CARD[i.metric.key]!)} className="mt-1 flex min-h-11 items-center text-[15px] text-link">
           Подробнее в библиотеке
         </a>
       )}

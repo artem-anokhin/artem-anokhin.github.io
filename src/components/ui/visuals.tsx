@@ -36,7 +36,7 @@ export function ProgressRing({
             <stop offset="1" stopColor={night ? "#4D7DFF" : "#1E5BFF"} />
           </linearGradient>
         </defs>
-        <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke={night ? "rgba(255,255,255,.14)" : "#E9EEFB"} strokeWidth={stroke} />
+        <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke={night ? "rgba(255,255,255,.14)" : "var(--color-fill)"} strokeWidth={stroke} />
         <circle
           cx={size / 2}
           cy={size / 2}
@@ -69,7 +69,7 @@ export function WeekStrip({ days }: { days: { date: string; done: boolean; today
             <span className={`text-[12px] ${d.today ? "font-semibold text-ink" : "font-medium text-muted"}`}>{wd}</span>
             <span
               className={`grid size-8 place-items-center rounded-full text-[13px] font-semibold tabular-nums ${
-                d.done ? "bg-accent text-white" : d.today ? "text-accent ring-2 ring-accent ring-inset" : "bg-[#e9e9ee] text-muted"
+                d.done ? "bg-accent text-white" : d.today ? "text-link ring-2 ring-accent ring-inset" : "bg-fill text-muted"
               }`}
             >
               {d.done ? <Check aria-hidden size={15} strokeWidth={3} /> : dd}
@@ -110,7 +110,7 @@ export function TreeScene({
   lift?: number;
 }) {
   return (
-    <div className={`relative overflow-hidden ${night ? "bg-night-2" : "bg-gradient-to-b from-white to-[#eef6ec]"} ${className}`}>
+    <div className={`relative overflow-hidden ${night ? "bg-night-2" : "bg-gradient-to-b from-surface to-garden"} ${className}`}>
       <div className="relative flex h-full items-end justify-center" style={{ paddingBottom: lift + 8 }}>
         <div className="w-[52%] max-w-[220px]">
           <TreeSvg stage={stage} wilting={wilting} title={title} />

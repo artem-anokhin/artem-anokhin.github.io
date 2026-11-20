@@ -44,7 +44,7 @@ export function CheckInSummary({
       <section className="card p-5 md:p-6" aria-labelledby="done-title">
         <div className="mb-4 flex items-center gap-2">
           <CircleCheck aria-hidden className="text-leaf" size={26} />
-          <h2 id="done-title" className="font-display text-xl font-extrabold text-navy">
+          <h2 id="done-title" className="font-display text-xl font-extrabold text-link">
             Сегодня отмечено
           </h2>
         </div>

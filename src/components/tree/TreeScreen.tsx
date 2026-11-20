@@ -87,7 +87,7 @@ export function TreeScreen() {
                 aria-valuemin={0}
                 aria-valuemax={tree.nextAt}
                 aria-valuenow={tree.drops}
-                className="h-2 overflow-hidden rounded-full bg-[#e9e9ee]"
+                className="h-2 overflow-hidden rounded-full bg-fill"
               >
                 <div className="h-full rounded-full bg-leaf transition-[width] duration-700" style={{ width: `${tree.progress * 100}%` }} />
               </div>
@@ -103,7 +103,7 @@ export function TreeScreen() {
               <li key={name} className="flex flex-col items-center gap-1">
                 <span
                   className={`grid size-10 place-items-center rounded-full ${
-                    i < tree.stage ? "bg-leaf text-white" : i === tree.stage ? "bg-accent text-white" : "bg-[#e9e9ee] text-muted"
+                    i < tree.stage ? "bg-leaf text-white" : i === tree.stage ? "bg-accent text-white" : "bg-fill text-muted"
                   }`}
                 >
                   {(() => {
@@ -124,7 +124,7 @@ export function TreeScreen() {
 
         <section aria-label="Сообщения" className="space-y-3">
           {messages.map((m) => (
-            <p key={m.text} className="rounded-card bg-sand p-4 text-ink">
+            <p key={m.text} className="rounded-card-lg bg-surface p-4 text-[15px] text-ink">
               {m.text}
               {m.source && (
                 <a href={m.source.url} target="_blank" rel="noopener noreferrer" className="mt-1 flex min-h-11 items-center text-[13px] text-muted underline">
@@ -165,7 +165,7 @@ export function TreeScreen() {
             {[
               ["Чек-ин", "+1 в день", "bg-navy"],
               ["Тест реакции", "+1 в день", "bg-accent"],
-              ["Фокус-сессия до конца", "+1 в день", "bg-night"],
+              ["Фокус-сессия до конца", "+1 в день", "bg-s-sleep"],
               ["Хотя бы одна привычка", "+1 в день", "bg-s-activity"],
               ["День «Эксперимента недели»", "+1 в день", "bg-leaf"],
             ].map(([k, v, c]) => (
