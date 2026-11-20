@@ -1,0 +1,14 @@
+{
+  "name": "FocusAI",
+  "short_name": "FocusAI",
+  "description": "Узнайте, что мешает вашей концентрации, и улучшайте её за минуту в день.",
+  "lang": "ru",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#F4F7FE",
+  "theme_color": "#0A2A9E",
+  "icons": [
+    { "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}
