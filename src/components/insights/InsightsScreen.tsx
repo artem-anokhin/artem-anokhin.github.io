@@ -11,7 +11,9 @@ import {
   experimentResult,
   pairDays,
   pickExperiment,
+  splitMeans,
   usableDays,
+  type SplitMeans,
   type ExperimentResult,
   type Insight,
   type Strength,
@@ -21,6 +23,11 @@ import { plural } from "@/lib/plural";
 import { TIPS, type TipKey } from "@/lib/tips";
 import { METRIC_CARD, cardHref } from "@/lib/libraryLinks";
 import { btnPrimary, btnSecondary } from "@/components/ui/controls";
+import { ProgressRing } from "@/components/ui/visuals";
+import { latestTestByDay } from "@/lib/today";
+import { SPHERE_STYLE } from "@/lib/spheres";
+import { SPHERES } from "@/lib/checkin";
+import { ArrowRight, FlaskConical } from "lucide-react";
 
 const LIMITS_URL = "https://www.frontiersin.org/journals/digital-health/articles/10.3389/fdgth.2020.00003/full";
 
@@ -32,6 +39,9 @@ type Ready = {
   experiment: Experiment | null;
   result: ExperimentResult | null;
   today: string;
+  splits: Record<string, SplitMeans | null>;
+  /** Focus Score for each of the last 7 days (oldest → today), null = no test. */
+  week: (number | null)[];
 };
 type State = { kind: "loading" } | { kind: "error" } | Ready;
 
@@ -44,11 +54,11 @@ const STRENGTH_SEGMENTS: Record<Strength, number> = { слабая: 1, заме�
 function StrengthChip({ strength, days }: { strength: Strength; days: number }) {
   const filled = STRENGTH_SEGMENTS[strength];
   return (
-    <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm">
-      <span className="flex items-center gap-2 font-semibold text-navy">
+    <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[13px]">
+      <span className="flex items-center gap-2 font-semibold text-ink">
         <span aria-hidden className="flex gap-0.5">
           {[1, 2, 3].map((i) => (
-            <span key={i} className={`h-2 w-5 rounded-full ${i <= filled ? "bg-accent" : "bg-soft"}`} />
+            <span key={i} className={`h-1.5 w-4 rounded-full ${i <= filled ? "bg-navy" : "bg-line"}`} />
           ))}
         </span>
         {strength} связь в ваших данных
@@ -79,16 +89,16 @@ function ExperimentCard({
   const finished = experiment !== null && day > EXPERIMENT_DAYS;
 
   return (
-    <article className="card p-5 md:p-6" aria-labelledby="exp-title">
-      <h2 id="exp-title" className="font-display text-xl font-extrabold text-navy">
-        Эксперимент недели
+    <article className="rounded-card-lg bg-sand p-5 md:p-6" aria-labelledby="exp-title">
+      <h2 id="exp-title" className="eyebrow flex items-center gap-1.5 text-sand-ink">
+        <FlaskConical aria-hidden size={16} /> Эксперимент недели
       </h2>
       {tip && (
         <>
-          <h3 className="mt-3 font-semibold text-ink">{tip.title}</h3>
+          <h3 className="title mt-2 text-[22px]">{tip.title}</h3>
           <p className="mt-1 text-ink">{tip.text}</p>
           <p className="mt-1 text-sm font-medium text-navy">Пробуйте {EXPERIMENT_DAYS} дней подряд.</p>
-          <a href={tip.url} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-11 items-center text-sm text-muted underline">
+          <a href={tip.url} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-11 items-center text-[13px] text-sand-ink underline">
             Источник: {tip.source}
             <span className="sr-only"> (откроется в новой вкладке)</span>
           </a>
@@ -106,16 +116,16 @@ function ExperimentCard({
             aria-valuemin={0}
             aria-valuemax={EXPERIMENT_DAYS}
             aria-valuenow={day}
-            className="mt-2 h-2 overflow-hidden rounded-full bg-soft"
+            className="mt-2 h-2.5 overflow-hidden rounded-full bg-white/70"
           >
-            <div className="h-full bg-accent" style={{ width: `${(day / EXPERIMENT_DAYS) * 100}%` }} />
+            <div className="h-full rounded-full bg-leaf" style={{ width: `${(day / EXPERIMENT_DAYS) * 100}%` }} />
           </div>
           <p className="mt-2 text-sm text-muted">Проходите тест каждый день, чтобы было с чем сравнить.</p>
         </div>
       )}
 
       {finished && result && (
-        <div className="mt-3 rounded-2xl bg-soft p-4 text-ink">
+        <div className="mt-3 rounded-[18px] bg-white/70 p-4 text-ink">
           {result.diff === null ? (
             <p>Мало дней с тестом, чтобы сравнить «до» и «после».</p>
           ) : (
@@ -133,7 +143,7 @@ function ExperimentCard({
       )}
 
       {experiment ? (
-        <button type="button" className={`${btnSecondary} mt-4 w-full`} onClick={onEnd} disabled={busy}>
+        <button type="button" className={`${btnSecondary} mt-4 w-full bg-white/80`} onClick={onEnd} disabled={busy}>
           Завершить эксперимент
         </button>
       ) : (
@@ -158,10 +168,19 @@ export function InsightsScreen() {
         const pairs = pairDays(checkins, tests);
         const days = usableDays(pairs);
         const all = days >= MIN_DAYS ? computeInsights(pairs) : [];
+        const top = all.slice(0, 3);
+        const byDay = latestTestByDay(tests);
+        const now = new Date();
+        const week = Array.from({ length: 7 }, (_, i) => {
+          const d = dayKey(new Date(now.getFullYear(), now.getMonth(), now.getDate() - (6 - i)));
+          return byDay.get(d)?.score ?? null;
+        });
         setState({
           kind: "ready",
           days,
-          insights: all.slice(0, 3),
+          week,
+          splits: Object.fromEntries(top.map((i) => [i.metric.key, splitMeans(pairs, i.metric)])),
+          insights: top,
           candidate: pickExperiment(all),
           experiment,
           result: experiment ? experimentResult(tests, experiment.start) : null,
@@ -204,58 +223,44 @@ export function InsightsScreen() {
     );
   }
 
-  const { days, insights, candidate, experiment } = state;
+  const { days, insights, candidate, experiment, splits, week } = state;
   const locked = days < MIN_DAYS;
 
   return (
-    <div className="mx-auto max-w-2xl space-y-4">
-      <p className="text-sm text-muted">
-        Расчёт на вашем устройстве{locked ? "" : ` по ${days} ${plural(days, DAYS_GEN)}`}. Данные не покидают устройство.
-      </p>
+    <div className="stagger mx-auto max-w-2xl space-y-6">
+      <WeekHero week={week} />
 
       {locked ? (
-        <section className="card p-5 md:p-6" aria-labelledby="locked-title">
-          <h2 id="locked-title" className="font-display text-xl font-extrabold text-navy">
-            {days} из {MIN_DAYS} дней
-          </h2>
-          <div
-            role="progressbar"
-            aria-label="Дни с данными"
-            aria-valuemin={0}
-            aria-valuemax={MIN_DAYS}
-            aria-valuenow={days}
-            className="mt-3 h-2 overflow-hidden rounded-full bg-soft"
-          >
-            <div className="h-full bg-accent" style={{ width: `${(days / MIN_DAYS) * 100}%` }} />
-          </div>
-          <p className="mt-3 text-ink">
-            Нужно 7 дней, в которые есть и чек-ин, и тест фокуса. Сегодня: чек-ин (1 минута) и тест (90 секунд).
-          </p>
-          <div className="mt-4 grid gap-3 sm:grid-cols-2">
-            <Link href="/" className={btnPrimary}>
-              Чек-ин
-            </Link>
-            <Link href="/test/" className={btnSecondary}>
-              Тест фокуса
-            </Link>
+        <section className="flex items-center gap-5 rounded-card-lg bg-surface p-5 shadow-soft" aria-labelledby="locked-title">
+          <ProgressRing value={days / MIN_DAYS} size={96} stroke={10} label={`${days} из ${MIN_DAYS} дней`}>
+            <span className="stat text-[26px] text-navy">
+              {days}/{MIN_DAYS}
+            </span>
+          </ProgressRing>
+          <div className="min-w-0 flex-1">
+            <h2 id="locked-title" className="title text-[20px]">
+              {days} из {MIN_DAYS} дней
+            </h2>
+            <p className="mt-1 text-[15px] text-muted">Нужно 7 дней, в которые есть и чек-ин, и тест фокуса.</p>
+            <div className="mt-3 flex flex-wrap gap-2">
+              <Link href="/checkin/" className="pressable inline-flex min-h-11 items-center rounded-full bg-navy px-4 text-[15px] font-semibold text-white">
+                Чек-ин
+              </Link>
+              <Link href="/test/" className="pressable inline-flex min-h-11 items-center rounded-full bg-soft px-4 text-[15px] font-semibold text-navy">
+                Тест фокуса
+              </Link>
+            </div>
           </div>
         </section>
       ) : insights.length === 0 ? (
-        <p className="card p-5 text-ink">Явных связей пока нет. Это нормально, продолжайте отмечать дни.</p>
+        <p className="rounded-card-lg bg-surface p-5 text-ink shadow-soft">Явных связей пока нет. Это нормально, продолжайте отмечать дни.</p>
       ) : (
-        <section aria-label="Связи" className="space-y-3">
+        <section aria-labelledby="links-h" className="space-y-3">
+          <h2 id="links-h" className="eyebrow">
+            Что связано с вашим фокусом · по {days} {plural(days, DAYS_GEN)}
+          </h2>
           {insights.map((i) => (
-            <article key={i.metric.key} className="card p-5">
-              <p className="font-medium text-ink">{i.text}</p>
-              <div className="mt-3">
-                <StrengthChip strength={i.strength} days={i.days} />
-              </div>
-              {METRIC_CARD[i.metric.key] && (
-                <a href={cardHref(METRIC_CARD[i.metric.key]!)} className="mt-1 flex min-h-11 items-center text-sm font-semibold text-accent underline">
-                  Подробнее в библиотеке
-                </a>
-              )}
-            </article>
+            <InsightCard key={i.metric.key} insight={i} split={splits[i.metric.key] ?? null} />
           ))}
         </section>
       )}
@@ -274,13 +279,90 @@ export function InsightsScreen() {
         />
       )}
 
-      <p className="text-sm text-muted">
-        Это гипотезы, а не причины: на фокус влияет много всего сразу.
-        <a href={LIMITS_URL} target="_blank" rel="noopener noreferrer" className="flex min-h-11 items-center underline">
+      <p className="text-[13px] text-muted">
+        Расчёт на вашем устройстве, данные не покидают его. Это гипотезы, а не причины: на фокус влияет много всего сразу.
+        <a href={LIMITS_URL} target="_blank" rel="noopener noreferrer" className="flex min-h-11 items-center font-semibold underline">
           Почему это не причина?
           <span className="sr-only"> (откроется в новой вкладке)</span>
         </a>
       </p>
     </div>
+  );
+}
+
+const WD = ["вс", "пн", "вт", "ср", "чт", "пт", "сб"];
+
+/** Hero: «Итоги недели» with a 7-bar mini chart of Focus Score. */
+function WeekHero({ week }: { week: (number | null)[] }) {
+  const now = new Date();
+  const has = week.some((v) => v !== null);
+  return (
+    <Link
+      href="/week/"
+      className="pressable block overflow-hidden rounded-card-lg bg-gradient-to-br from-accent to-deep p-5 text-white shadow-lift"
+    >
+      <p className="eyebrow text-white/75">Итоги недели</p>
+      <div className="mt-1 flex items-end justify-between gap-4">
+        <p className="title max-w-[60%] text-[22px] text-white">Как прошли ваши 7 дней</p>
+        <span className="inline-flex items-center gap-1 text-[15px] font-semibold">
+          Смотреть <ArrowRight aria-hidden size={18} />
+        </span>
+      </div>
+      <div aria-hidden className="mt-4 flex h-20 items-end gap-2">
+        {week.map((v, i) => (
+          <div key={i} className="flex flex-1 flex-col items-center gap-1">
+            <div
+              className={`w-full origin-bottom animate-grow rounded-t-[8px] rounded-b-[4px] ${v === null ? "bg-white/15" : i === 6 ? "bg-white" : "bg-white/55"}`}
+              style={{ height: `${v === null ? 8 : Math.max(12, (v / 100) * 64)}px`, animationDelay: `${i * 40}ms` }}
+            />
+            <span className="text-[11px] text-white/70">{WD[new Date(now.getFullYear(), now.getMonth(), now.getDate() - (6 - i)).getDay()]}</span>
+          </div>
+        ))}
+      </div>
+      {!has && <p className="mt-2 text-[13px] text-white/80">Пройдите тест, чтобы появились столбики.</p>}
+    </Link>
+  );
+}
+
+function InsightCard({ insight: i, split }: { insight: Insight; split: SplitMeans | null }) {
+  const st = SPHERE_STYLE[i.metric.sphere];
+  const Icon = st.icon;
+  const sphereTitle = SPHERES.find((s) => s.key === i.metric.sphere)?.title ?? "";
+  const max = split ? Math.max(split.high, split.low, 1) : 1;
+  return (
+    <article className="rounded-card-lg bg-surface p-5 shadow-soft">
+      <p className={`eyebrow flex items-center gap-1.5 ${st.ink}`}>
+        <Icon aria-hidden size={16} /> {sphereTitle}
+      </p>
+      <p className="mt-2 text-[17px] leading-snug font-semibold text-ink">{i.text}</p>
+      {split && (
+        <div className="mt-4 space-y-2" role="img" aria-label={`Средний Focus Score: ${split.high} в дни «${i.metric.higher}», ${split.low} в остальные`}>
+          {[
+            [i.metric.higher, split.high, split.highDays, true],
+            [i.metric.lower, split.low, split.lowDays, false],
+          ].map(([label, v, n, hi]) => (
+            <div key={String(label)}>
+              <div className="flex justify-between text-[13px]">
+                <span className="text-muted first-letter:uppercase">
+                  {String(label)} · {Number(n)} {plural(Number(n), DAYS)}
+                </span>
+                <span className="font-semibold text-ink tabular-nums">{Number(v)}</span>
+              </div>
+              <div className={`mt-1 h-2.5 overflow-hidden rounded-full ${st.tint}`}>
+                <div className={`h-full origin-left animate-grow rounded-full ${hi ? st.base : "bg-line"}`} style={{ width: `${(Number(v) / max) * 100}%` }} />
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+      <div className="mt-4">
+        <StrengthChip strength={i.strength} days={i.days} />
+      </div>
+      {METRIC_CARD[i.metric.key] && (
+        <a href={cardHref(METRIC_CARD[i.metric.key]!)} className="mt-1 flex min-h-11 items-center text-[15px] font-semibold text-navy underline underline-offset-4">
+          Подробнее в библиотеке
+        </a>
+      )}
+    </article>
   );
 }

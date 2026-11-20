@@ -174,3 +174,19 @@ describe("review follow-ups", () => {
     expect(computeInsights(pairs)).toEqual([]);
   });
 });
+
+describe("splitMeans", () => {
+  it("splits by median and averages scores", async () => {
+    const { splitMeans, METRICS } = await import("./insights");
+    const { emptyCheckIn } = await import("./checkin");
+    const sleep = METRICS.find((m) => m.key === "sleepHours")!;
+    const mk = (wake: string, score: number) => ({
+      date: "d",
+      score,
+      checkin: { ...emptyCheckIn(), sleep: { bedtime: "23:00", wake, quality: 3 as const }, date: "d", createdAt: 1, updatedAt: 1 },
+    });
+    const r = splitMeans([mk("05:00", 50), mk("06:00", 60), mk("08:00", 80), mk("09:00", 90)], sleep);
+    expect(r).toEqual({ high: 85, low: 55, highDays: 2, lowDays: 2 });
+    expect(splitMeans([mk("05:00", 50)], sleep)).toBeNull();
+  });
+});

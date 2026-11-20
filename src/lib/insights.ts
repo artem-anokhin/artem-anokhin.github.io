@@ -311,3 +311,39 @@ export function experimentResult(tests: FocusTestResult[], start: DayKey): Exper
   const diff = enough ? Math.round(after.mean! - before.mean!) : null;
   return { before, after, diff };
 }
+
+export interface SplitMeans {
+  /** Mean Focus Score on days where the metric was above its median. */
+  high: number;
+  /** Mean Focus Score on days at or below the median. */
+  low: number;
+  highDays: number;
+  lowDays: number;
+}
+
+/**
+ * Descriptive split for the insight mini chart: mean score on "higher" vs
+ * "lower" days of a metric (median split). Null when either side is empty.
+ */
+export function splitMeans(pairs: DayPair[], metric: Metric): SplitMeans | null {
+  const rows: { v: number; s: number }[] = [];
+  for (const p of pairs) {
+    const answered = p.checkin.answered;
+    if (Array.isArray(answered) && !answered.includes(metric.sphere)) continue;
+    let v: number | null;
+    try {
+      v = metric.value(p.checkin);
+    } catch {
+      v = null;
+    }
+    if (v !== null && Number.isFinite(v)) rows.push({ v, s: p.score });
+  }
+  if (rows.length < 2) return null;
+  const sorted = rows.map((r) => r.v).sort((a, b) => a - b);
+  const median = sorted[Math.floor((sorted.length - 1) / 2)]!;
+  const hi = rows.filter((r) => r.v > median);
+  const lo = rows.filter((r) => r.v <= median);
+  if (!hi.length || !lo.length) return null;
+  const mean = (xs: { s: number }[]) => Math.round(xs.reduce((a, r) => a + r.s, 0) / xs.length);
+  return { high: mean(hi), low: mean(lo), highDays: hi.length, lowDays: lo.length };
+}

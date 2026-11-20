@@ -1,14 +1,41 @@
 "use client";
 
-import { ChevronLeft, ShieldCheck } from "lucide-react";
+import { ChevronLeft, HeartHandshake, ShieldCheck } from "lucide-react";
 import { useState } from "react";
 import { HELP_LINES } from "@/lib/crisis";
 import { MODE_LABEL, saveProfile, type Mode } from "@/lib/settings";
+import { SPHERE_STYLE } from "@/lib/spheres";
+import { SPHERE_KEYS } from "@/lib/checkin";
 import { ChoiceField, btnPrimary } from "./ui/controls";
+import { ProgressRing, TreeScene } from "./ui/visuals";
 
-const STEPS = 3;
+const STEPS = 4;
 
-/** One-time onboarding: mode → disclaimer → consent. Calls onDone after saving. */
+/** Welcome art: the garden with the 7 sphere colors orbiting. */
+function WelcomeArt() {
+  return (
+    <div className="relative">
+      <TreeScene stage={3} wilting={false} title="Сад фокуса" className="h-64 rounded-card-lg" />
+      <ul aria-hidden className="absolute inset-x-6 top-4 flex justify-between">
+        {SPHERE_KEYS.map((k, i) => {
+          const st = SPHERE_STYLE[k];
+          const Icon = st.icon;
+          return (
+            <li
+              key={k}
+              className={`grid size-9 animate-rise place-items-center rounded-full bg-white shadow-soft ${st.text}`}
+              style={{ animationDelay: `${i * 60}ms`, marginTop: `${Math.abs(3 - i) * 6}px` }}
+            >
+              <Icon size={18} />
+            </li>
+          );
+        })}
+      </ul>
+    </div>
+  );
+}
+
+/** One-time onboarding: welcome → mode → disclaimer → consent. Calls onDone after saving. */
 export function Onboarding({ onDone }: { onDone: () => void }) {
   const [step, setStep] = useState(0);
   const [mode, setMode] = useState<Mode>("study");
@@ -30,136 +57,169 @@ export function Onboarding({ onDone }: { onDone: () => void }) {
   }
 
   return (
-    <div className="mx-auto flex min-h-dvh w-full max-w-md flex-col justify-center px-4 py-8">
-      <p className="title mb-6 text-center text-2xl">
-        Focus<span className="text-accent">AI</span>
-      </p>
-      <section className="card p-6">
-        <div className="mb-6 flex min-h-11 items-center justify-between">
+    <div className="min-h-dvh bg-gradient-to-b from-bg to-sky-bottom">
+      <div className="mx-auto flex min-h-dvh w-full max-w-md flex-col px-5 pt-[calc(12px+env(safe-area-inset-top))] pb-[calc(20px+env(safe-area-inset-bottom))]">
+        <div className="flex min-h-11 items-center justify-between">
           {step > 0 ? (
             <button
               type="button"
               onClick={() => setStep(step - 1)}
-              className="-ml-2 inline-flex min-h-11 items-center gap-1 rounded-xl px-2 font-medium text-navy hover:bg-soft"
+              className="pressable -ml-2 inline-flex min-h-11 items-center gap-1 rounded-full px-3 font-semibold text-navy hover:bg-soft"
             >
               <ChevronLeft aria-hidden size={20} /> Назад
             </button>
           ) : (
-            <span />
+            <p className="font-display text-[22px] font-black text-navy">
+              Focus<span className="text-accent">AI</span>
+            </p>
           )}
           <div className="flex items-center gap-2">
-            <span className="text-sm text-muted">
+            <span className="sr-only">
               Шаг {step + 1} из {STEPS}
             </span>
-            <span aria-hidden className="flex gap-1">
+            <span aria-hidden className="flex gap-1.5">
               {Array.from({ length: STEPS }, (_, i) => (
-                <span key={i} className={`size-2 rounded-full ${i <= step ? "bg-accent" : "bg-line"}`} />
+                <span key={i} className={`h-2 rounded-full transition-all ${i === step ? "w-6 bg-navy" : i < step ? "w-2 bg-navy/40" : "w-2 bg-line"}`} />
               ))}
             </span>
           </div>
         </div>
 
-        {step === 0 && (
-          <>
-            <p className="mb-4 rounded-2xl bg-soft px-4 py-3 text-sm font-medium text-navy">
-              Узнайте, что помогает вашей концентрации: чек-ин за 1 минуту, тест за 90 секунд, данные только у вас.
-            </p>
-            <h1 className="title mb-6 text-2xl">
-              Как вы
-              <span className="block text-accent">проводите день?</span>
-            </h1>
-            <ChoiceField
-              legend="Выберите режим — от него зависят вопросы"
-              name="mode"
-              value={mode}
-              onChange={setMode}
-              options={(["study", "work"] as const).map((m) => ({ value: m, label: MODE_LABEL[m] }))}
-            />
-            <button type="button" className={`${btnPrimary} mt-6 w-full`} onClick={() => setStep(1)}>
-              Далее
-            </button>
-          </>
-        )}
+        <section key={step} className="stagger mt-6 flex flex-1 flex-col">
+          {step === 0 && (
+            <>
+              <WelcomeArt />
+              <h1 className="title mt-8 text-[32px]">Фокус растёт, как сад</h1>
+              <p className="mt-3 text-[17px] text-muted">Узнайте, что помогает именно вашей концентрации — по вашим же данным.</p>
+              <ul className="mt-6 space-y-3">
+                {[
+                  ["1 минута", "чек-ин дня: сон, еда, кофе, настроение…"],
+                  ["90 секунд", "тест реакции — ваш Focus Score"],
+                  ["7 дней", "и вы увидите, что с ним связано"],
+                ].map(([a, b]) => (
+                  <li key={a} className="flex items-baseline gap-3">
+                    <span className="stat w-28 shrink-0 text-[22px] text-navy">{a}</span>
+                    <span className="text-[15px] text-ink">{b}</span>
+                  </li>
+                ))}
+              </ul>
+              <div className="flex-1" />
+              <button type="button" className={`${btnPrimary} mt-8 w-full`} onClick={() => setStep(1)}>
+                Далее
+              </button>
+            </>
+          )}
 
-        {step === 1 && (
-          <>
-            <h1 className="title mb-4 text-2xl">
-              Важно
-              <span className="block text-accent">знать</span>
-            </h1>
-            <p className="rounded-2xl bg-soft p-4 font-semibold text-navy">
-              Не является медицинской консультацией
-            </p>
-            <p className="mt-4 text-ink">
-              FocusAI помогает замечать связи между привычками и концентрацией. Приложение не ставит
-              диагнозов и не заменяет врача.
-            </p>
-            <p className="mt-4 text-sm text-muted">
-              Если станет тяжело, бесплатная поддержка:{" "}
-              {HELP_LINES.map((l, i) => (
-                <span key={l.phone}>
-                  {i > 0 && ", "}
-                  <a href={`tel:${l.phone}`} className="font-semibold text-navy underline underline-offset-4">
-                    {l.phone}
-                  </a>
-                </span>
-              ))}{" "}
-              или психолог вашего вуза.
-            </p>
-            <button type="button" className={`${btnPrimary} mt-6 w-full`} onClick={() => setStep(2)}>
-              Понятно
-            </button>
-          </>
-        )}
-
-        {step === 2 && (
-          <>
-            <h1 className="title mb-4 text-2xl">
-              Ваши данные —
-              <span className="block text-accent">только у вас</span>
-            </h1>
-            <p className="flex gap-3 text-ink">
-              <ShieldCheck aria-hidden className="mt-0.5 shrink-0 text-leaf" size={22} />
-              Ответы хранятся только в этом браузере. Нет аккаунтов и сервера, данные никуда не
-              отправляются.
-            </p>
-            <label className="mt-5 flex min-h-11 cursor-pointer items-start gap-3 rounded-2xl border-[1.5px] border-line p-3">
-              <input
-                type="checkbox"
-                checked={consent}
-                onChange={(e) => setConsent(e.target.checked)}
-                className="mt-0.5 size-6 shrink-0 accent-navy"
+          {step === 1 && (
+            <>
+              <div className="grid h-44 place-items-center rounded-card-lg bg-soft">
+                <ProgressRing value={0.72} size={140} stroke={13}>
+                  <span>
+                    <span className="stat block text-[40px] text-navy">72</span>
+                    <span className="text-[12px] font-semibold text-muted">Focus Score</span>
+                  </span>
+                </ProgressRing>
+              </div>
+              <h1 className="title mt-8 text-[32px]">Как вы проводите день?</h1>
+              <p className="mt-2 mb-6 text-[17px] text-muted">От этого зависят вопросы в чек-ине.</p>
+              <ChoiceField
+                legend="Выберите режим"
+                name="mode"
+                value={mode}
+                onChange={setMode}
+                columns={2}
+                options={(["study", "work"] as const).map((m) => ({ value: m, label: MODE_LABEL[m] }))}
               />
-              <span className="text-ink">
-                Я согласен(на) хранить свои ответы на этом устройстве для личной статистики
+              <div className="flex-1" />
+              <button type="button" className={`${btnPrimary} mt-8 w-full`} onClick={() => setStep(2)}>
+                Далее
+              </button>
+            </>
+          )}
+
+          {step === 2 && (
+            <>
+              <span className="grid size-20 place-items-center rounded-full bg-s-mind-tint text-s-mind-ink">
+                <HeartHandshake aria-hidden size={40} />
               </span>
-            </label>
-            <p className="mt-3 text-sm text-muted">
-              Данные можно выгрузить или удалить в любой момент в настройках.{" "}
-              <a href="/privacy/" target="_blank" rel="noopener" className="font-semibold text-navy underline underline-offset-4">Политика конфиденциальности</a>
-            </p>
-            {error && (
-              <p role="alert" className="mt-3 text-sm font-medium text-ink">
-                Не удалось сохранить. Попробуйте ещё раз.
+              <h1 className="title mt-6 text-[32px]">Важно знать</h1>
+              <p className="mt-4 inline-flex self-start rounded-full bg-sand px-4 py-2 text-[15px] font-semibold text-sand-ink">
+                Не является медицинской консультацией
               </p>
-            )}
-            <button
-              type="button"
-              className={`${btnPrimary} mt-6 w-full`}
-              disabled={!consent || saving}
-              onClick={finish}
-              aria-describedby={!consent ? "consent-hint" : undefined}
-            >
-              Начать
-            </button>
-            {!consent && (
-              <p id="consent-hint" className="mt-2 text-center text-sm text-muted">
-                Чтобы начать, отметьте согласие
+              <p className="mt-4 text-[17px] text-ink">
+                FocusAI помогает замечать связи между привычками и концентрацией. Приложение не ставит диагнозов и не заменяет
+                врача.
               </p>
-            )}
-          </>
-        )}
-      </section>
+              <div className="mt-6 rounded-card-lg bg-surface p-4 shadow-soft">
+                <p className="text-[15px] text-muted">Если станет тяжело, поговорить можно бесплатно:</p>
+                <ul className="mt-2 space-y-1">
+                  {HELP_LINES.map((l) => (
+                    <li key={l.phone}>
+                      <a href={`tel:${l.phone}`} className="inline-flex min-h-11 items-center gap-3 text-navy">
+                        <span className="stat text-[24px]">{l.phone}</span>
+                        <span className="text-[14px] text-ink underline underline-offset-4">{l.label}</span>
+                      </a>
+                    </li>
+                  ))}
+                  <li className="text-[14px] text-ink">или психолог вашего вуза</li>
+                </ul>
+              </div>
+              <div className="flex-1" />
+              <button type="button" className={`${btnPrimary} mt-8 w-full`} onClick={() => setStep(3)}>
+                Понятно
+              </button>
+            </>
+          )}
+
+          {step === 3 && (
+            <>
+              <span className="grid size-20 place-items-center rounded-full bg-s-activity-tint text-s-activity-ink">
+                <ShieldCheck aria-hidden size={40} />
+              </span>
+              <h1 className="title mt-6 text-[32px]">Ваши данные — только у вас</h1>
+              <ul className="mt-5 space-y-3 text-[16px] text-ink">
+                {[
+                  "Ответы хранятся только на этом устройстве.",
+                  "Нет аккаунтов и сервера — данные никуда не отправляются.",
+                  "Выгрузить или удалить всё можно в настройках.",
+                ].map((t) => (
+                  <li key={t} className="flex gap-3">
+                    <span aria-hidden className="mt-2 size-2 shrink-0 rounded-full bg-leaf" />
+                    {t}
+                  </li>
+                ))}
+              </ul>
+              <label className="mt-6 flex min-h-11 cursor-pointer items-start gap-3 rounded-card bg-surface p-4 shadow-soft has-[:checked]:ring-2 has-[:checked]:ring-navy">
+                <input type="checkbox" checked={consent} onChange={(e) => setConsent(e.target.checked)} className="mt-0.5 size-6 shrink-0 accent-navy" />
+                <span className="text-ink">Я согласен(на) хранить свои ответы на этом устройстве для личной статистики</span>
+              </label>
+              <a href="/privacy/" target="_blank" rel="noopener" className="mt-3 inline-flex min-h-11 items-center text-[15px] font-semibold text-navy underline underline-offset-4">
+                Политика конфиденциальности
+              </a>
+              {error && (
+                <p role="alert" className="mt-3 text-sm font-medium text-ink">
+                  Не удалось сохранить. Попробуйте ещё раз.
+                </p>
+              )}
+              <div className="flex-1" />
+              <button
+                type="button"
+                className={`${btnPrimary} mt-6 w-full`}
+                disabled={!consent || saving}
+                onClick={finish}
+                aria-describedby={!consent ? "consent-hint" : undefined}
+              >
+                Начать
+              </button>
+              {!consent && (
+                <p id="consent-hint" className="mt-2 text-center text-sm text-muted">
+                  Чтобы начать, отметьте согласие
+                </p>
+              )}
+            </>
+          )}
+        </section>
+      </div>
     </div>
   );
 }

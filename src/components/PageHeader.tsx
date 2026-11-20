@@ -13,13 +13,13 @@ export function PageHeader({
   return (
     <header className="mb-6">
       <div className="flex items-start justify-between gap-3">
-        <h1 className="title text-3xl md:text-4xl">
-          {title}
-          {accent && <span className="block text-accent">{accent}</span>}
-        </h1>
+        <div>
+          {accent && <p className="eyebrow first-letter:uppercase">{accent}</p>}
+          <h1 className="title mt-1 text-[32px]">{title}</h1>
+        </div>
         {action}
       </div>
-      {lead && <p className="mt-3 text-muted">{lead}</p>}
+      {lead && <p className="mt-2 text-[17px] text-muted">{lead}</p>}
     </header>
   );
 }

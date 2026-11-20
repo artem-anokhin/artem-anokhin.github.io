@@ -9,6 +9,7 @@ const page = await b.newPage({ viewport: { width: 375, height: 812 }, deviceScal
 await page.goto(`${base}/welcome/`);
 await page.screenshot({ path: `${out}/01-welcome.png` });
 await page.getByRole("button", { name: "Далее" }).click();
+await page.getByRole("button", { name: "Далее" }).click();
 await page.getByRole("button", { name: "Понятно" }).click();
 await page.getByRole("checkbox").check();
 await page.getByRole("button", { name: "Начать" }).click();

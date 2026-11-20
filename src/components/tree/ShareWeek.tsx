@@ -19,7 +19,7 @@ export function ShareWeek({ stageName, activeDays }: { stageName: string; active
   }, []);
 
   async function onShare() {
-    const tree = document.querySelector("#tree-card svg");
+    const tree = document.querySelector("#tree-card svg[role=img]");
     if (!tree) return;
     setStatus("busy");
     try {

@@ -79,7 +79,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
       <main className="mx-auto w-full max-w-3xl px-5 pt-6 pb-32 md:px-10 md:pt-10 md:pb-12">
         {demo && (
-          <p role="note" className="mb-4 inline-flex items-center gap-2 rounded-full bg-sand px-4 py-2 text-[13px] font-semibold text-sand-ink">
+          <p role="note" className="mb-6 inline-flex items-center gap-2 rounded-full bg-sand px-4 py-2 text-[13px] font-semibold text-sand-ink">
             <Info aria-hidden size={16} />
             <span>
               <strong>Демо-данные.</strong> Пример, а не ваши результаты ·{" "}
