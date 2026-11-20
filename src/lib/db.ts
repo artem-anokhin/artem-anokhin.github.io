@@ -21,6 +21,11 @@ export interface FocusTestResult {
   date: DayKey;
   takenAt: number;
   score: number;
+  /** Non-indexed details (added in M2, no schema bump needed). */
+  medianRt?: number;
+  lapses?: number;
+  falseStarts?: number;
+  trials?: number;
 }
 
 export interface Setting {
@@ -72,3 +77,4 @@ export async function saveCheckIn(
     return row;
   });
 }
+
