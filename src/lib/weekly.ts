@@ -1,5 +1,5 @@
 import { sleepHours } from "./checkin";
-import type { CheckIn, DayKey, FocusSession, FocusTestResult } from "./db";
+import type { CheckIn, DayKey, FocusSession, FocusTestResult, HabitLog } from "./db";
 import { daysBetween } from "./tree";
 import { latestTestByDay } from "./today";
 
@@ -25,7 +25,7 @@ export interface WeeklyReview {
   /** Change in average Focus Score; null if either week has no tests. */
   scoreDelta: number | null;
   /** Each of the last 7 days (oldest → today): which activities happened. */
-  days: { date: DayKey; checkin: boolean; test: boolean; session: boolean }[];
+  days: { date: DayKey; checkin: boolean; test: boolean; session: boolean; habit: boolean }[];
 }
 
 function stats(checkins: CheckIn[], tests: Map<DayKey, FocusTestResult>, sessions: FocusSession[], inRange: (d: DayKey) => boolean): WeekStats {
@@ -56,16 +56,23 @@ function minusDays(key: DayKey, n: number): DayKey {
   return `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, "0")}-${String(dt.getDate()).padStart(2, "0")}`;
 }
 
-export function weeklyReview(checkins: CheckIn[], tests: FocusTestResult[], sessions: FocusSession[], today: DayKey): WeeklyReview {
+export function weeklyReview(
+  checkins: CheckIn[],
+  tests: FocusTestResult[],
+  sessions: FocusSession[],
+  today: DayKey,
+  habitLogs: HabitLog[] = [],
+): WeeklyReview {
   const byDay = latestTestByDay(tests);
   const age = (d: DayKey) => daysBetween(d, today);
   const current = stats(checkins, byDay, sessions, (d) => age(d) >= 0 && age(d) < 7);
   const previous = stats(checkins, byDay, sessions, (d) => age(d) >= 7 && age(d) < 14);
   const cDays = new Set(checkins.map((c) => c.date));
   const sDays = new Set(sessions.map((s) => s.date));
+  const hDays = new Set(habitLogs.map((l) => l.date));
   const days = Array.from({ length: 7 }, (_, i) => {
     const date = minusDays(today, 6 - i);
-    return { date, checkin: cDays.has(date), test: byDay.has(date), session: sDays.has(date) };
+    return { date, checkin: cDays.has(date), test: byDay.has(date), session: sDays.has(date), habit: hDays.has(date) };
   });
   const scoreDelta = current.avgScore !== null && previous.avgScore !== null ? current.avgScore - previous.avgScore : null;
   return { current, previous, scoreDelta, days };

@@ -21,7 +21,7 @@ describe("weeklyReview", () => {
     expect(r.previous).toMatchObject({ checkinDays: 1, avgScore: 50, focusMinutes: 0 });
     expect(r.scoreDelta).toBe(25);
     expect(r.days.map((d) => d.date)).toEqual(["2026-11-15", "2026-11-16", "2026-11-17", "2026-11-18", "2026-11-19", "2026-11-20", "2026-11-21"]);
-    expect(r.days.at(-1)).toEqual({ date: "2026-11-21", checkin: true, test: true, session: true });
+    expect(r.days.at(-1)).toEqual({ date: "2026-11-21", checkin: true, test: true, session: true, habit: false });
   });
 
   it("returns nulls without data", () => {

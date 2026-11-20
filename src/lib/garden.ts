@@ -4,12 +4,13 @@ import { treeState, type TreeState } from "./tree";
 
 /** The one way screens load the tree, so every screen shows the same drops and stage. */
 export async function loadTree(db: FocusDB = defaultDb, today: string = dayKey()): Promise<TreeState> {
-  const [checkins, tests, sessions, experiment, past] = await Promise.all([
+  const [checkins, tests, sessions, experiment, past, habitLogs] = await Promise.all([
     db.checkins.toArray(),
     db.focusTests.toArray(),
     db.sessions.toArray(),
     getExperiment(db),
     getExperimentHistory(db),
+    db.habitLogs.toArray(),
   ]);
   return treeState({
     checkinDates: checkins.map((c) => c.date),
@@ -17,6 +18,7 @@ export async function loadTree(db: FocusDB = defaultDb, today: string = dayKey()
     experiment,
     pastExperiments: past,
     sessionDates: sessions.map((s) => s.date),
+    habitDates: habitLogs.map((l) => l.date),
     today,
   });
 }

@@ -69,13 +69,26 @@ export async function isDemo(database: FocusDB = defaultDb): Promise<boolean> {
 
 /** Loads demo data. Returns false (nothing written) without consent or if any real data exists. */
 export async function loadDemo(database: FocusDB = defaultDb, today = new Date()): Promise<boolean> {
-  return database.transaction("rw", [database.checkins, database.focusTests, database.settings, database.sessions], async () => {
+  return database.transaction("rw", [database.checkins, database.focusTests, database.settings, database.sessions, database.habits, database.habitLogs], async () => {
     if (!(await getProfile(database))) return false;
     if ((await database.checkins.count()) || (await database.focusTests.count())) return false;
     const { checkins, tests, sessions } = buildDemo(today);
     await database.checkins.bulkPut(checkins);
     await database.focusTests.bulkAdd(tests);
     await database.sessions.bulkAdd(sessions);
+    // Two demo habits with marks on most days.
+    const ids = await database.habits.bulkAdd(
+      [
+        { title: "Стакан воды утром", sphere: "caffeine", createdAt: 1, archived: 0, demo: true },
+        { title: "Прогулка 10 минут", sphere: "activity", createdAt: 2, archived: 0, demo: true },
+      ],
+      { allKeys: true },
+    );
+    await database.habitLogs.bulkPut(
+      checkins.flatMap((c, i) =>
+        ids.filter((_, j) => (i + j) % 3 !== 0).map((habitId) => ({ habitId: habitId as number, date: c.date, doneAt: c.createdAt, demo: true as const })),
+      ),
+    );
     await database.settings.put({ key: DEMO_KEY, value: true });
     return true;
   });
@@ -83,8 +96,10 @@ export async function loadDemo(database: FocusDB = defaultDb, today = new Date()
 
 /** Removes only demo-tagged rows and the flag; real check-ins, tests, experiments and the profile stay. */
 export async function clearDemo(database: FocusDB = defaultDb): Promise<void> {
-  await database.transaction("rw", [database.checkins, database.focusTests, database.settings, database.sessions], async () => {
+  await database.transaction("rw", [database.checkins, database.focusTests, database.settings, database.sessions, database.habits, database.habitLogs], async () => {
     await database.sessions.filter((s) => s.demo === true).delete();
+    await database.habitLogs.filter((l) => l.demo === true).delete();
+    await database.habits.filter((h) => h.demo === true).delete();
     await database.checkins.filter((c) => c.demo === true).delete();
     await database.focusTests.filter((t) => t.demo === true).delete();
     await database.settings.delete(DEMO_KEY);

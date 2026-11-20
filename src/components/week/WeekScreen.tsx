@@ -7,10 +7,10 @@ import { SPHERES } from "@/lib/checkin";
 import { db, dayKey } from "@/lib/db";
 import { MIN_DAYS, computeInsights, pairDays, usableDays, type Insight } from "@/lib/insights";
 import { plural } from "@/lib/plural";
-import { getExperiment, getExperimentHistory } from "@/lib/settings";
+import { loadTree } from "@/lib/garden";
 import { SPHERE_STYLE } from "@/lib/spheres";
 import { latestTestByDay } from "@/lib/today";
-import { treeState, type TreeState } from "@/lib/tree";
+import type { TreeState } from "@/lib/tree";
 import { weeklyReview, type WeeklyReview } from "@/lib/weekly";
 import { btnPrimary } from "@/components/ui/controls";
 import { TreeSvg } from "@/components/tree/TreeSvg";
@@ -31,25 +31,12 @@ export function WeekScreen() {
     let alive = true;
     (async () => {
       const key = dayKey();
-      const [checkins, tests, sessions, experiment, past] = await Promise.all([
-        db.checkins.toArray(),
-        db.focusTests.toArray(),
-        db.sessions.toArray(),
-        getExperiment(),
-        getExperimentHistory(),
-      ]);
+      const [checkins, tests, sessions] = await Promise.all([db.checkins.toArray(), db.focusTests.toArray(), db.sessions.toArray()]);
       const review = weeklyReview(checkins, tests, sessions, key);
       const byDay = latestTestByDay(tests);
       const pairs = pairDays(checkins, tests);
       const usable = usableDays(pairs);
-      const tree = treeState({
-        checkinDates: checkins.map((c) => c.date),
-        tests,
-        experiment,
-        pastExperiments: past,
-        sessionDates: sessions.map((s) => s.date),
-        today: key,
-      });
+      const tree = await loadTree();
       if (alive)
         setData({
           review,

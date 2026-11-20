@@ -2,9 +2,8 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { db, dayKey } from "@/lib/db";
-import { getExperiment, getExperimentHistory } from "@/lib/settings";
-import { STAGES, treeMessages, treeState, type TreeState } from "@/lib/tree";
+import { STAGES, treeMessages, type TreeState } from "@/lib/tree";
+import { loadTree } from "@/lib/garden";
 import { btnPrimary } from "@/components/ui/controls";
 import { DropIcon, TreeScene } from "@/components/ui/visuals";
 import { plural } from "@/lib/plural";
@@ -25,18 +24,9 @@ export function TreeScreen() {
 
   useEffect(() => {
     let alive = true;
-    Promise.all([db.checkins.toArray(), db.focusTests.toArray(), getExperiment(), getExperimentHistory(), db.sessions.toArray()])
-      .then(([checkins, tests, experiment, pastExperiments, sessions]) => {
-        if (!alive) return;
-        const tree = treeState({
-          checkinDates: checkins.map((c) => c.date),
-          tests,
-          experiment,
-          pastExperiments,
-          sessionDates: sessions.map((s) => s.date),
-          today: dayKey(),
-        });
-        setState({ kind: "ready", tree });
+    loadTree()
+      .then((tree) => {
+        if (alive) setState({ kind: "ready", tree });
       })
       .catch(() => alive && setState({ kind: "error" }));
     return () => {

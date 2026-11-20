@@ -1,6 +1,7 @@
 import { SPHERE_KEYS, sanitizeCheckIn } from "./checkin";
 import { SESSION_LENGTHS, type SessionLength } from "./focusSession";
-import { db as defaultDb, dayKey, type CheckIn, type FocusDB, type FocusSession, type FocusTestResult, type Setting } from "./db";
+import { HABIT_TITLE_MAX, MAX_HABITS } from "./habits";
+import { db as defaultDb, dayKey, type CheckIn, type FocusDB, type FocusSession, type Habit, type HabitLog, type FocusTestResult, type Setting } from "./db";
 import { getProfile, isExperiment, isWindow } from "./settings";
 
 export const EXPORT_FORMAT = "focusai-export";
@@ -14,13 +15,16 @@ export interface ExportFile {
   focusTests: unknown[];
   /** All settings rows: profile, experiment, experimentHistory, … */
   settings: unknown[];
-  /** Finished focus sessions (added in export version 1, optional on import). */
+  /** Finished focus sessions (optional on import). */
   sessions?: unknown[];
+  /** Habits and their daily marks (optional on import). */
+  habits?: unknown[];
+  habitLogs?: unknown[];
 }
 
 /** Snapshot of every table, read in one transaction so it is consistent. */
 export async function exportData(database: FocusDB = defaultDb, now = new Date()): Promise<ExportFile> {
-  return database.transaction("r", [database.checkins, database.focusTests, database.settings, database.sessions], async () => ({
+  return database.transaction("r", [database.checkins, database.focusTests, database.settings, database.sessions, database.habits, database.habitLogs], async () => ({
     format: EXPORT_FORMAT,
     version: EXPORT_VERSION,
     exportedAt: now.toISOString(),
@@ -28,6 +32,8 @@ export async function exportData(database: FocusDB = defaultDb, now = new Date()
     focusTests: await database.focusTests.toArray(),
     settings: await database.settings.toArray(),
     sessions: await database.sessions.toArray(),
+    habits: await database.habits.toArray(),
+    habitLogs: await database.habitLogs.toArray(),
   }));
 }
 
@@ -51,8 +57,10 @@ export function downloadJson(data: unknown, fileName: string): void {
 
 /** Deletes all user data (check-ins, tests, sessions, profile, experiments) in one transaction. */
 export async function deleteAllData(database: FocusDB = defaultDb): Promise<void> {
-  await database.transaction("rw", [database.checkins, database.focusTests, database.settings, database.sessions], async () => {
+  await database.transaction("rw", [database.checkins, database.focusTests, database.settings, database.sessions, database.habits, database.habitLogs], async () => {
     await database.sessions.clear();
+    await database.habits.clear();
+    await database.habitLogs.clear();
     await database.checkins.clear();
     await database.focusTests.clear();
     await database.settings.clear();
@@ -132,17 +140,47 @@ export async function importData(raw: unknown, database: FocusDB = defaultDb): P
     } else skipped++;
   }
 
+  const habits: Habit[] = [];
+  const idMap = new Map<number, true>();
+  for (const r of arr(f.habits)) {
+    const h = r as Habit;
+    const title = typeof h?.title === "string" ? h.title.replace(/\s+/g, " ").trim().slice(0, HABIT_TITLE_MAX) : "";
+    if (h && Number.isInteger(h.id) && (h.id as number) > 0 && title && SPHERE_KEYS.includes(h.sphere) && isNum(h.createdAt) && !idMap.has(h.id!)) {
+      idMap.set(h.id!, true);
+      habits.push({
+        id: h.id,
+        title,
+        sphere: h.sphere,
+        createdAt: h.createdAt,
+        archived: h.archived === 1 ? 1 : 0,
+        ...(typeof h.ideaId === "string" && /^[a-z0-9-]{1,40}$/.test(h.ideaId) ? { ideaId: h.ideaId } : {}),
+        ...(h.demo === true ? { demo: true as const } : {}),
+      });
+    } else skipped++;
+  }
+  // Never more than MAX_HABITS active after import.
+  habits.filter((h) => h.archived === 0).slice(MAX_HABITS).forEach((h) => (h.archived = 1));
+  const habitLogs: HabitLog[] = [];
+  for (const r of arr(f.habitLogs)) {
+    const l = r as HabitLog;
+    if (l && idMap.has(l.habitId) && isDay(l.date) && isNum(l.doneAt)) {
+      habitLogs.push({ habitId: l.habitId, date: l.date, doneAt: l.doneAt, ...(l.demo === true ? { demo: true as const } : {}) });
+    } else skipped++;
+  }
+
   const settings = new Map(arr(f.settings).map((s) => [(s as Setting)?.key, (s as Setting)?.value]));
   const mode = (settings.get("profile") as { mode?: unknown } | undefined)?.mode;
   const experiment = settings.get("experiment");
   const history = arr(settings.get("experimentHistory")).filter(isWindow);
 
-  return database.transaction("rw", [database.checkins, database.focusTests, database.settings, database.sessions], async () => {
+  return database.transaction("rw", [database.checkins, database.focusTests, database.settings, database.sessions, database.habits, database.habitLogs], async () => {
     const profile = await getProfile(database);
     if (!profile) return null; // no consent → no storage
     await database.checkins.clear();
     await database.focusTests.clear();
     await database.sessions.clear();
+    await database.habits.clear();
+    await database.habitLogs.clear();
     await database.settings.clear();
     await database.settings.put({
       key: "profile",
@@ -151,10 +189,12 @@ export async function importData(raw: unknown, database: FocusDB = defaultDb): P
     if (isExperiment(experiment)) await database.settings.put({ key: "experiment", value: experiment });
     if (history.length) await database.settings.put({ key: "experimentHistory", value: history });
     // Demo label only if the file really holds demo-tagged rows.
-    if ([...checkins, ...tests, ...sessions].some((r) => r.demo === true)) await database.settings.put({ key: "demo", value: true });
+    if ([...checkins, ...tests, ...sessions, ...habits].some((r) => r.demo === true)) await database.settings.put({ key: "demo", value: true });
     await database.checkins.bulkPut(checkins);
     await database.focusTests.bulkAdd(tests);
     await database.sessions.bulkAdd(sessions);
+    await database.habits.bulkAdd(habits);
+    await database.habitLogs.bulkPut(habitLogs);
     return { checkins: checkins.length, focusTests: tests.length, skipped };
   });
 }

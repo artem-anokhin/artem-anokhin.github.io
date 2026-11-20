@@ -1,5 +1,5 @@
 import Dexie, { type EntityTable } from "dexie";
-import { sanitizeCheckIn, type CheckInData } from "./checkin";
+import { sanitizeCheckIn, type CheckInData, type SphereKey } from "./checkin";
 
 /**
  * Local-first storage. All user data stays in this browser's IndexedDB.
@@ -42,6 +42,27 @@ export interface FocusSession {
   demo?: true;
 }
 
+/** A small daily habit the user chose («Привычки»). */
+export interface Habit {
+  id?: number;
+  title: string;
+  sphere: SphereKey;
+  /** Id from HABIT_IDEAS when picked from suggestions. */
+  ideaId?: string;
+  createdAt: number;
+  /** 1 = removed from the active list (history kept). Number so Dexie can index it. */
+  archived: 0 | 1;
+  demo?: true;
+}
+
+/** One habit done on one day. */
+export interface HabitLog {
+  habitId: number;
+  date: DayKey;
+  doneAt: number;
+  demo?: true;
+}
+
 export interface Setting {
   key: string;
   value: unknown;
@@ -52,6 +73,8 @@ export class FocusDB extends Dexie {
   focusTests!: EntityTable<FocusTestResult, "id">;
   settings!: EntityTable<Setting, "key">;
   sessions!: EntityTable<FocusSession, "id">;
+  habits!: EntityTable<Habit, "id">;
+  habitLogs!: Dexie.Table<HabitLog, [number, string]>;
 
   constructor(name = "focusai") {
     super(name);
@@ -62,6 +85,8 @@ export class FocusDB extends Dexie {
     });
     // v2: focus sessions (study timer).
     this.version(2).stores({ sessions: "++id, date" });
+    // v3: habits and their daily marks.
+    this.version(3).stores({ habits: "++id, archived", habitLogs: "&[habitId+date], date, habitId" });
   }
 }
 

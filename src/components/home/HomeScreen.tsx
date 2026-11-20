@@ -8,11 +8,13 @@ import { db, dayKey, type CheckIn } from "@/lib/db";
 import { MIN_DAYS, pairDays, usableDays } from "@/lib/insights";
 import { TIP_CARD, cardHref } from "@/lib/libraryLinks";
 import { plural } from "@/lib/plural";
-import { getExperiment, getExperimentHistory, getProfile } from "@/lib/settings";
+import { getProfile } from "@/lib/settings";
+import { loadTree } from "@/lib/garden";
+import { HabitsToday } from "@/components/habits/HabitsToday";
 import { SPHERE_STYLE } from "@/lib/spheres";
 import { TIPS } from "@/lib/tips";
 import { latestTestByDay, pickTip, sphereStatus } from "@/lib/today";
-import { STAGES, treeState, type TreeState } from "@/lib/tree";
+import { STAGES, type TreeState } from "@/lib/tree";
 import { weeklyReview, type WeeklyReview } from "@/lib/weekly";
 import { btnPrimary } from "@/components/ui/controls";
 import { DropIcon, ProgressRing, TreeScene, WeekStrip } from "@/components/ui/visuals";
@@ -46,27 +48,19 @@ export function HomeScreen() {
     (async () => {
       if (!(await getProfile())) return; // AppShell redirects to onboarding
       const key = dayKey();
-      const [checkins, tests, sessions, experiment, past] = await Promise.all([
+      const [checkins, tests, sessions, tree, habitLogs] = await Promise.all([
         db.checkins.toArray(),
         db.focusTests.toArray(),
         db.sessions.toArray(),
-        getExperiment(),
-        getExperimentHistory(),
+        loadTree(),
+        db.habitLogs.toArray(),
       ]);
-      const tree = treeState({
-        checkinDates: checkins.map((c) => c.date),
-        tests,
-        experiment,
-        pastExperiments: past,
-        sessionDates: sessions.map((s) => s.date),
-        today: key,
-      });
       if (!alive) return;
       setData({
         today: checkins.find((c) => c.date === key) ?? null,
         score: latestTestByDay(tests).get(key)?.score ?? null,
         tree,
-        week: weeklyReview(checkins, tests, sessions, key),
+        week: weeklyReview(checkins, tests, sessions, key, habitLogs),
         usable: usableDays(pairDays(checkins, tests)),
         focusToday: sessions.filter((s) => s.date === key).reduce((a, s) => a + s.minutes, 0),
       });
@@ -117,15 +111,15 @@ export function HomeScreen() {
       ) : !data ? (
         <div aria-busy="true" className="h-[420px] animate-pulse rounded-card-lg bg-soft" />
       ) : (
-        <Loaded data={data} />
+        <Loaded data={data} onChange={() => setReload((n) => n + 1)} />
       )}
     </div>
   );
 }
 
-function Loaded({ data }: { data: Data }) {
+function Loaded({ data, onChange }: { data: Data; onChange: () => void }) {
   const { today, score, tree, week, usable, focusToday } = data;
-  const strip = week.days.map((d, i) => ({ date: d.date, done: d.checkin || d.test || d.session, today: i === 6 }));
+  const strip = week.days.map((d, i) => ({ date: d.date, done: d.checkin || d.test || d.session || d.habit, today: i === 6 }));
   const next = tree.nextAt === null ? null : STAGES[tree.stage + 1];
 
   return (
@@ -213,6 +207,8 @@ function Loaded({ data }: { data: Data }) {
           <ChevronRight aria-hidden size={20} className="text-muted" />
         </Link>
       )}
+
+      <HabitsToday onChange={onChange} />
 
       {today && <TodaySpheres data={today} />}
       {usable < MIN_DAYS && <Countdown days={usable} />}

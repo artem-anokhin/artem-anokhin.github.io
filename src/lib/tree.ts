@@ -27,6 +27,8 @@ export interface TreeInput {
   pastExperiments?: { start: DayKey; end: DayKey }[];
   /** Days with at least one finished «Фокус-сессия» (+1 drop per day). */
   sessionDates?: DayKey[];
+  /** Days with at least one habit done (+1 drop per day). */
+  habitDates?: DayKey[];
   today: DayKey;
 }
 
@@ -72,12 +74,13 @@ export function stageFor(drops: number): number {
   return s;
 }
 
-export function treeState({ checkinDates, tests, experiment, pastExperiments = [], sessionDates = [], today }: TreeInput): TreeState {
+export function treeState({ checkinDates, tests, experiment, pastExperiments = [], sessionDates = [], habitDates = [], today }: TreeInput): TreeState {
   const checkins = new Set(checkinDates.filter((d) => d <= today));
   const testDays = new Set(tests.map((t) => t.date).filter((d) => d <= today));
   const sessionDays = new Set(sessionDates.filter((d) => d <= today));
+  const habitDays = new Set(habitDates.filter((d) => d <= today));
 
-  let drops = checkins.size + testDays.size + sessionDays.size;
+  let drops = checkins.size + testDays.size + sessionDays.size + habitDays.size;
   const windows = [...pastExperiments];
   if (experiment) {
     const end = new Date(toDate(experiment.start).getTime());
@@ -91,7 +94,7 @@ export function treeState({ checkinDates, tests, experiment, pastExperiments = [
   const nextAt = stage < STAGE_AT.length - 1 ? STAGE_AT[stage + 1]! : null;
   const progress = nextAt === null ? 1 : (drops - STAGE_AT[stage]!) / (nextAt - STAGE_AT[stage]!);
 
-  const active = [...checkins, ...testDays, ...sessionDays].sort();
+  const active = [...checkins, ...testDays, ...sessionDays, ...habitDays].sort();
   const last = active.at(-1);
   const silentDays = last === undefined ? null : daysBetween(last, today);
   // "3 silent days" = three full days without activity before today.
