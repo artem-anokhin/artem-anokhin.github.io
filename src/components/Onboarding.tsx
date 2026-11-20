@@ -89,7 +89,9 @@ export function Onboarding({ onDone }: { onDone: () => void }) {
           {step === 0 && (
             <>
               <WelcomeArt />
-              <h1 className="title mt-8 text-[32px]">Фокус растёт, как сад</h1>
+              <h1 className="title mt-8 text-[32px] text-balance">
+                Фокус растёт, <span className="text-accent">как сад</span>
+              </h1>
               <p className="mt-3 text-[17px] text-muted">Узнайте, что помогает именно вашей концентрации — по вашим же данным.</p>
               <ul className="mt-6 space-y-3">
                 {[
@@ -176,7 +178,9 @@ export function Onboarding({ onDone }: { onDone: () => void }) {
               <span className="grid size-20 place-items-center rounded-full bg-s-activity-tint text-s-activity-ink">
                 <ShieldCheck aria-hidden size={40} />
               </span>
-              <h1 className="title mt-6 text-[32px]">Ваши данные — только у вас</h1>
+              <h1 className="title mt-6 text-[32px] text-balance">
+                Ваши данные — <span className="text-accent">только у вас</span>
+              </h1>
               <ul className="mt-5 space-y-3 text-[16px] text-ink">
                 {[
                   "Ответы хранятся только на этом устройстве.",

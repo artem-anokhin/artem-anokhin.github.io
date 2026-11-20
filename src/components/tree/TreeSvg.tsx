@@ -74,10 +74,24 @@ export function TreeSvg({ stage, wilting, title }: { stage: number; wilting: boo
   const droop = wilting ? 6 : 0;
   const sway = wilting ? "" : "animate-sway";
   const swayStyle = { transformBox: "fill-box", transformOrigin: "50% 100%" } as const;
+  const uid = useId().replace(/:/g, "");
+  const crownFill = wilting ? LIGHT : `url(#crown-${uid})`;
+  const trunkFill = `url(#trunk-${uid})`;
 
   return (
     <svg viewBox="0 0 200 220" role="img" aria-labelledby={titleId} className="mx-auto h-auto w-full max-w-[280px]">
       <title id={titleId}>{title}</title>
+      <defs>
+        <radialGradient id={`crown-${uid}`} cx=".35" cy=".3" r=".75">
+          <stop offset="0" stopColor="#9BDB7E" />
+          <stop offset=".55" stopColor="#5DB55A" />
+          <stop offset="1" stopColor="#3F8F45" />
+        </radialGradient>
+        <linearGradient id={`trunk-${uid}`} x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0" stopColor="#B9875C" />
+          <stop offset="1" stopColor="#8A5E3B" />
+        </linearGradient>
+      </defs>
       {/* ground shadow + soil mound */}
       <ellipse cx="100" cy="206" rx="70" ry="8" fill="#1F6B35" opacity="0.14" />
       <path d="M58 206 C 70 190, 130 190, 142 206 Z" fill={TRUNK} />
@@ -101,9 +115,9 @@ export function TreeSvg({ stage, wilting, title }: { stage: number; wilting: boo
 
       {stage === 2 && (
         <g>
-          <path d="M97 200 C 98 170, 99 140, 100 112 L 103 112 C 103 140, 104 170, 105 200 Z" fill={TRUNK} />
+          <path d="M97 200 C 98 170, 99 140, 100 112 L 103 112 C 103 140, 104 170, 105 200 Z" fill={trunkFill} />
           <g className={sway} style={swayStyle} transform={`translate(0 ${droop})`}>
-            <circle cx="101" cy="112" r="22" fill={back} />
+            <circle cx="101" cy="112" r="22" fill={crownFill} />
             <Leaf x={100} y={150} r={-160} fill={leaf} />
             <Leaf x={102} y={142} r={-20} />
             <Leaf x={100} y={128} r={-155} />
@@ -116,7 +130,7 @@ export function TreeSvg({ stage, wilting, title }: { stage: number; wilting: boo
 
       {stage >= 3 && (
         <g>
-          <path d="M90 202 C 94 170, 95 140, 95 112 L 105 112 C 105 140, 106 170, 110 202 Z" fill={TRUNK} />
+          <path d="M90 202 C 94 170, 95 140, 95 112 L 105 112 C 105 140, 106 170, 110 202 Z" fill={trunkFill} />
           <path d="M99 150 C 90 138, 80 130, 72 124 M101 140 C 110 128, 120 120, 128 116" stroke={TRUNK} strokeWidth="6" strokeLinecap="round" fill="none" />
           <path d="M104 196 C 104 176, 103 150, 102 124" stroke={TRUNK_DARK} strokeOpacity="0.35" strokeWidth="3" fill="none" strokeLinecap="round" />
           <g className={sway} style={swayStyle} transform={`translate(0 ${droop})`}>
@@ -124,10 +138,10 @@ export function TreeSvg({ stage, wilting, title }: { stage: number; wilting: boo
               <circle key={`b${i}`} cx={cx} cy={cy} r={r} fill={back} />
             ))}
             {CROWN_MID.map(([cx, cy, r], i) => (
-              <circle key={`m${i}`} cx={cx} cy={cy} r={r} fill={i % 2 ? LIGHT : leaf} />
+              <circle key={`m${i}`} cx={cx} cy={cy} r={r} fill={crownFill} />
             ))}
-            {CROWN_SHINE.map(([cx, cy, r], i) => (
-              <circle key={`s${i}`} cx={cx} cy={cy} r={r} fill={SHINE} opacity="0.75" />
+            {CROWN_SHINE.slice(0, 2).map(([cx, cy, r], i) => (
+              <circle key={`s${i}`} cx={cx} cy={cy} r={r} fill={SHINE} opacity="0.35" />
             ))}
             {stage === 4 && !wilting && FLOWERS.map(([x, y, s], i) => <Flower key={i} x={x} y={y} s={s} />)}
           </g>

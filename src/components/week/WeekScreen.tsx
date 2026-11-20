@@ -106,7 +106,7 @@ function Story({ data }: { data: Data }) {
               <div key={d.date} className="flex flex-1 flex-col items-center gap-1.5">
                 <span className="text-[12px] font-semibold text-ink tabular-nums">{s ?? ""}</span>
                 <div
-                  className={`w-full origin-bottom animate-grow rounded-t-[10px] rounded-b-[4px] ${s === null ? "bg-soft" : best ? "bg-accent" : "bg-navy/70"}`}
+                  className={`w-full origin-bottom animate-grow rounded-t-[10px] rounded-b-[4px] ${s === null ? "bg-soft" : best ? "bg-accent" : "bg-[#C9D7FF]"}`}
                   style={{ height: `${s === null ? 8 : Math.max(14, (s / max) * 110)}px`, animationDelay: `${i * 50}ms` }}
                 />
                 <span className={`text-[12px] ${best ? "font-bold text-accent" : "text-muted"}`}>{weekday(d.date)}</span>

@@ -69,10 +69,14 @@ export function WeekStrip({ days }: { days: { date: string; done: boolean; today
             <span className={`text-[13px] ${d.today ? "font-bold text-navy" : "font-medium text-muted"}`}>{wd}</span>
             <span
               className={`grid size-9 place-items-center rounded-full text-[13px] font-semibold tabular-nums ${
-                d.done ? "bg-leaf text-white" : d.today ? "border-2 border-navy text-navy" : "border border-dashed border-line text-muted"
+                d.done
+                  ? "bg-s-activity-tint text-s-activity-ink"
+                  : d.today
+                    ? "bg-surface text-navy shadow-lift ring-2 ring-accent"
+                    : "border border-dashed border-line text-muted"
               }`}
             >
-              {d.done ? <Check aria-hidden size={18} strokeWidth={3} /> : dd}
+              {d.done ? <Check aria-hidden size={16} strokeWidth={3} /> : dd}
             </span>
             <span className="sr-only">{d.done ? "активность была" : "без активности"}</span>
           </li>
@@ -115,9 +119,14 @@ export function TreeScene({
       <svg aria-hidden viewBox="0 0 400 300" preserveAspectRatio="xMidYMax slice" className="absolute inset-0 h-full w-full">
         <defs>
           <linearGradient id={sky} x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0" stopColor={night ? "#13215A" : "#CFE0FF"} />
-            <stop offset="1" stopColor={night ? "#0B1640" : "#F3F7FF"} />
+            <stop offset="0" stopColor={night ? "#13215A" : "#BFD4FF"} />
+            <stop offset=".55" stopColor={night ? "#0F1B4D" : "#E4EDFF"} />
+            <stop offset="1" stopColor={night ? "#0B1640" : "#FBF5EA"} />
           </linearGradient>
+          <radialGradient id={`${sky}-sun`}>
+            <stop offset="0" stopColor="#FFE3A0" stopOpacity=".9" />
+            <stop offset="1" stopColor="#FFE3A0" stopOpacity="0" />
+          </radialGradient>
         </defs>
         <rect width="400" height="300" fill={`url(#${sky})`} />
         {night ? (
@@ -132,14 +141,14 @@ export function TreeScene({
           </>
         ) : (
           <>
-            <circle cx="290" cy="74" r="34" fill="#FFC75A" opacity=".25" />
+            <circle cx="290" cy="74" r="60" fill={`url(#${sky}-sun)`} />
             <circle cx="290" cy="74" r="22" fill="#FFC75A" />
-            <ellipse cx="120" cy="70" rx="38" ry="12" fill="#fff" opacity=".8" />
-            <ellipse cx="146" cy="62" rx="24" ry="12" fill="#fff" opacity=".8" />
+            <ellipse cx="200" cy="56" rx="38" ry="12" fill="#fff" opacity=".75" />
+            <ellipse cx="226" cy="48" rx="24" ry="12" fill="#fff" opacity=".75" />
           </>
         )}
-        <path d="M0 230 C 80 190, 160 200, 230 220 C 300 238, 350 205, 400 210 V300 H0 Z" fill={night ? "#1B2C6E" : "#B9E0B0"} />
-        <path d="M0 262 C 90 238, 200 236, 290 252 C 340 260, 370 254, 400 248 V300 H0 Z" fill={night ? "#22357F" : "#83CF6E"} />
+        <path d="M0 230 C 80 190, 160 200, 230 220 C 300 238, 350 205, 400 210 V300 H0 Z" fill={night ? "#1B2C6E" : "#B9E0B0"} stroke="#fff" strokeOpacity={night ? 0.08 : 0.35} strokeWidth="1.5" />
+        <path d="M0 262 C 90 238, 200 236, 290 252 C 340 260, 370 254, 400 248 V300 H0 Z" fill={night ? "#22357F" : "#83CF6E"} stroke="#fff" strokeOpacity={night ? 0.08 : 0.35} strokeWidth="1.5" />
       </svg>
       <div className="relative flex h-full items-end justify-center" style={{ paddingBottom: lift }}>
         <div className="w-[62%] max-w-[260px] translate-y-[6%]">

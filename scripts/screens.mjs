@@ -29,6 +29,7 @@ const shots = [
   ["/library/", "09-library"],
   ["/week/", "10-week"],
   ["/history/", "11-history"],
+  ["/habits/", "13-habits"],
   ["/settings/", "12-settings"],
 ];
 for (const [path, name] of shots) {

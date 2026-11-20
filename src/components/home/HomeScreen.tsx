@@ -137,10 +137,10 @@ function Loaded({ data, onChange }: { data: Data; onChange: () => void }) {
         </span>
         <Link
           href={score === null ? "/test/" : "/history/"}
-          className="pressable absolute top-4 right-4 rounded-full bg-white/95 p-1.5 shadow-soft"
+          className="pressable absolute top-3 right-3 rounded-full bg-white/75 p-1.5 shadow-[0_12px_32px_-8px_rgba(30,91,255,.45)] backdrop-blur-md"
           aria-label={score === null ? "Focus Score сегодня ещё нет. Пройти тест" : `Focus Score сегодня: ${score} из 100. История`}
         >
-          <ProgressRing value={(score ?? 0) / 100} size={92} stroke={9}>
+          <ProgressRing value={(score ?? 0) / 100} size={88} stroke={8}>
             {score === null ? (
               <span className="text-[12px] leading-tight font-semibold text-navy">
                 Тест

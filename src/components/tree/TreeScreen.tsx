@@ -4,6 +4,9 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { STAGES, treeMessages, type TreeState } from "@/lib/tree";
 import { loadTree } from "@/lib/garden";
+import { Bean, Flower2, Leaf, Sprout, TreeDeciduous, type LucideIcon } from "lucide-react";
+
+const STAGE_ICONS: LucideIcon[] = [Bean, Sprout, Leaf, TreeDeciduous, Flower2];
 import { btnPrimary } from "@/components/ui/controls";
 import { DropIcon, TreeScene } from "@/components/ui/visuals";
 import { plural } from "@/lib/plural";
@@ -100,11 +103,14 @@ export function TreeScreen() {
             {STAGES.map((name, i) => (
               <li key={name} className="flex flex-col items-center gap-1">
                 <span
-                  className={`grid size-9 place-items-center rounded-full text-[13px] font-bold ${
-                    i < tree.stage ? "bg-leaf text-white" : i === tree.stage ? "bg-navy text-white ring-4 ring-soft" : "bg-soft text-muted"
+                  className={`grid size-10 place-items-center rounded-full ${
+                    i < tree.stage ? "bg-s-activity-tint text-s-activity-ink" : i === tree.stage ? "bg-navy text-white shadow-lift ring-4 ring-soft" : "bg-soft text-muted"
                   }`}
                 >
-                  {i + 1}
+                  {(() => {
+                    const Icon = STAGE_ICONS[i]!;
+                    return <Icon aria-hidden size={20} />;
+                  })()}
                 </span>
                 <span className={`text-[12px] ${i === tree.stage ? "font-semibold text-ink" : "text-muted"}`}>{name}</span>
               </li>
@@ -135,14 +141,14 @@ export function TreeScreen() {
           <h2 id="week-title" className="eyebrow mb-3">
             Эта неделя
           </h2>
-          <dl className="grid grid-cols-4 gap-2 text-center">
+          <dl className="grid grid-cols-4 divide-x divide-line rounded-card-lg bg-surface py-4 text-center shadow-soft">
             {[
               ["Чек-ины", String(tree.week.checkins)],
               ["Тесты", String(tree.week.tests)],
               ["Фокус", String(tree.week.sessions)],
               ["Лучший", tree.week.best ? String(tree.week.best.score) : "—"],
             ].map(([k, v]) => (
-              <div key={k} className="rounded-card bg-surface px-1 py-3 shadow-soft">
+              <div key={k} className="px-1">
                 <dd className="stat text-[26px] text-ink">{v}</dd>
                 <dt className="mt-1 text-[12px] text-muted">{k}</dt>
               </div>
@@ -161,6 +167,7 @@ export function TreeScreen() {
               ["Чек-ин", "+1 в день", "bg-navy"],
               ["Тест реакции", "+1 в день", "bg-accent"],
               ["Фокус-сессия до конца", "+1 в день", "bg-night"],
+              ["Хотя бы одна привычка", "+1 в день", "bg-s-activity"],
               ["День «Эксперимента недели»", "+1 в день", "bg-leaf"],
             ].map(([k, v, c]) => (
               <li key={k} className="flex min-h-14 items-center gap-3 px-4">

@@ -82,7 +82,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           <p role="note" className="mb-6 inline-flex items-center gap-2 rounded-full bg-sand px-4 py-2 text-[13px] font-semibold text-sand-ink">
             <Info aria-hidden size={16} />
             <span>
-              <strong>Демо-данные.</strong> Пример, а не ваши результаты ·{" "}
+              <strong>Демо-данные.</strong> Пример ·{" "}
               <Link href="/settings/" className="underline underline-offset-2">
                 убрать
               </Link>
@@ -96,7 +96,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       {/* Mobile floating bottom navigation */}
       <nav
         aria-label="Основная навигация"
-        className="fixed inset-x-3 bottom-[calc(12px+env(safe-area-inset-bottom))] z-20 rounded-full bg-surface/92 shadow-soft backdrop-blur-md md:hidden"
+        className="fixed inset-x-3 bottom-[calc(12px+env(safe-area-inset-bottom))] z-20 rounded-full bg-white/80 shadow-[0_8px_30px_-10px_rgba(10,42,158,.25)] ring-1 ring-white/60 backdrop-blur-xl md:hidden"
       >
         <ul className="grid grid-cols-4 p-1.5">
           {NAV_ITEMS.map((item) => {
@@ -107,11 +107,13 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 <Link
                   href={href}
                   aria-current={active ? "page" : undefined}
-                  className={`pressable flex min-h-14 flex-col items-center justify-center gap-0.5 rounded-full text-[13px] leading-tight ${
-                    active ? "bg-soft font-semibold text-navy" : "font-medium text-muted"
+                  className={`pressable flex min-h-14 flex-col items-center justify-center gap-1 rounded-full text-[12px] leading-tight ${
+                    active ? "font-semibold text-navy" : "font-medium text-muted"
                   }`}
                 >
-                  <Icon aria-hidden size={22} strokeWidth={active ? 2.4 : 2} />
+                  <span className={`grid h-8 w-11 place-items-center rounded-full transition-colors ${active ? "bg-navy text-white" : ""}`}>
+                    <Icon aria-hidden size={20} strokeWidth={active ? 2.4 : 2} />
+                  </span>
                   {label}
                 </Link>
               </li>
