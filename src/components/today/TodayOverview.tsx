@@ -7,6 +7,7 @@ import { SPHERES, type CheckInData } from "@/lib/checkin";
 import { db, dayKey, type FocusTestResult } from "@/lib/db";
 import type { Mode } from "@/lib/settings";
 import { TIPS } from "@/lib/tips";
+import { TIP_CARD, cardHref } from "@/lib/libraryLinks";
 import { latestTestByDay, pickTip, sphereStatus, type SphereStatus } from "@/lib/today";
 import { btnPrimary } from "@/components/ui/controls";
 import { CheckInSummary } from "@/components/checkin/CheckInSummary";
@@ -102,7 +103,8 @@ function SpheresCard({ data }: { data: CheckInData }) {
 }
 
 function TipCard({ data }: { data: CheckInData }) {
-  const tip = TIPS[pickTip(data)];
+  const key = pickTip(data);
+  const tip = TIPS[key];
   return (
     <section className="card p-5 md:p-6" aria-labelledby="tip-title">
       <p className="text-sm font-semibold text-accent">Совет на завтра</p>
@@ -117,6 +119,9 @@ function TipCard({ data }: { data: CheckInData }) {
         className="mt-2 inline-flex min-h-11 items-center text-sm text-muted underline"
       >
         Источник: {tip.source}
+      </a>
+      <a href={cardHref(TIP_CARD[key])} className="flex min-h-11 items-center font-semibold text-accent underline">
+        Подробнее в библиотеке
       </a>
     </section>
   );

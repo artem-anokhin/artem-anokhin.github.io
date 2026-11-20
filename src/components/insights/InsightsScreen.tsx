@@ -19,6 +19,7 @@ import {
 import { endExperiment, getExperiment, startExperiment, type Experiment } from "@/lib/settings";
 import { plural } from "@/lib/plural";
 import { TIPS, type TipKey } from "@/lib/tips";
+import { METRIC_CARD, cardHref } from "@/lib/libraryLinks";
 import { btnPrimary, btnSecondary } from "@/components/ui/controls";
 
 const LIMITS_URL = "https://www.frontiersin.org/journals/digital-health/articles/10.3389/fdgth.2020.00003/full";
@@ -249,6 +250,11 @@ export function InsightsScreen() {
               <div className="mt-3">
                 <StrengthChip strength={i.strength} days={i.days} />
               </div>
+              {METRIC_CARD[i.metric.key] && (
+                <a href={cardHref(METRIC_CARD[i.metric.key]!)} className="mt-1 flex min-h-11 items-center text-sm font-semibold text-accent underline">
+                  Подробнее в библиотеке
+                </a>
+              )}
             </article>
           ))}
         </section>

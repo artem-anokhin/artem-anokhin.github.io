@@ -1,5 +1,5 @@
 import { PageHeader } from "@/components/PageHeader";
-import { Placeholder } from "@/components/Placeholder";
+import { LibraryScreen } from "@/components/library/LibraryScreen";
 
 export const metadata = { title: "Библиотека · FocusAI" };
 
@@ -7,7 +7,7 @@ export default function Page() {
   return (
     <>
       <PageHeader title="Библиотека" accent="знаний" />
-      <Placeholder text="Короткие карточки с источниками появятся здесь." />
+      <LibraryScreen />
     </>
   );
 }
