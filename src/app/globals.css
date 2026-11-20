@@ -15,6 +15,7 @@
   --color-leaf-light: #83cf6e;
   --color-trunk: #a9774f;
   --color-bloom: #f49ac1;
+  --color-danger: #b42318;
 
   --font-sans: var(--font-inter), system-ui, sans-serif;
   --font-display: var(--font-montserrat), system-ui, sans-serif;

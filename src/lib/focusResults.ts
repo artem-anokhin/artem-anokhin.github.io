@@ -20,7 +20,6 @@ export async function saveFocusTest(
     Number.isFinite(medianRt) && medianRt > 0 &&
     isCount(lapses) && isCount(falseStarts) && isCount(trials) && lapses <= trials;
   if (!valid || !Number.isFinite(now)) return null;
-  if (!(await getProfile(database))) return null; // no consent → no storage
   const row: FocusTestResult = {
     date: dayKey(new Date(now)),
     takenAt: now,
@@ -30,6 +29,10 @@ export async function saveFocusTest(
     falseStarts,
     trials,
   };
-  row.id = await database.focusTests.add(row);
-  return row;
+  // Consent check and insert in one transaction, so a delete in another tab can't race in.
+  return database.transaction("rw", database.focusTests, database.settings, async () => {
+    if (!(await getProfile(database))) return null; // no consent → no storage
+    row.id = await database.focusTests.add(row);
+    return row;
+  });
 }

@@ -58,14 +58,24 @@ export function dayKey(d: Date = new Date()): DayKey {
   return `${y}-${m}-${day}`;
 }
 
-/** Insert or update the check-in for `date`; keeps the original createdAt. */
+/** True when a consented profile exists (kept here to avoid a settings ↔ db import cycle). */
+async function hasConsent(database: FocusDB): Promise<boolean> {
+  const v = (await database.settings.get("profile"))?.value as { consentAt?: unknown } | undefined;
+  return typeof v?.consentAt === "number";
+}
+
+/**
+ * Insert or update the check-in for `date`; keeps the original createdAt.
+ * Returns null (nothing stored) without a consented profile.
+ */
 export async function saveCheckIn(
   data: CheckInData,
   date: DayKey = dayKey(),
   database: FocusDB = db,
   now = Date.now(),
-): Promise<CheckIn> {
-  return database.transaction("rw", database.checkins, async () => {
+): Promise<CheckIn | null> {
+  return database.transaction("rw", database.checkins, database.settings, async () => {
+    if (!(await hasConsent(database))) return null; // no consent → no storage
     const prev = await database.checkins.get(date);
     const row: CheckIn = {
       ...sanitizeCheckIn(data),

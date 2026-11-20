@@ -12,6 +12,7 @@ describe("dayKey", () => {
 describe("FocusDB", () => {
   it("stores one check-in per day (upsert by date)", async () => {
     const db = new FocusDB("test-db");
+    await db.settings.put({ key: "profile", value: { mode: "study", consentAt: 1 } });
     await saveCheckIn(emptyCheckIn(), "2026-11-20", db, 1);
     const edited = { ...emptyCheckIn(), note: "  второй раз  " };
     await saveCheckIn(edited, "2026-11-20", db, 2);
@@ -22,4 +23,11 @@ describe("FocusDB", () => {
     expect(row?.note).toBe("второй раз");
     await db.delete();
   });
+});
+
+it("stores nothing without consent", async () => {
+  const db = new FocusDB("test-db-noconsent");
+  expect(await saveCheckIn(emptyCheckIn(), "2026-11-20", db, 1)).toBeNull();
+  expect(await db.checkins.count()).toBe(0);
+  await db.delete();
 });

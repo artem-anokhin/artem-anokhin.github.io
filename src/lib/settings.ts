@@ -36,6 +36,18 @@ export async function saveProfile(
   return profile;
 }
 
+/** Changes the mode of an existing profile; keeps the original consent time. */
+export async function updateMode(mode: Mode, db: FocusDB = defaultDb): Promise<Profile | null> {
+  if (mode !== "study" && mode !== "work") return null;
+  return db.transaction("rw", db.settings, async () => {
+    const current = await getProfile(db);
+    if (!current) return null; // no consent → no storage
+    const profile: Profile = { mode, consentAt: current.consentAt };
+    await db.settings.put({ key: PROFILE_KEY, value: profile });
+    return profile;
+  });
+}
+
 export const MODE_LABEL: Record<Mode, string> = { study: "Учусь", work: "Работаю" };
 
 /** «Эксперимент недели» in progress (one at a time). */

@@ -88,6 +88,13 @@ export function TodayScreen() {
         mode={profile.mode}
         onSave={async (data) => {
           const row = await saveCheckIn(data);
+          if (!row) {
+            // Consent is gone (e.g. data deleted in another tab): back to onboarding.
+            // Full reload on purpose: drops all in-memory state after data is gone.
+            // eslint-disable-next-line @next/next/no-location-assign-relative-destination
+            window.location.assign("/welcome/");
+            return;
+          }
           setState({ ...state, today: row, prefill: toData(row), editing: false });
         }}
       />

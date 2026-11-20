@@ -53,3 +53,16 @@ describe("experiment history", () => {
     await db.delete();
   });
 });
+
+describe("updateMode", () => {
+  it("keeps consentAt and refuses without a profile", async () => {
+    const { FocusDB } = await import("./db");
+    const { updateMode, saveProfile } = await import("./settings");
+    const d = new FocusDB("update-mode");
+    expect(await updateMode("work", d)).toBeNull();
+    expect(await d.settings.count()).toBe(0);
+    await saveProfile("study", true, d, 5);
+    expect(await updateMode("work", d)).toEqual({ mode: "work", consentAt: 5 });
+    await d.delete();
+  });
+});

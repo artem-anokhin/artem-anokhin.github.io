@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect } from "react";
-import { NAV_ITEMS, isActive } from "@/lib/nav";
+import { NAV_ITEMS, SIDEBAR_EXTRA, isActive } from "@/lib/nav";
 import { getProfile } from "@/lib/settings";
 
 const WELCOME = "/welcome/";
@@ -41,7 +41,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           Focus<span className="text-accent">AI</span>
         </Link>
         <nav aria-label="Основная навигация" className="flex flex-col gap-1">
-          {NAV_ITEMS.map(({ href, label, icon: Icon }) => {
+          {[...NAV_ITEMS, ...SIDEBAR_EXTRA].map(({ href, label, icon: Icon }) => {
             const active = isActive(pathname, href);
             return (
               <Link
