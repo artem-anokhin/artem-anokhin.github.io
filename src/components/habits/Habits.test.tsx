@@ -21,6 +21,8 @@ describe("habits UI", () => {
     fireEvent.change(screen.getByPlaceholderText(/20 минут чтения/), { target: { value: "Читать 20 минут" } });
     fireEvent.click(screen.getByRole("button", { name: "Добавить" }));
     expect(await screen.findByText("Мои привычки · 2 из 5")).toBeInTheDocument();
+    expect(screen.getAllByText(/Источник:/).length).toBe(5);
+    fireEvent.click(screen.getByRole("button", { name: /Показать ещё/ }));
     expect(screen.getAllByText(/Источник:/).length).toBe(HABIT_IDEAS.length);
   });
 

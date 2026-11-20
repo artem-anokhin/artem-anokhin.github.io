@@ -10,6 +10,8 @@ import { HABIT_TITLE_MAX, MAX_HABITS, activeHabits, addHabit, archiveHabit } fro
 import { SPHERE_STYLE } from "@/lib/spheres";
 import { btnPrimary } from "@/components/ui/controls";
 
+const IDEAS_FIRST = 5;
+
 const REASON: Record<string, string> = {
   limit: `Уже ${MAX_HABITS} привычек — уберите одну, чтобы добавить новую.`,
   duplicate: "Такая привычка уже есть.",
@@ -23,6 +25,7 @@ export function HabitsScreen() {
   const [title, setTitle] = useState("");
   const [sphere, setSphere] = useState<SphereKey>("work");
   const [msg, setMsg] = useState<string | null>(null);
+  const [showAll, setShowAll] = useState(false);
 
   const [rev, setRev] = useState(0);
   const load = () => setRev((n) => n + 1);
@@ -100,7 +103,7 @@ export function HabitsScreen() {
           Идеи с источниками
         </h2>
         <ul className="group-list">
-          {HABIT_IDEAS.map((idea) => {
+          {(showAll ? HABIT_IDEAS : HABIT_IDEAS.slice(0, IDEAS_FIRST)).map((idea) => {
             const st = SPHERE_STYLE[idea.sphere];
             const Icon = st.icon;
             const has = taken.has(idea.id);
@@ -132,6 +135,11 @@ export function HabitsScreen() {
             );
           })}
         </ul>
+        {!showAll && (
+          <button type="button" onClick={() => setShowAll(true)} className="mt-2 inline-flex min-h-11 items-center px-4 text-[17px] text-link">
+            Показать ещё {HABIT_IDEAS.length - IDEAS_FIRST}
+          </button>
+        )}
       </section>
 
       <section aria-labelledby="own-h" className="rounded-card-lg bg-surface p-4">
