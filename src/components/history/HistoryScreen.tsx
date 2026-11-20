@@ -98,7 +98,6 @@ export function HistoryScreen() {
           ))}
         </ul>
       </section>
-      <p className="text-sm text-muted">Не является медицинской консультацией.</p>
     </div>
   );
 }
