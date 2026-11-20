@@ -7,6 +7,7 @@ import { getExperiment, getExperimentHistory } from "@/lib/settings";
 import { STAGES, treeMessages, treeState, type TreeState } from "@/lib/tree";
 import { btnPrimary } from "@/components/ui/controls";
 import { TreeSvg } from "./TreeSvg";
+import { ShareWeek } from "./ShareWeek";
 
 type State = { kind: "loading" } | { kind: "error" } | { kind: "ready"; tree: TreeState };
 
@@ -67,7 +68,7 @@ export function TreeScreen() {
 
   return (
     <div className="mx-auto max-w-5xl gap-4 space-y-4 lg:grid lg:grid-cols-2 lg:space-y-0">
-      <section className="card rounded-card-lg p-5 text-center md:p-6" aria-labelledby="stage-title">
+      <section id="tree-card" className="card rounded-card-lg p-5 text-center md:p-6" aria-labelledby="stage-title">
         <TreeSvg stage={tree.stage} wilting={tree.wilting} title={title} />
         <h2 id="stage-title" className="mt-3 font-display text-2xl font-extrabold text-navy first-letter:uppercase">
           {tree.stageName}
@@ -130,6 +131,7 @@ export function TreeScreen() {
               </div>
             ))}
           </dl>
+          <ShareWeek stageName={tree.stageName} activeDays={tree.week.checkins} />
         </section>
 
         <section className="card p-5" aria-labelledby="how-title">

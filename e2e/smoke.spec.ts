@@ -28,5 +28,23 @@ test("onboarding → demo data → every screen fits 375px", async ({ page }) =>
     await page.screenshot({ path: `test-results/375${path.replaceAll("/", "_") || "_"}.png`, fullPage: true });
   }
   await page.goto("/insights/");
-  await expect(page.getByText(/связан/).first()).toBeVisible();
+  await expect(page.getByText(/выше в дни/).first()).toBeVisible();
+
+  // «Карточка недели» is hidden in demo mode; clear the demo, add one real check-in.
+  await page.goto("/tree/");
+  await expect(page.getByText("Эта неделя")).toBeVisible();
+  await expect(page.getByRole("button", { name: "Поделиться неделей" })).toHaveCount(0);
+  await page.goto("/settings/");
+  await page.getByRole("button", { name: "Убрать демо-данные" }).click();
+  await expect(page).toHaveURL(/\/$/);
+  for (let i = 0; i < 7; i++) await page.getByRole("button", { name: "Далее" }).click();
+  await page.getByRole("button", { name: "Сохранить" }).click();
+  await expect(page.getByText(/чек-ин сохранён/)).toBeVisible();
+  // Headless Chromium has no share sheet, so the PNG downloads.
+  await page.goto("/tree/");
+  const download = page.waitForEvent("download");
+  await page.getByRole("button", { name: "Поделиться неделей" }).click();
+  await (await download).saveAs("test-results/share-card.png");
+  await expect(page.getByText(/Картинка сохранена/)).toBeVisible();
+
 });
