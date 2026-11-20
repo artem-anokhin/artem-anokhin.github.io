@@ -30,3 +30,18 @@ describe("focus session", () => {
     await db.delete();
   });
 });
+
+describe("focus session edge cases", () => {
+  it("finishes once, dates by start day, keeps a running session", async () => {
+    const db = new FocusDB("session-test-3");
+    await db.settings.put({ key: "profile", value: { mode: "study", consentAt: 1 } });
+    const late = new Date(2026, 10, 21, 23, 50).getTime();
+    await startSession(25, db, late);
+    expect(await startSession(50, db, late + 1000)).toEqual({ startedAt: late, minutes: 25 });
+    const row = await finishSession(db, late + 30 * 60_000);
+    expect(row?.date).toBe("2026-11-21");
+    expect(await finishSession(db, late + 31 * 60_000)).toBeNull();
+    expect(await db.sessions.count()).toBe(1);
+    await db.delete();
+  });
+});

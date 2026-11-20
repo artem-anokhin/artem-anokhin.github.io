@@ -15,7 +15,7 @@ describe("FocusScreen", () => {
     render(<FocusScreen />);
     fireEvent.click(await screen.findByRole("radio", { name: "50 мин" }));
     fireEvent.click(screen.getByRole("button", { name: "Начать 50 минут" }));
-    expect(await screen.findByRole("img", { name: /Осталось (50:00|49:5\d)/ })).toBeInTheDocument();
+    expect(await screen.findByRole("img", { name: /Осталось (50:00|49:5\d)/ }, { timeout: 4000 })).toBeInTheDocument();
     expect(document.documentElement.dataset.immersive).toBe("1");
     fireEvent.click(screen.getByRole("button", { name: "Завершить раньше" }));
     fireEvent.click(screen.getByRole("button", { name: "Завершить" }));

@@ -190,3 +190,13 @@ describe("splitMeans", () => {
     expect(splitMeans([mk("05:00", 50)], sleep)).toBeNull();
   });
 });
+
+describe("splitMeans edge", () => {
+  it("returns null when all values are equal", async () => {
+    const { splitMeans, METRICS } = await import("./insights");
+    const { emptyCheckIn } = await import("./checkin");
+    const sleep = METRICS.find((m) => m.key === "sleepHours")!;
+    const p = (score: number) => ({ date: "d", score, checkin: { ...emptyCheckIn(), date: "d", createdAt: 1, updatedAt: 1 } });
+    expect(splitMeans([p(50), p(60), p(70)], sleep)).toBeNull();
+  });
+});

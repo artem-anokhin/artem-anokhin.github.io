@@ -31,3 +31,16 @@ it("stores nothing without consent", async () => {
   expect(await db.checkins.count()).toBe(0);
   await db.delete();
 });
+
+it("upgrades a v1 database to v2 keeping data and adding sessions", async () => {
+  const { default: Dexie } = await import("dexie");
+  const old = new Dexie("upgrade-test");
+  old.version(1).stores({ checkins: "&date", focusTests: "++id, date", settings: "&key" });
+  await old.open();
+  await old.table("focusTests").add({ date: "2026-11-01", takenAt: 1, score: 50 });
+  old.close();
+  const db = new FocusDB("upgrade-test");
+  expect(await db.focusTests.count()).toBe(1);
+  expect(await db.sessions.count()).toBe(0);
+  await db.delete();
+});

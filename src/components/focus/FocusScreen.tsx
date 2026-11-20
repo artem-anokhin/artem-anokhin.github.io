@@ -15,7 +15,7 @@ import {
   type SessionLength,
 } from "@/lib/focusSession";
 import { plural } from "@/lib/plural";
-import { stageFor } from "@/lib/tree";
+import { loadTree } from "@/lib/garden";
 import { btnNight, btnNightGhost } from "@/components/ui/controls";
 import { DropIcon, ProgressRing, TreeScene } from "@/components/ui/visuals";
 
@@ -65,21 +65,21 @@ function useWakeLock(on: boolean) {
 export function FocusScreen() {
   const [view, setView] = useState<View>({ kind: "loading" });
   const [length, setLength] = useState<SessionLength>(25);
-  const [stats, setStats] = useState({ today: 0, week: 0, drops: 0 });
+  const [stats, setStats] = useState({ today: 0, week: 0, stage: 0 });
   const [now, setNow] = useState(() => Date.now());
   const [confirmStop, setConfirmStop] = useState(false);
   const [error, setError] = useState(false);
   const finishing = useRef(false);
 
   const loadStats = useCallback(async () => {
-    const [sessions, checkins, tests] = await Promise.all([db.sessions.toArray(), db.checkins.toArray(), db.focusTests.toArray()]);
+    const [sessions, tree] = await Promise.all([db.sessions.toArray(), loadTree()]);
     const key = dayKey();
-    const weekAgo = dayKey(new Date(Date.now() - 6 * 86_400_000));
+    const n = new Date();
+    const weekAgo = dayKey(new Date(n.getFullYear(), n.getMonth(), n.getDate() - 6));
     setStats({
       today: sessions.filter((s) => s.date === key).reduce((a, s) => a + s.minutes, 0),
       week: sessions.filter((s) => s.date >= weekAgo && s.date <= key).reduce((a, s) => a + s.minutes, 0),
-      drops:
-        new Set(checkins.map((c) => c.date)).size + new Set(tests.map((t) => t.date)).size + new Set(sessions.map((s) => s.date)).size,
+      stage: tree.stage,
     });
   }, []);
 
@@ -116,6 +116,10 @@ export function FocusScreen() {
         await loadStats();
         setView(row ? { kind: "done", minutes } : { kind: "setup" });
       })
+      .catch(() => {
+        setError(true);
+        setView({ kind: "setup" });
+      })
       .finally(() => (finishing.current = false));
   }, [view, now, loadStats]);
 
@@ -143,7 +147,7 @@ export function FocusScreen() {
     setView({ kind: "setup" });
   }
 
-  const stage = stageFor(stats.drops);
+  const stage = stats.stage;
 
   return (
     <div className="night fixed inset-0 z-10 overflow-y-auto">
@@ -185,7 +189,7 @@ export function FocusScreen() {
             </button>
             {error && (
               <p role="alert" className="text-night-ink">
-                Не получилось начать. Попробуйте ещё раз.
+                Не получилось сохранить сессию. Попробуйте ещё раз.
               </p>
             )}
 

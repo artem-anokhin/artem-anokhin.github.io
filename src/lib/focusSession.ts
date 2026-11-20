@@ -37,6 +37,9 @@ export async function startSession(minutes: SessionLength, db: FocusDB = default
   // Consent check and write in one transaction, so «Удалить все данные» can't race in.
   return db.transaction("rw", db.settings, async () => {
     if (!(await getProfile(db))) return null; // no consent → no storage
+    // A session already running (e.g. started in another tab) keeps its timer.
+    const running = await getActiveSession(db);
+    if (running) return running;
     const a: ActiveSession = { startedAt: now, minutes };
     await db.settings.put({ key: ACTIVE_KEY, value: a });
     return a;

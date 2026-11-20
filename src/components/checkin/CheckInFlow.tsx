@@ -8,14 +8,15 @@ import { getProfile, type Profile } from "@/lib/settings";
 import { btnPrimary, btnSecondary } from "@/components/ui/controls";
 import { DropIcon } from "@/components/ui/visuals";
 import { TreeSvg } from "@/components/tree/TreeSvg";
-import { stageFor, STAGES } from "@/lib/tree";
+import { STAGES } from "@/lib/tree";
+import { loadTree } from "@/lib/garden";
 import { CheckInWizard } from "./CheckInWizard";
 
 type State =
   | { kind: "loading" }
   | { kind: "error" }
   | { kind: "wizard"; profile: Profile; prefill: CheckInData; isEdit: boolean }
-  | { kind: "done"; isEdit: boolean; drops: number };
+  | { kind: "done"; isEdit: boolean; stage: number };
 
 /** Strip storage fields so a row can seed the wizard. */
 function toData(row: CheckIn): CheckInData {
@@ -56,7 +57,7 @@ export function CheckInFlow() {
       </div>
     );
   }
-  if (state.kind === "done") return <Done isEdit={state.isEdit} drops={state.drops} />;
+  if (state.kind === "done") return <Done isEdit={state.isEdit} stage={state.stage} />;
 
   return (
     <CheckInWizard
@@ -70,17 +71,14 @@ export function CheckInFlow() {
           window.location.assign("/welcome/");
           return;
         }
-        const [c, t, s] = await Promise.all([db.checkins.toArray(), db.focusTests.toArray(), db.sessions.toArray()]);
-        // Approximate drops for the celebration (the garden screen shows the exact count).
-        const drops = new Set(c.map((x) => x.date)).size + new Set(t.map((x) => x.date)).size + new Set(s.map((x) => x.date)).size;
-        setState({ kind: "done", isEdit: state.isEdit, drops });
+        const tree = await loadTree().catch(() => null);
+        setState({ kind: "done", isEdit: state.isEdit, stage: tree?.stage ?? 0 });
       }}
     />
   );
 }
 
-function Done({ isEdit, drops }: { isEdit: boolean; drops: number }) {
-  const stage = stageFor(drops);
+function Done({ isEdit, stage }: { isEdit: boolean; stage: number }) {
   return (
     <div className="flex min-h-dvh flex-col bg-gradient-to-b from-sky-top to-sand px-5 pt-16 pb-[calc(24px+env(safe-area-inset-bottom))] text-center">
       <div className="mx-auto w-full max-w-md flex-1">
