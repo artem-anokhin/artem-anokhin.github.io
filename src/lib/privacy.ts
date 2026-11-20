@@ -1,5 +1,5 @@
 import { SPHERE_KEYS, sanitizeCheckIn } from "./checkin";
-import { db as defaultDb, type CheckIn, type FocusDB, type FocusTestResult, type Setting } from "./db";
+import { db as defaultDb, type CheckIn, type FocusDB, type FocusSession, type FocusTestResult, type Setting } from "./db";
 import { getProfile, isExperiment, isWindow } from "./settings";
 
 export const EXPORT_FORMAT = "focusai-export";
@@ -13,17 +13,20 @@ export interface ExportFile {
   focusTests: unknown[];
   /** All settings rows: profile, experiment, experimentHistory, … */
   settings: unknown[];
+  /** Finished focus sessions (added in export version 1, optional on import). */
+  sessions?: unknown[];
 }
 
 /** Snapshot of every table, read in one transaction so it is consistent. */
 export async function exportData(database: FocusDB = defaultDb, now = new Date()): Promise<ExportFile> {
-  return database.transaction("r", database.checkins, database.focusTests, database.settings, async () => ({
+  return database.transaction("r", [database.checkins, database.focusTests, database.settings, database.sessions], async () => ({
     format: EXPORT_FORMAT,
     version: EXPORT_VERSION,
     exportedAt: now.toISOString(),
     checkins: await database.checkins.toArray(),
     focusTests: await database.focusTests.toArray(),
     settings: await database.settings.toArray(),
+    sessions: await database.sessions.toArray(),
   }));
 }
 
@@ -45,9 +48,10 @@ export function downloadJson(data: unknown, fileName: string): void {
   setTimeout(() => URL.revokeObjectURL(url), 0);
 }
 
-/** Deletes all user data (check-ins, tests, profile, experiments) in one transaction. */
+/** Deletes all user data (check-ins, tests, sessions, profile, experiments) in one transaction. */
 export async function deleteAllData(database: FocusDB = defaultDb): Promise<void> {
-  await database.transaction("rw", database.checkins, database.focusTests, database.settings, async () => {
+  await database.transaction("rw", [database.checkins, database.focusTests, database.settings, database.sessions], async () => {
+    await database.sessions.clear();
     await database.checkins.clear();
     await database.focusTests.clear();
     await database.settings.clear();
@@ -118,16 +122,25 @@ export async function importData(raw: unknown, database: FocusDB = defaultDb): P
     tests.push({ date, takenAt, score, medianRt, lapses, falseStarts, trials, ...(t.demo === true ? { demo: true as const } : {}) });
   }
 
+  const sessions: FocusSession[] = [];
+  for (const r of arr(f.sessions)) {
+    const x = r as FocusSession;
+    if (x && isDay(x.date) && isNum(x.startedAt) && Number.isInteger(x.minutes) && x.minutes > 0 && x.minutes <= 180) {
+      sessions.push({ date: x.date, startedAt: x.startedAt, minutes: x.minutes, ...(x.demo === true ? { demo: true as const } : {}) });
+    } else skipped++;
+  }
+
   const settings = new Map(arr(f.settings).map((s) => [(s as Setting)?.key, (s as Setting)?.value]));
   const mode = (settings.get("profile") as { mode?: unknown } | undefined)?.mode;
   const experiment = settings.get("experiment");
   const history = arr(settings.get("experimentHistory")).filter(isWindow);
 
-  return database.transaction("rw", database.checkins, database.focusTests, database.settings, async () => {
+  return database.transaction("rw", [database.checkins, database.focusTests, database.settings, database.sessions], async () => {
     const profile = await getProfile(database);
     if (!profile) return null; // no consent → no storage
     await database.checkins.clear();
     await database.focusTests.clear();
+    await database.sessions.clear();
     await database.settings.clear();
     await database.settings.put({
       key: "profile",
@@ -136,9 +149,10 @@ export async function importData(raw: unknown, database: FocusDB = defaultDb): P
     if (isExperiment(experiment)) await database.settings.put({ key: "experiment", value: experiment });
     if (history.length) await database.settings.put({ key: "experimentHistory", value: history });
     // Demo label only if the file really holds demo-tagged rows.
-    if ([...checkins, ...tests].some((r) => r.demo === true)) await database.settings.put({ key: "demo", value: true });
+    if ([...checkins, ...tests, ...sessions].some((r) => r.demo === true)) await database.settings.put({ key: "demo", value: true });
     await database.checkins.bulkPut(checkins);
     await database.focusTests.bulkAdd(tests);
+    await database.sessions.bulkAdd(sessions);
     return { checkins: checkins.length, focusTests: tests.length, skipped };
   });
 }

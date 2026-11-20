@@ -24,14 +24,15 @@ export function TreeScreen() {
 
   useEffect(() => {
     let alive = true;
-    Promise.all([db.checkins.toArray(), db.focusTests.toArray(), getExperiment(), getExperimentHistory()])
-      .then(([checkins, tests, experiment, pastExperiments]) => {
+    Promise.all([db.checkins.toArray(), db.focusTests.toArray(), getExperiment(), getExperimentHistory(), db.sessions.toArray()])
+      .then(([checkins, tests, experiment, pastExperiments, sessions]) => {
         if (!alive) return;
         const tree = treeState({
           checkinDates: checkins.map((c) => c.date),
           tests,
           experiment,
           pastExperiments,
+          sessionDates: sessions.map((s) => s.date),
           today: dayKey(),
         });
         setState({ kind: "ready", tree });

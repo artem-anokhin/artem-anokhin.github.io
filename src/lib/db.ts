@@ -32,6 +32,16 @@ export interface FocusTestResult {
   demo?: true;
 }
 
+/** A finished «Фокус-сессия» (study timer). Only completed sessions are stored. */
+export interface FocusSession {
+  id?: number;
+  date: DayKey;
+  startedAt: number;
+  minutes: number;
+  /** Synthetic demo row (see demo.ts). */
+  demo?: true;
+}
+
 export interface Setting {
   key: string;
   value: unknown;
@@ -41,6 +51,7 @@ export class FocusDB extends Dexie {
   checkins!: EntityTable<CheckIn, "date">;
   focusTests!: EntityTable<FocusTestResult, "id">;
   settings!: EntityTable<Setting, "key">;
+  sessions!: EntityTable<FocusSession, "id">;
 
   constructor(name = "focusai") {
     super(name);
@@ -49,6 +60,8 @@ export class FocusDB extends Dexie {
       focusTests: "++id, date",
       settings: "&key",
     });
+    // v2: focus sessions (study timer).
+    this.version(2).stores({ sessions: "++id, date" });
   }
 }
 

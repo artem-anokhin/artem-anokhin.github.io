@@ -1,5 +1,5 @@
 import type { CheckInData, Scale5 } from "./checkin";
-import { db as defaultDb, dayKey, type CheckIn, type FocusDB, type FocusTestResult } from "./db";
+import { db as defaultDb, dayKey, type CheckIn, type FocusDB, type FocusSession, type FocusTestResult } from "./db";
 import { getProfile } from "./settings";
 
 /**
@@ -34,6 +34,7 @@ export function buildDemo(today: Date = new Date(), days = DEMO_DAYS, seed = 7) 
   const r = rng(seed);
   const checkins: CheckIn[] = [];
   const tests: FocusTestResult[] = [];
+  const sessions: FocusSession[] = [];
   for (let i = days; i >= 1; i--) {
     const d = new Date(today.getFullYear(), today.getMonth(), today.getDate() - i, 20, 0);
     const date = dayKey(d);
@@ -53,12 +54,13 @@ export function buildDemo(today: Date = new Date(), days = DEMO_DAYS, seed = 7) 
     };
     const t = d.getTime();
     checkins.push({ ...data, date, createdAt: t, updatedAt: t, demo: true });
+    if (r() > 0.45) sessions.push({ date, startedAt: t - 3 * 3_600_000, minutes: r() > 0.5 ? 50 : 25, demo: true });
     if (r() > 0.12) {
       const score = Math.round(Math.min(95, Math.max(30, 40 + (sleepH - 5.5) * 12 + (r() - 0.5) * 16)));
       tests.push({ date, takenAt: t + 60_000, score, medianRt: Math.round(420 - score * 1.6), lapses: Math.floor(r() * 3), falseStarts: Math.floor(r() * 2), trials: 30, demo: true });
     }
   }
-  return { checkins, tests };
+  return { checkins, tests, sessions };
 }
 
 export async function isDemo(database: FocusDB = defaultDb): Promise<boolean> {
@@ -67,12 +69,13 @@ export async function isDemo(database: FocusDB = defaultDb): Promise<boolean> {
 
 /** Loads demo data. Returns false (nothing written) without consent or if any real data exists. */
 export async function loadDemo(database: FocusDB = defaultDb, today = new Date()): Promise<boolean> {
-  return database.transaction("rw", database.checkins, database.focusTests, database.settings, async () => {
+  return database.transaction("rw", [database.checkins, database.focusTests, database.settings, database.sessions], async () => {
     if (!(await getProfile(database))) return false;
     if ((await database.checkins.count()) || (await database.focusTests.count())) return false;
-    const { checkins, tests } = buildDemo(today);
+    const { checkins, tests, sessions } = buildDemo(today);
     await database.checkins.bulkPut(checkins);
     await database.focusTests.bulkAdd(tests);
+    await database.sessions.bulkAdd(sessions);
     await database.settings.put({ key: DEMO_KEY, value: true });
     return true;
   });
@@ -80,7 +83,8 @@ export async function loadDemo(database: FocusDB = defaultDb, today = new Date()
 
 /** Removes only demo-tagged rows and the flag; real check-ins, tests, experiments and the profile stay. */
 export async function clearDemo(database: FocusDB = defaultDb): Promise<void> {
-  await database.transaction("rw", database.checkins, database.focusTests, database.settings, async () => {
+  await database.transaction("rw", [database.checkins, database.focusTests, database.settings, database.sessions], async () => {
+    await database.sessions.filter((s) => s.demo === true).delete();
     await database.checkins.filter((c) => c.demo === true).delete();
     await database.focusTests.filter((t) => t.demo === true).delete();
     await database.settings.delete(DEMO_KEY);

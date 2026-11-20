@@ -25,12 +25,16 @@ export interface TreeInput {
   experiment: { start: DayKey } | null;
   /** Finished experiments (inclusive day windows). */
   pastExperiments?: { start: DayKey; end: DayKey }[];
+  /** Days with at least one finished «Фокус-сессия» (+1 drop per day). */
+  sessionDates?: DayKey[];
   today: DayKey;
 }
 
 export interface WeekFacts {
   checkins: number;
   tests: number;
+  /** Days with a finished focus session in the last 7 days. */
+  sessions: number;
   best: { score: number; date: DayKey } | null;
 }
 
@@ -68,11 +72,12 @@ export function stageFor(drops: number): number {
   return s;
 }
 
-export function treeState({ checkinDates, tests, experiment, pastExperiments = [], today }: TreeInput): TreeState {
+export function treeState({ checkinDates, tests, experiment, pastExperiments = [], sessionDates = [], today }: TreeInput): TreeState {
   const checkins = new Set(checkinDates.filter((d) => d <= today));
   const testDays = new Set(tests.map((t) => t.date).filter((d) => d <= today));
+  const sessionDays = new Set(sessionDates.filter((d) => d <= today));
 
-  let drops = checkins.size + testDays.size;
+  let drops = checkins.size + testDays.size + sessionDays.size;
   const windows = [...pastExperiments];
   if (experiment) {
     const end = new Date(toDate(experiment.start).getTime());
@@ -86,7 +91,7 @@ export function treeState({ checkinDates, tests, experiment, pastExperiments = [
   const nextAt = stage < STAGE_AT.length - 1 ? STAGE_AT[stage + 1]! : null;
   const progress = nextAt === null ? 1 : (drops - STAGE_AT[stage]!) / (nextAt - STAGE_AT[stage]!);
 
-  const active = [...checkins, ...testDays].sort();
+  const active = [...checkins, ...testDays, ...sessionDays].sort();
   const last = active.at(-1);
   const silentDays = last === undefined ? null : daysBetween(last, today);
   // "3 silent days" = three full days without activity before today.
@@ -104,6 +109,7 @@ export function treeState({ checkinDates, tests, experiment, pastExperiments = [
   const week: WeekFacts = {
     checkins: [...checkins].filter(inWeek).length,
     tests: [...testDays].filter(inWeek).length,
+    sessions: [...sessionDays].filter(inWeek).length,
     best,
   };
 

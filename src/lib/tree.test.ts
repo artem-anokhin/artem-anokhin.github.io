@@ -65,7 +65,7 @@ describe("treeState", () => {
       checkinDates: ["2026-11-18", "2026-11-20", "2026-11-01"],
       tests: [t("2026-11-18", 72), t("2026-11-19", 65), t("2026-11-02", 99)],
     });
-    expect(s.week).toEqual({ checkins: 2, tests: 2, best: { score: 72, date: "2026-11-18" } });
+    expect(s.week).toEqual({ checkins: 2, tests: 2, sessions: 0, best: { score: 72, date: "2026-11-18" } });
     expect(treeMessages(s).map((m) => m.text)).toEqual([
       "За 7 дней чек-инов: 2, тестов: 2.",
       "Лучший Focus Score недели — 72, в среду.",
@@ -113,5 +113,14 @@ describe("review follow-ups", () => {
     expect(treeState({ ...base, tests: [t("2026-11-19")] }).silentDays).toBe(1);
     const s = treeState({ ...base, checkinDates: ["2026-11-10", "2026-11-20"] });
     expect(s.wilting).toBe(false);
+  });
+});
+
+describe("focus sessions water the tree", () => {
+  it("adds one drop per day with a session and counts as activity", () => {
+    const s = treeState({ checkinDates: [], tests: [], experiment: null, sessionDates: ["2026-11-20", "2026-11-20", "2026-11-21"], today: "2026-11-21" });
+    expect(s.drops).toBe(2);
+    expect(s.silentDays).toBe(0);
+    expect(s.week.sessions).toBe(2);
   });
 });
