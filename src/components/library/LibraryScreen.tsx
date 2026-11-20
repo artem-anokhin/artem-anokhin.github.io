@@ -5,13 +5,13 @@ import { Activity, Apple, ChevronDown, Coffee, Moon, Smartphone, Sparkles, type 
 import { CARDS, type CardId, type KnowledgeCard, type Topic } from "@/lib/library";
 
 /** Topic look: icon + sphere-like colors (docs/DESIGN.md). */
-const TOPIC_STYLE: Record<Topic, { icon: LucideIcon; tint: string; ink: string; on: string }> = {
-  Сон: { icon: Moon, tint: "bg-s-sleep-tint", ink: "text-s-sleep-ink", on: "bg-s-sleep-ink" },
-  Кофеин: { icon: Coffee, tint: "bg-s-caffeine-tint", ink: "text-s-caffeine-ink", on: "bg-s-caffeine-ink" },
-  "Питание и вода": { icon: Apple, tint: "bg-s-food-tint", ink: "text-s-food-ink", on: "bg-s-food-ink" },
-  "Движение и стресс": { icon: Activity, tint: "bg-s-activity-tint", ink: "text-s-activity-ink", on: "bg-s-activity-ink" },
-  "Перерывы и телефон": { icon: Smartphone, tint: "bg-s-rest-tint", ink: "text-s-rest-ink", on: "bg-s-rest-ink" },
-  "Как работает FocusAI": { icon: Sparkles, tint: "bg-soft", ink: "text-navy", on: "bg-navy" },
+const TOPIC_STYLE: Record<Topic, { icon: LucideIcon; tint: string; ink: string; on: string; base: string }> = {
+  Сон: { icon: Moon, tint: "bg-s-sleep-tint", ink: "text-s-sleep-ink", on: "bg-s-sleep-ink", base: "bg-s-sleep" },
+  Кофеин: { icon: Coffee, tint: "bg-s-caffeine-tint", ink: "text-s-caffeine-ink", on: "bg-s-caffeine-ink", base: "bg-s-caffeine" },
+  "Питание и вода": { icon: Apple, tint: "bg-s-food-tint", ink: "text-s-food-ink", on: "bg-s-food-ink", base: "bg-s-food" },
+  "Движение и стресс": { icon: Activity, tint: "bg-s-activity-tint", ink: "text-s-activity-ink", on: "bg-s-activity-ink", base: "bg-s-activity" },
+  "Перерывы и телефон": { icon: Smartphone, tint: "bg-s-rest-tint", ink: "text-s-rest-ink", on: "bg-s-rest-ink", base: "bg-s-rest" },
+  "Как работает FocusAI": { icon: Sparkles, tint: "bg-soft", ink: "text-accent", on: "bg-accent", base: "bg-accent" },
 };
 
 const TOPICS: Topic[] = ["Сон", "Кофеин", "Питание и вода", "Движение и стресс", "Перерывы и телефон", "Как работает FocusAI"];
@@ -24,25 +24,25 @@ function Card({ card, highlighted }: { card: KnowledgeCard; highlighted: boolean
   return (
     <details
       id={card.id}
-      className={`group scroll-mt-6 rounded-card-lg bg-surface shadow-soft ${highlighted ? "outline-3 outline-offset-2 outline-accent" : ""}`}
+      className={`group scroll-mt-6 bg-surface ${highlighted ? "outline-3 -outline-offset-3 outline-accent" : ""}`}
     >
-      <summary className="flex min-h-11 cursor-pointer list-none items-start gap-4 p-4 [&::-webkit-details-marker]:hidden">
-        <span className={`grid size-12 shrink-0 place-items-center rounded-[16px] ${st.tint} ${st.ink}`}>
-          <Icon aria-hidden size={24} />
+      <summary className="flex min-h-[60px] cursor-pointer list-none items-start gap-3 px-4 py-3 active:bg-[#e5e5ea] [&::-webkit-details-marker]:hidden">
+        <span className={`mt-0.5 grid size-[30px] shrink-0 place-items-center rounded-[7px] text-white ${st.base}`}>
+          <Icon aria-hidden size={18} />
         </span>
         <span className="min-w-0 flex-1">
-          <span className="block text-[17px] leading-snug font-semibold text-ink">{card.title}</span>
-          <span className="mt-1 block text-[15px] text-muted">{card.summary}</span>
+          <span className="block text-[17px] leading-snug text-ink">{card.title}</span>
+          <span className="mt-0.5 block text-[13px] leading-snug text-muted">{card.summary}</span>
         </span>
-        <ChevronDown aria-hidden size={22} className="mt-1 shrink-0 text-muted transition-transform group-open:rotate-180" />
+        <ChevronDown aria-hidden size={18} className="mt-1 shrink-0 text-[#c4c4c7] transition-transform group-open:rotate-180" />
       </summary>
-      <div className="space-y-3 px-5 pb-5 text-[16px] leading-relaxed text-ink">
+      <div className="space-y-3 px-4 pb-4 pl-[58px] text-[15px] leading-relaxed text-ink">
         {card.body.map((p) => (
           <p key={p}>{p}</p>
         ))}
         {card.tryThis && (
-          <p className="rounded-[18px] bg-sand p-4">
-            <span className="font-semibold text-sand-ink">Попробуйте: </span>
+          <p className="rounded-[12px] bg-bg p-3">
+            <span className="font-semibold text-ink">Попробуйте: </span>
             {card.tryThis}
           </p>
         )}
@@ -126,7 +126,7 @@ export function LibraryScreen() {
           Такой карточки нет. Вот все материалы.
         </p>
       )}
-      <div role="group" aria-label="Темы" className="-mx-5 flex snap-x gap-2 overflow-x-auto px-5 pb-1 [scrollbar-width:none]">
+      <div role="group" aria-label="Темы" className="-mx-4 flex snap-x gap-2 overflow-x-auto px-4 pb-1 [scrollbar-width:none]">
         {[null, ...TOPICS].map((t) => {
           const on = topic === t;
           const st = t ? TOPIC_STYLE[t] : null;
@@ -137,7 +137,7 @@ export function LibraryScreen() {
               type="button"
               aria-pressed={on}
               onClick={() => setTopic(t)}
-              className={`${chip} snap-start ${on ? `${st?.on ?? "bg-navy"} animate-pop text-white` : `${st?.tint ?? "bg-surface shadow-soft"} ${st?.ink ?? "text-navy"}`}`}
+              className={`${chip} snap-start ${on ? "bg-accent text-white" : "bg-surface text-ink"}`}
             >
               {Icon && <Icon aria-hidden size={16} />}
               {t ?? "Все"}
@@ -149,14 +149,18 @@ export function LibraryScreen() {
       {shown.map((t) => {
         const cards = CARDS.filter((c) => c.topic === t);
         return (
-          <section key={t} aria-labelledby={`topic-${t}`} className="space-y-3">
-            <h2 id={`topic-${t}`} className="eyebrow">
-              {t} · {cards.length}
+          <section key={t} aria-labelledby={`topic-${t}`}>
+            <h2 id={`topic-${t}`} className="px-4 pb-1.5 text-[13px] text-muted uppercase">
+              {t}
             </h2>
             {cards.length === 0 ? (
               <p className="text-muted">В этой теме пока нет карточек.</p>
             ) : (
-              cards.map((c) => <Card key={c.id} card={c} highlighted={target === c.id} />)
+              <div className="group-list">
+                {cards.map((c) => (
+                  <Card key={c.id} card={c} highlighted={target === c.id} />
+                ))}
+              </div>
             )}
           </section>
         );

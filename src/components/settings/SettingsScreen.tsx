@@ -1,6 +1,6 @@
 "use client";
 
-import { Download, Presentation, ShieldCheck, Trash2, Upload } from "lucide-react";
+import { Download, Presentation, ShieldCheck, Upload } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { ChoiceField, btnSecondary } from "@/components/ui/controls";
 import { HELP_LINES } from "@/lib/crisis";
@@ -14,10 +14,8 @@ const IMPORT_MAX_BYTES = 5 * 1024 * 1024;
 
 const MODES = (Object.keys(MODE_LABEL) as Mode[]).map((value) => ({ value, label: MODE_LABEL[value] }));
 
-const btnDanger =
-  "inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl border-[1.5px] border-danger bg-card px-6 font-semibold text-danger transition-colors hover:bg-danger/5 disabled:cursor-not-allowed disabled:opacity-50";
 const btnDangerSolid =
-  "inline-flex min-h-12 items-center justify-center rounded-2xl bg-danger px-6 font-semibold text-white transition-colors hover:bg-danger/90 disabled:cursor-not-allowed disabled:opacity-50";
+  "pressable inline-flex min-h-[50px] items-center justify-center rounded-[14px] bg-[#d70015] px-5 text-[17px] font-semibold text-white disabled:cursor-not-allowed disabled:opacity-50";
 
 const consentDate = (t: number) =>
   new Date(t).toLocaleDateString("ru-RU", { day: "numeric", month: "long", year: "numeric" });
@@ -154,122 +152,95 @@ export function SettingsScreen() {
     }
   }
 
+  const row = "flex min-h-[50px] w-full items-center gap-3 px-4 py-2.5 text-left text-[17px] active:bg-[#e5e5ea]";
+  const icon = (bg: string) => `grid size-[30px] shrink-0 place-items-center rounded-[7px] text-white ${bg}`;
+
   return (
-    <div className="space-y-4">
+    <div className="space-y-7">
       {error && (
-        <p role="alert" className="text-sm font-medium text-danger">
+        <p role="alert" className="px-4 text-[15px] font-medium text-danger">
           {error}
         </p>
       )}
 
-      <section aria-labelledby="s-profile" className="card p-5">
-        <h2 id="s-profile" className="mb-4 font-display text-lg font-extrabold text-ink">
-          Профиль
-        </h2>
-        <ChoiceField legend="Сейчас я" name="mode" value={profile.mode} options={MODES} onChange={changeMode} columns={2} />
-        <p role="status" className="mt-2 min-h-5 text-sm text-navy">
-          {saved ? "Сохранено" : ""}
-        </p>
-        <p className="text-sm text-muted">Согласие дано: {consentDate(profile.consentAt)}</p>
-      </section>
+      <Group id="s-profile" title="Профиль" footer={`Согласие дано: ${consentDate(profile.consentAt)}`}>
+        <div className="p-4">
+          <ChoiceField legend="Сейчас я" name="mode" value={profile.mode} options={MODES} onChange={changeMode} columns={2} />
+          <p role="status" className="text-[13px] text-accent empty:hidden">
+            {saved ? "Сохранено" : ""}
+          </p>
+        </div>
+      </Group>
 
       <ReminderCard />
 
-      <section aria-labelledby="s-privacy" className="card p-5">
-        <div className="flex items-start gap-3">
-          <ShieldCheck aria-hidden className="mt-0.5 shrink-0 text-navy" size={24} />
-          <div>
-            <h2 id="s-privacy" className="font-display text-lg font-extrabold text-ink">
-              Приватность
-            </h2>
-            <p className="mt-1 text-muted">
-              Все данные хранятся только на этом устройстве. Мы их не видим и никуда не отправляем.
-            </p>
-            <a href="/privacy/" className="mt-2 inline-flex min-h-11 items-center font-semibold text-navy underline underline-offset-4">
-              Политика конфиденциальности
-            </a>
-          </div>
-        </div>
-      </section>
-
-      <section aria-labelledby="s-export" className="card p-5">
-        <h2 id="s-export" className="font-display text-lg font-extrabold text-ink">
-          Перенос данных
-        </h2>
-        <p className="mt-1 text-sm text-muted">
-          Экспорт — файл JSON со всеми отметками, заметками, тестами и настройками. Файл не зашифрован — храните
-          его осторожно. Импорт этого файла на другом телефоне перенесёт всё без аккаунта.
-        </p>
-        <div className="mt-4 flex flex-wrap gap-2">
-          <button type="button" onClick={onExport} className={`${btnSecondary} gap-2`}>
-            <Download aria-hidden size={20} />
-            Экспорт данных
+      <Group
+        id="s-export"
+        title="Перенос данных"
+        footer="Экспорт — файл JSON со всеми отметками, заметками и настройками. Он не зашифрован — храните его осторожно. Импорт на другом телефоне перенесёт всё без аккаунта."
+      >
+        <a href="/privacy/" className={row}>
+          <span className={icon("bg-leaf")}>
+            <ShieldCheck aria-hidden size={18} />
+          </span>
+          <span className="flex-1 text-ink">Политика конфиденциальности</span>
+        </a>
+        <button type="button" onClick={onExport} className={row}>
+          <span className={icon("bg-accent")}>
+            <Download aria-hidden size={18} />
+          </span>
+          <span className="flex-1 text-ink">Экспорт данных</span>
+        </button>
+        <label className={`${row} cursor-pointer has-[:focus-visible]:outline-3 has-[:focus-visible]:outline-accent`}>
+          <span className={icon("bg-s-sleep")}>
+            <Upload aria-hidden size={18} />
+          </span>
+          <span className="flex-1 text-ink">Импорт данных</span>
+          <input type="file" accept="application/json,.json" onChange={onPickFile} className="sr-only" />
+        </label>
+        {(dataKind === "empty" || dataKind === "demo") && (
+          <button type="button" disabled={busy} onClick={onDemo} className={`${row} disabled:opacity-50`}>
+            <span className={icon("bg-[#ff9f0a]")}>
+              <Presentation aria-hidden size={18} />
+            </span>
+            <span className="flex-1">
+              <span className="block text-ink">{dataKind === "demo" ? "Убрать демо-данные" : "Показать демо-данные"}</span>
+              <span className="block text-[13px] text-muted">
+                {dataKind === "demo" ? "Ваши собственные отметки останутся" : `Пример за ${DEMO_DAYS} день с пометкой «демо-данные»`}
+              </span>
+            </span>
           </button>
-          <label className={`${btnSecondary} cursor-pointer gap-2 has-[:focus-visible]:outline-3 has-[:focus-visible]:outline-accent`}>
-            <Upload aria-hidden size={20} />
-            Импорт данных
-            <input type="file" accept="application/json,.json" onChange={onPickFile} className="sr-only" />
-          </label>
-        </div>
-        {pending !== null && (
-          <div role="group" aria-labelledby="s-import-confirm" className="mt-4 rounded-2xl bg-soft p-4">
-            <p id="s-import-confirm" className="font-semibold text-ink">
-              Заменить текущие данные данными из файла?
-            </p>
-            <div className="mt-3 flex flex-wrap gap-2">
-              <button type="button" disabled={busy} onClick={() => setPending(null)} className={`${btnSecondary} disabled:opacity-50`}>
-                Отмена
-              </button>
-              <button type="button" disabled={busy} onClick={onImport} className={btnDangerSolid}>
-                Да, заменить
-              </button>
-            </div>
-          </div>
         )}
-      </section>
+      </Group>
 
-      {(dataKind === "empty" || dataKind === "demo") && (
-        <section aria-labelledby="s-demo" className="card p-5">
-          <h2 id="s-demo" className="font-display text-lg font-extrabold text-ink">
-            Демо-режим
-          </h2>
-          <p className="mt-1 text-sm text-muted">
-            {dataKind === "demo"
-              ? "Сейчас показаны демо-данные. Уберите их, чтобы начать вести свои. Ваши собственные отметки останутся."
-              : `Пример за ${DEMO_DAYS} день, чтобы посмотреть инсайты и дерево. Данные будут помечены как «демо-данные».`}
+      {pending !== null && (
+        <div role="group" aria-labelledby="s-import-confirm" className="rounded-card-lg bg-surface p-4">
+          <p id="s-import-confirm" className="text-[17px] font-semibold text-ink">
+            Заменить текущие данные данными из файла?
           </p>
-          <button type="button" disabled={busy} onClick={onDemo} className={`${btnSecondary} mt-4 gap-2 disabled:opacity-50`}>
-            <Presentation aria-hidden size={20} />
-            {dataKind === "demo" ? "Убрать демо-данные" : "Показать демо-данные"}
-          </button>
-        </section>
+          <div className="mt-3 grid grid-cols-2 gap-2">
+            <button type="button" disabled={busy} onClick={() => setPending(null)} className={`${btnSecondary} disabled:opacity-50`}>
+              Отмена
+            </button>
+            <button type="button" disabled={busy} onClick={onImport} className={btnDangerSolid}>
+              Да, заменить
+            </button>
+          </div>
+        </div>
       )}
 
-      <section aria-labelledby="s-delete" className="card p-5">
-        <h2 id="s-delete" className="font-display text-lg font-extrabold text-ink">
-          Удалить все данные
-        </h2>
-        <p className="mt-1 text-sm text-muted">
-          Удалит отметки, тесты, эксперименты и профиль с этого устройства.
-        </p>
+      <Group id="s-delete" title="Удаление" footer="Удалит отметки, тесты, привычки, эксперименты и профиль с этого устройства.">
         {!confirming ? (
-          <button ref={deleteRef} type="button" onClick={() => setConfirming(true)} className={`${btnDanger} mt-4`}>
-            <Trash2 aria-hidden size={20} />
+          <button ref={deleteRef} type="button" onClick={() => setConfirming(true)} className={`${row} justify-center font-medium text-danger`}>
             Удалить все данные
           </button>
         ) : (
-          <div role="group" aria-labelledby="s-confirm" className="mt-4 rounded-2xl bg-soft p-4">
-            <p id="s-confirm" className="font-semibold text-ink">
+          <div role="group" aria-labelledby="s-confirm" className="p-4">
+            <p id="s-confirm" className="text-[17px] font-semibold text-ink">
               Удалить всё без возможности восстановления?
             </p>
-            <div className="mt-3 flex flex-wrap gap-2">
-              <button
-                ref={cancelRef}
-                type="button"
-                disabled={busy}
-                onClick={() => setConfirming(false)}
-                className={`${btnSecondary} disabled:opacity-50`}
-              >
+            <div className="mt-3 grid grid-cols-2 gap-2">
+              <button ref={cancelRef} type="button" disabled={busy} onClick={() => setConfirming(false)} className={`${btnSecondary} disabled:opacity-50`}>
                 Отмена
               </button>
               <button type="button" disabled={busy} onClick={onDelete} className={btnDangerSolid}>
@@ -278,29 +249,30 @@ export function SettingsScreen() {
             </div>
           </div>
         )}
-      </section>
+      </Group>
 
-      <section aria-labelledby="s-about" className="card p-5">
-        <h2 id="s-about" className="font-display text-lg font-extrabold text-ink">
-          О приложении
-        </h2>
-        <p className="mt-1 font-medium text-ink">Не является медицинской консультацией.</p>
-        <p className="mt-2 text-sm text-muted">Если тяжело, поговорить можно бесплатно:</p>
-        <ul className="mt-2 space-y-1">
-          {HELP_LINES.map((l) => (
-            <li key={l.phone}>
-              <a
-                href={`tel:${l.phone}`}
-                className="inline-flex min-h-11 items-center gap-2 font-semibold text-navy underline underline-offset-4"
-              >
-                <span className="font-display text-xl font-extrabold">{l.phone}</span>
-                <span className="text-sm font-medium text-ink">{l.label}</span>
-              </a>
-            </li>
-          ))}
-          <li className="text-sm text-ink">или психолог вашего вуза</li>
-        </ul>
-      </section>
+      <Group id="s-about" title="Поддержка" footer="Не является медицинской консультацией.">
+        {HELP_LINES.map((l) => (
+          <a key={l.phone} href={`tel:${l.phone}`} className={row}>
+            <span className="w-12 text-[20px] font-bold text-accent tabular-nums">{l.phone}</span>
+            <span className="flex-1 text-[15px] text-ink">{l.label}</span>
+          </a>
+        ))}
+        <p className="px-4 py-3 text-[15px] text-ink">или психолог вашего вуза</p>
+      </Group>
     </div>
+  );
+}
+
+/** iOS-style settings group: small header, white rows, muted footer. */
+function Group({ id, title, footer, children }: { id: string; title: string; footer?: string; children: React.ReactNode }) {
+  return (
+    <section aria-labelledby={id}>
+      <h2 id={id} className="px-4 pb-1.5 text-[13px] text-muted uppercase">
+        {title}
+      </h2>
+      <div className="group-list">{children}</div>
+      {footer && <p className="px-4 pt-1.5 text-[13px] leading-snug text-muted">{footer}</p>}
+    </section>
   );
 }

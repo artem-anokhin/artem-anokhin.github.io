@@ -4,8 +4,6 @@ import { ChevronLeft, HeartHandshake, ShieldCheck } from "lucide-react";
 import { useState } from "react";
 import { HELP_LINES } from "@/lib/crisis";
 import { MODE_LABEL, saveProfile, type Mode } from "@/lib/settings";
-import { SPHERE_STYLE } from "@/lib/spheres";
-import { SPHERE_KEYS } from "@/lib/checkin";
 import { ChoiceField, btnPrimary } from "./ui/controls";
 import { ProgressRing, TreeScene } from "./ui/visuals";
 
@@ -16,21 +14,6 @@ function WelcomeArt() {
   return (
     <div className="relative">
       <TreeScene stage={3} wilting={false} title="Сад фокуса" className="h-64 rounded-card-lg" />
-      <ul aria-hidden className="absolute inset-x-6 top-4 flex justify-between">
-        {SPHERE_KEYS.map((k, i) => {
-          const st = SPHERE_STYLE[k];
-          const Icon = st.icon;
-          return (
-            <li
-              key={k}
-              className={`grid size-9 animate-rise place-items-center rounded-full bg-white shadow-soft ${st.text}`}
-              style={{ animationDelay: `${i * 60}ms`, marginTop: `${Math.abs(3 - i) * 6}px` }}
-            >
-              <Icon size={18} />
-            </li>
-          );
-        })}
-      </ul>
     </div>
   );
 }

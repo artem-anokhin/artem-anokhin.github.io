@@ -29,7 +29,7 @@ test("onboarding → demo → every screen fits 375px → check-in → focus →
   await expect(DEMO(page)).toBeVisible();
 
   // Tabs and sections with navigation show the demo label.
-  for (const path of ["/", "/focus/", "/tree/", "/insights/", "/library/", "/history/", "/settings/"]) {
+  for (const path of ["/", "/focus/", "/tree/", "/insights/", "/library/", "/history/", "/settings/", "/habits/"]) {
     await page.goto(path);
     await page.waitForLoadState("networkidle");
     if (path !== "/focus/") await expect(DEMO(page)).toBeVisible();
