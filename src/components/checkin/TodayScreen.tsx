@@ -5,7 +5,7 @@ import { emptyCheckIn, type CheckInData } from "@/lib/checkin";
 import { db, dayKey, saveCheckIn, type CheckIn } from "@/lib/db";
 import { getProfile, type Profile } from "@/lib/settings";
 import { btnPrimary } from "@/components/ui/controls";
-import { CheckInSummary } from "./CheckInSummary";
+import { TodayOverview } from "@/components/today/TodayOverview";
 import { CheckInWizard } from "./CheckInWizard";
 
 type State =
@@ -70,7 +70,7 @@ export function TodayScreen() {
 
   if (today && !editing) {
     return (
-      <CheckInSummary
+      <TodayOverview
         data={toData(today)}
         mode={profile.mode}
         onEdit={() => setState({ ...state, prefill: toData(today), editing: true })}

@@ -79,7 +79,7 @@ export function isTimeOfDay(v: unknown): v is TimeOfDay {
   return typeof v === "string" && TIME_RE.test(v);
 }
 
-function minutes(t: TimeOfDay): number {
+export function minutes(t: TimeOfDay): number {
   const m = TIME_RE.exec(t);
   if (!m) throw new Error(`Invalid time: ${t}`);
   return Number(m[1]) * 60 + Number(m[2]);
