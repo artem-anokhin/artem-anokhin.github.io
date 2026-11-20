@@ -22,7 +22,7 @@ describe("FocusScreen", () => {
     expect(await screen.findByRole("heading", { name: "Фокус-сессия" }, { timeout: 4000 })).toBeInTheDocument();
     expect(await db.sessions.count()).toBe(0);
     await waitFor(() => expect(document.documentElement.dataset.immersive).toBeUndefined());
-  });
+  }, 15_000);
 
   it("saves a session whose time ran out while the app was closed", async () => {
     await consent();

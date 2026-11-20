@@ -15,6 +15,7 @@ import {
   type SessionLength,
 } from "@/lib/focusSession";
 import { plural } from "@/lib/plural";
+import { tap } from "@/lib/haptics";
 import { loadTree } from "@/lib/garden";
 import { btnNight, btnNightGhost } from "@/components/ui/controls";
 import { DropIcon, ProgressRing, TreeScene } from "@/components/ui/visuals";
@@ -114,6 +115,7 @@ export function FocusScreen() {
     finishSession()
       .then(async (row) => {
         await loadStats();
+        if (row) tap("success");
         setView(row ? { kind: "done", minutes } : { kind: "setup" });
       })
       .catch(() => {

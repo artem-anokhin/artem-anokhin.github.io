@@ -3,6 +3,7 @@
 import { Minus, Plus } from "lucide-react";
 import type { Scale5 } from "@/lib/checkin";
 import type { SphereStyle } from "@/lib/spheres";
+import { tap } from "@/lib/haptics";
 
 export const btnPrimary =
   "pressable inline-flex min-h-[50px] items-center justify-center gap-2 text-center rounded-[14px] bg-accent px-5 text-[17px] font-semibold text-white transition-colors hover:bg-deep disabled:cursor-not-allowed disabled:bg-pressed disabled:text-muted";
@@ -61,7 +62,7 @@ export function ChoiceField<T extends string>({
                 on ? `${theme.base} text-white` : "bg-surface text-ink ring-1 ring-line ring-inset hover:bg-pressed"
               } ${focusRing}`}
             >
-              <input type="radio" name={name} value={o.value} checked={on} onChange={() => onChange(o.value)} className="sr-only" />
+              <input type="radio" name={name} value={o.value} checked={on} onChange={() => { tap(); onChange(o.value); }} className="sr-only" />
               {o.label}
             </label>
           );
@@ -167,7 +168,10 @@ export function ScaleField({
                 name={name}
                 value={n}
                 checked={on}
-                onChange={() => onChange(n)}
+                onChange={() => {
+                  tap();
+                  onChange(n);
+                }}
                 className="sr-only"
                 aria-label={`${n} из 5${n === 1 ? ` — ${low}` : n === 5 ? ` — ${high}` : ""}`}
               />

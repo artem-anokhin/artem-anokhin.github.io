@@ -6,6 +6,7 @@ import { Check, Plus } from "lucide-react";
 import { db, dayKey, type Habit, type HabitLog } from "@/lib/db";
 import { activeHabits, doneInLastDays, toggleHabit } from "@/lib/habits";
 import { SPHERE_STYLE } from "@/lib/spheres";
+import { tap } from "@/lib/haptics";
 
 /** «Привычки» block on Сегодня: one tap to mark, gentle «N из 7» instead of streaks. */
 export function HabitsToday({ onChange }: { onChange?: () => void }) {
@@ -33,6 +34,7 @@ export function HabitsToday({ onChange }: { onChange?: () => void }) {
     // Date at tap time, not render time (a screen left open past midnight).
     const res = await toggleHabit(id, dayKey()).catch(() => null);
     if (res === null) return;
+    tap(res ? "success" : "light");
     setRev((n) => n + 1);
     onChange?.();
   }
