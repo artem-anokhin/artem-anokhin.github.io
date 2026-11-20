@@ -115,7 +115,7 @@ export function CheckInWizard({
 
         <section key={step} className="stagger mt-6 space-y-6 pb-6" aria-labelledby="sphere-title">
           <div>
-            <p className={`text-[13px] font-semibold ${st?.text ?? "text-link"}`}>{isNote ? "Последний шаг" : `Сфера ${step + 1} из ${SPHERES.length}`}</p>
+            <p className={`text-[13px] font-semibold ${st?.ink ?? "text-link"}`}>{isNote ? "Последний шаг" : `Сфера ${step + 1} из ${SPHERES.length}`}</p>
             <h2 id="sphere-title" ref={headingRef} tabIndex={-1} className="title text-[34px] focus:outline-none">
               {title}
             </h2>
