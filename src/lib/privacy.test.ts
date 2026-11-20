@@ -42,3 +42,36 @@ describe("privacy", () => {
     expect(exportFileName(new Date(2026, 0, 5))).toBe("focusai-2026-01-05.json");
   });
 });
+
+describe("importData", () => {
+  it("round-trips an export and keeps the current consent", async () => {
+    const src = await seeded("privacy-import-src");
+    const { emptyCheckIn } = await import("./checkin");
+    await src.checkins.put({ ...emptyCheckIn(), date: "2026-11-19", createdAt: 1, updatedAt: 1 });
+    const file = JSON.parse(JSON.stringify(await exportData(src)));
+    const { importData } = await import("./privacy");
+    const dst = new FocusDB("privacy-import-dst");
+    expect(await importData(file, dst)).toBeNull(); // no consent on target
+    await dst.settings.put({ key: "profile", value: { mode: "work", consentAt: 99 } });
+    const res = await importData(file, dst);
+    expect(res).toEqual({ checkins: 1, focusTests: 1, skipped: 1 }) // seeded stub row is incomplete;
+    expect((await dst.settings.get("profile"))?.value).toEqual({ mode: "study", consentAt: 99 });
+    expect((await dst.settings.get("experimentHistory"))?.value).toHaveLength(1);
+    await src.delete();
+    await dst.delete();
+  });
+
+  it("rejects foreign files and skips broken rows", async () => {
+    const { importData } = await import("./privacy");
+    const dst = new FocusDB("privacy-import-bad");
+    await dst.settings.put({ key: "profile", value: { mode: "study", consentAt: 1 } });
+    expect(await importData({ hello: 1 }, dst)).toBeNull();
+    const res = await importData(
+      { format: "focusai-export", version: 1, checkins: [{ date: "bad" }, null], focusTests: [{ date: "2026-11-20", takenAt: 1, score: 500 }], settings: [{ key: "profile", value: { mode: "x" } }] },
+      dst,
+    );
+    expect(res).toEqual({ checkins: 0, focusTests: 0, skipped: 3 });
+    expect((await dst.settings.get("profile"))?.value).toEqual({ mode: "study", consentAt: 1 });
+    await dst.delete();
+  });
+});

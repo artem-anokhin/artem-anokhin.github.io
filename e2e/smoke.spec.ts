@@ -7,6 +7,10 @@ async function fitsWidth(page: Page) {
 }
 
 test("onboarding → demo data → every screen fits 375px", async ({ page }) => {
+  // Privacy policy is public (Google Play needs a URL) and fits 375px.
+  await page.goto("/privacy/");
+  await expect(page.getByRole("heading", { name: /Политика/ })).toBeVisible();
+  await fitsWidth(page);
   await page.goto("/");
   await expect(page).toHaveURL(/\/welcome\/$/);
   await fitsWidth(page);

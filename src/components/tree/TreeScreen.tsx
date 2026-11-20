@@ -145,7 +145,6 @@ export function TreeScreen() {
           </ul>
           <p className="mt-2 text-sm text-muted">Капли не пропадают. Один пропуск ничего не меняет.</p>
         </section>
-        <p className="text-sm text-muted">Не является медицинской консультацией.</p>
       </div>
     </div>
   );

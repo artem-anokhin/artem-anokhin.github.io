@@ -37,6 +37,22 @@ describe("SettingsScreen", () => {
     expect(await db.focusTests.count()).toBe(0);
   });
 
+  it("imports a file only after confirmation and rejects foreign files", async () => {
+    await seed();
+    const assign = vi.fn();
+    vi.stubGlobal("location", { ...window.location, assign });
+    const { container } = render(<SettingsScreen />);
+    await screen.findByText("Перенос данных");
+    const input = container.querySelector('input[type="file"]')!;
+    fireEvent.change(input, { target: { files: [new File(["{}"], "x.json", { type: "application/json" })] } });
+    expect(await screen.findByRole("alert")).toHaveTextContent("Это не файл экспорта FocusAI.");
+    const file = { format: "focusai-export", version: 1, checkins: [], focusTests: [{ date: "2026-11-20", takenAt: 1, score: 70 }], settings: [] };
+    fireEvent.change(input, { target: { files: [new File([JSON.stringify(file)], "f.json", { type: "application/json" })] } });
+    fireEvent.click(await screen.findByRole("button", { name: "Да, заменить" }));
+    await waitFor(() => expect(assign).toHaveBeenCalledWith("/"));
+    expect(await db.focusTests.count()).toBe(1);
+  });
+
   it("shows the disclaimer and help lines", async () => {
     await seed();
     render(<SettingsScreen />);

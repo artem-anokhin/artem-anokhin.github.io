@@ -12,7 +12,8 @@ const WELCOME = "/welcome/";
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname() ?? "/";
   const router = useRouter();
-  const onWelcome = isActive(pathname, WELCOME);
+  // Onboarding and the public privacy policy work without consent and without navigation.
+  const onWelcome = isActive(pathname, WELCOME) || isActive(pathname, "/privacy/");
   // Render page content only after consent is confirmed (no first-run flash).
   const [ready, setReady] = useState(false);
   const [demo, setDemo] = useState(false);
@@ -98,10 +99,12 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                   href={href}
                   aria-current={active ? "page" : undefined}
                   className={`flex min-h-14 min-w-0 flex-col items-center justify-center gap-0.5 px-0.5 text-xs leading-tight tracking-tight font-medium ${
-                    active ? "text-accent" : "text-muted"
+                    active ? "text-navy" : "text-muted"
                   }`}
                 >
-                  <Icon aria-hidden size={22} strokeWidth={active ? 2.4 : 2} />
+                  <span className={`flex h-7 w-12 items-center justify-center rounded-full transition-colors ${active ? "bg-soft text-accent" : ""}`}>
+                    <Icon aria-hidden size={22} strokeWidth={active ? 2.4 : 2} />
+                  </span>
                   {label}
                 </Link>
               </li>

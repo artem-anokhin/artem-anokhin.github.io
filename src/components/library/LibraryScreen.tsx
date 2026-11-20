@@ -143,7 +143,6 @@ export function LibraryScreen() {
           </section>
         );
       })}
-      <p className="text-sm text-muted">Не является медицинской консультацией.</p>
     </div>
   );
 }

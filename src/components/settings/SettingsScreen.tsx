@@ -1,13 +1,15 @@
 "use client";
 
-import { Download, Presentation, ShieldCheck, Trash2 } from "lucide-react";
+import { Download, Presentation, ShieldCheck, Trash2, Upload } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { ChoiceField, btnSecondary } from "@/components/ui/controls";
 import { HELP_LINES } from "@/lib/crisis";
 import { db } from "@/lib/db";
 import { DEMO_DAYS, clearDemo, isDemo, loadDemo } from "@/lib/demo";
-import { deleteAllData, downloadJson, exportData, exportFileName } from "@/lib/privacy";
+import { deleteAllData, downloadJson, exportData, exportFileName, importData } from "@/lib/privacy";
 import { MODE_LABEL, getProfile, updateMode, type Mode, type Profile } from "@/lib/settings";
+
+const IMPORT_MAX_BYTES = 5 * 1024 * 1024;
 
 const MODES = (Object.keys(MODE_LABEL) as Mode[]).map((value) => ({ value, label: MODE_LABEL[value] }));
 
@@ -25,6 +27,8 @@ export function SettingsScreen() {
   const [error, setError] = useState<string | null>(null);
   const [confirming, setConfirming] = useState(false);
   const [busy, setBusy] = useState(false);
+  /** Parsed import file waiting for confirmation. */
+  const [pending, setPending] = useState<unknown>(null);
   /** "empty" = no data yet (demo can be loaded), "demo" = demo loaded, "real" = user data. */
   const [dataKind, setDataKind] = useState<"empty" | "demo" | "real" | null>(null);
   const cancelRef = useRef<HTMLButtonElement>(null);
@@ -67,6 +71,36 @@ export function SettingsScreen() {
       }
     } catch {
       setError("Не получилось сохранить. Попробуйте ещё раз.");
+    }
+  }
+
+
+  async function onPickFile(e: React.ChangeEvent<HTMLInputElement>) {
+    setError(null);
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+    try {
+      if (file.size > IMPORT_MAX_BYTES) throw new Error("too big");
+      const data: unknown = JSON.parse(await file.text());
+      if ((data as { format?: unknown })?.format !== "focusai-export") throw new Error("format");
+      setPending(data);
+    } catch {
+      setError("Это не файл экспорта FocusAI.");
+    }
+  }
+
+  async function onImport() {
+    setBusy(true);
+    try {
+      if (!(await importData(pending))) throw new Error("rejected");
+      // Full reload on purpose: every screen re-reads the imported data.
+      // eslint-disable-next-line @next/next/no-location-assign-relative-destination
+      window.location.assign("/");
+    } catch {
+      setBusy(false);
+      setPending(null);
+      setError("Не получилось импортировать файл. Данные не изменены.");
     }
   }
 
@@ -137,22 +171,47 @@ export function SettingsScreen() {
             <p className="mt-1 text-muted">
               Все данные хранятся только на этом устройстве. Мы их не видим и никуда не отправляем.
             </p>
+            <a href="/privacy/" className="mt-2 inline-flex min-h-11 items-center font-semibold text-navy underline underline-offset-4">
+              Политика конфиденциальности
+            </a>
           </div>
         </div>
       </section>
 
       <section aria-labelledby="s-export" className="card p-5">
         <h2 id="s-export" className="font-display text-lg font-extrabold text-ink">
-          Экспорт данных
+          Перенос данных
         </h2>
         <p className="mt-1 text-sm text-muted">
-          Файл JSON со всеми отметками, заметками, тестами и настройками. Сохраняется на это устройство.
-          Файл не зашифрован — храните его осторожно.
+          Экспорт — файл JSON со всеми отметками, заметками, тестами и настройками. Файл не зашифрован — храните
+          его осторожно. Импорт этого файла на другом телефоне перенесёт всё без аккаунта.
         </p>
-        <button type="button" onClick={onExport} className={`${btnSecondary} mt-4 gap-2`}>
-          <Download aria-hidden size={20} />
-          Экспорт данных
-        </button>
+        <div className="mt-4 flex flex-wrap gap-2">
+          <button type="button" onClick={onExport} className={`${btnSecondary} gap-2`}>
+            <Download aria-hidden size={20} />
+            Экспорт данных
+          </button>
+          <label className={`${btnSecondary} cursor-pointer gap-2 has-[:focus-visible]:outline-3 has-[:focus-visible]:outline-accent`}>
+            <Upload aria-hidden size={20} />
+            Импорт данных
+            <input type="file" accept="application/json,.json" onChange={onPickFile} className="sr-only" />
+          </label>
+        </div>
+        {pending !== null && (
+          <div role="group" aria-labelledby="s-import-confirm" className="mt-4 rounded-2xl bg-soft p-4">
+            <p id="s-import-confirm" className="font-semibold text-ink">
+              Заменить текущие данные данными из файла?
+            </p>
+            <div className="mt-3 flex flex-wrap gap-2">
+              <button type="button" disabled={busy} onClick={() => setPending(null)} className={`${btnSecondary} disabled:opacity-50`}>
+                Отмена
+              </button>
+              <button type="button" disabled={busy} onClick={onImport} className={btnDangerSolid}>
+                Да, заменить
+              </button>
+            </div>
+          </div>
+        )}
       </section>
 
       {(dataKind === "empty" || dataKind === "demo") && (

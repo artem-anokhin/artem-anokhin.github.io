@@ -135,7 +135,8 @@ export function Onboarding({ onDone }: { onDone: () => void }) {
               </span>
             </label>
             <p className="mt-3 text-sm text-muted">
-              Данные можно выгрузить или удалить в любой момент в настройках.
+              Данные можно выгрузить или удалить в любой момент в настройках.{" "}
+              <a href="/privacy/" target="_blank" rel="noopener" className="font-semibold text-navy underline underline-offset-4">Политика конфиденциальности</a>
             </p>
             {error && (
               <p role="alert" className="mt-3 text-sm font-medium text-ink">

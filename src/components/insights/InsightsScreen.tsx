@@ -281,7 +281,6 @@ export function InsightsScreen() {
           <span className="sr-only"> (откроется в новой вкладке)</span>
         </a>
       </p>
-      <p className="text-sm text-muted">Не является медицинской консультацией.</p>
     </div>
   );
 }

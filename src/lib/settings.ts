@@ -63,7 +63,7 @@ export interface Experiment {
 const EXPERIMENT_KEY = "experiment";
 const DAY_RE = /^\d{4}-\d{2}-\d{2}$/;
 
-function isExperiment(v: unknown): v is Experiment {
+export function isExperiment(v: unknown): v is Experiment {
   if (!v || typeof v !== "object") return false;
   const e = v as Record<string, unknown>;
   return (
@@ -97,7 +97,7 @@ export interface ExperimentWindow {
 
 const HISTORY_KEY = "experimentHistory";
 
-function isWindow(v: unknown): v is ExperimentWindow {
+export function isWindow(v: unknown): v is ExperimentWindow {
   if (!v || typeof v !== "object") return false;
   const w = v as Record<string, unknown>;
   return typeof w.start === "string" && DAY_RE.test(w.start) && typeof w.end === "string" && DAY_RE.test(w.end) && w.start <= w.end;

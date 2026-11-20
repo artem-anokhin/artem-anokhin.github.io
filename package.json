@@ -25,6 +25,7 @@
     "eslint-config-next": "^16.4.6",
     "fake-indexeddb": "^6.2.8",
     "jsdom": "^31.0.1",
+    "serve": "^14.2.8",
     "tailwindcss": "^4.3.5",
     "typescript": "^6.0.3",
     "vitest": "^5.1.1"

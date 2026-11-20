@@ -16,7 +16,7 @@ export const metadata: Metadata = {
   title: "FocusAI",
   description: "Узнайте, что мешает вашей концентрации, и улучшайте её за минуту в день.",
   manifest: "/manifest.webmanifest",
-  icons: { icon: "/icon.svg", apple: "/icon.svg" },
+  icons: { icon: "/icon.svg", apple: "/icon-192.png" },
 };
 
 export const viewport: Viewport = {
