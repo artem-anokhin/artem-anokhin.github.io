@@ -52,6 +52,13 @@ export default function PrivacyPage() {
           </p>
         </section>
         <section>
+          <h2>Напоминание в календаре</h2>
+          <p className="mt-1">
+            Если вы нажмёте «Google Календарь», откроется сайт Google с готовым событием: в нём только выбранное время,
+            ежедневный повтор, название «FocusAI: чек-ин за 1 минуту» и ссылка на приложение. Файл .ics создаётся на устройстве и никуда не отправляется.
+          </p>
+        </section>
+        <section>
           <h2>Telegram</h2>
           <p className="mt-1">
             Если вы открываете FocusAI в Telegram, Telegram может передавать приложению сведения о вашем аккаунте. FocusAI

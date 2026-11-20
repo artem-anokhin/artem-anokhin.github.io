@@ -4,6 +4,7 @@ import { Download, Presentation, ShieldCheck, Trash2, Upload } from "lucide-reac
 import { useEffect, useRef, useState } from "react";
 import { ChoiceField, btnSecondary } from "@/components/ui/controls";
 import { HELP_LINES } from "@/lib/crisis";
+import { ReminderCard } from "./ReminderCard";
 import { db } from "@/lib/db";
 import { DEMO_DAYS, clearDemo, isDemo, loadDemo } from "@/lib/demo";
 import { deleteAllData, downloadJson, exportData, exportFileName, importData } from "@/lib/privacy";
@@ -47,6 +48,17 @@ export function SettingsScreen() {
       alive = false;
     };
   }, []);
+
+  // Deep links like /settings/#reminder: scroll once the content is rendered.
+  const loaded = profile != null;
+  useEffect(() => {
+    if (!loaded || !window.location.hash) return;
+    try {
+      document.getElementById(decodeURIComponent(window.location.hash.slice(1)))?.scrollIntoView();
+    } catch {
+      // Malformed hash: nothing to scroll to.
+    }
+  }, [loaded]);
 
   useEffect(() => {
     if (confirming) cancelRef.current?.focus();
@@ -160,6 +172,8 @@ export function SettingsScreen() {
         </p>
         <p className="text-sm text-muted">Согласие дано: {consentDate(profile.consentAt)}</p>
       </section>
+
+      <ReminderCard />
 
       <section aria-labelledby="s-privacy" className="card p-5">
         <div className="flex items-start gap-3">

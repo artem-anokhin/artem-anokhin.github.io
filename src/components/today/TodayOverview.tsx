@@ -7,6 +7,8 @@ import { SPHERES, type CheckInData } from "@/lib/checkin";
 import { db, dayKey, type FocusTestResult } from "@/lib/db";
 import type { Mode } from "@/lib/settings";
 import { TIPS } from "@/lib/tips";
+import { MIN_DAYS, pairDays, usableDays } from "@/lib/insights";
+import { plural } from "@/lib/plural";
 import { TIP_CARD, cardHref } from "@/lib/libraryLinks";
 import { latestTestByDay, pickTip, sphereStatus, type SphereStatus } from "@/lib/today";
 import { btnPrimary } from "@/components/ui/controls";
@@ -127,6 +129,36 @@ function TipCard({ data }: { data: CheckInData }) {
   );
 }
 
+/** Countdown to the first insights (day 7 is the «aha» moment). Hidden once unlocked. */
+function InsightsCountdown() {
+  const [days, setDays] = useState<number | null>(null);
+  useEffect(() => {
+    let alive = true;
+    Promise.all([db.checkins.toArray(), db.focusTests.toArray()])
+      .then(([c, t]) => alive && setDays(usableDays(pairDays(c, t))))
+      .catch(() => {});
+    return () => {
+      alive = false;
+    };
+  }, []);
+  if (days === null || days >= MIN_DAYS) return null;
+  const left = MIN_DAYS - days;
+  return (
+    <Link href="/insights/" className="card block p-5 hover:bg-soft">
+      <p className="font-display text-lg font-extrabold text-navy">
+        До ваших инсайтов: {left} {plural(left, ["день", "дня", "дней"])}
+      </p>
+      <div aria-hidden className="mt-3 h-2 overflow-hidden rounded-full bg-soft">
+        <div className="h-full bg-accent" style={{ width: `${(days / MIN_DAYS) * 100}%` }} />
+      </div>
+      <p className="mt-2 text-sm text-muted">
+        Дней с чек-ином и тестом: {days} из {MIN_DAYS}. Потом покажем, что в ваших данных связано с фокусом: сон, кофеин,
+        стресс, активность.
+      </p>
+    </Link>
+  );
+}
+
 export function TodayOverview({ data, mode, onEdit }: { data: CheckInData; mode: Mode; onEdit: () => void }) {
   return (
     <div className="space-y-4">
@@ -135,10 +167,15 @@ export function TodayOverview({ data, mode, onEdit }: { data: CheckInData; mode:
         {dateFmt.format(new Date())} · чек-ин сохранён
       </p>
       <FocusScoreCard key={dayKey()} />
+      <InsightsCountdown />
       <div className="grid gap-4 lg:grid-cols-2">
         <SpheresCard data={data} />
         <TipCard data={data} />
       </div>
+      <a href="/settings/#reminder" className="card flex min-h-14 items-center justify-between px-5 font-semibold text-navy hover:bg-soft">
+        Напоминать о чек-ине каждый день
+        <ChevronRight aria-hidden size={20} />
+      </a>
       <Link href="/history/" className="card flex min-h-14 items-center justify-between px-5 font-semibold text-navy hover:bg-soft">
         История
         <ChevronRight aria-hidden size={20} />
