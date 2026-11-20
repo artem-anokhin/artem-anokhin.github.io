@@ -139,11 +139,14 @@ export function sanitizeCheckIn(d: CheckInData): CheckInData {
     },
     rest: { type: pick(d.rest.type, REST_OPTIONS, "none") },
     note: d.note.trim().slice(0, NOTE_MAX),
-    ...(d.answered === undefined ? {} : { answered: SPHERE_KEYS.filter((k) => d.answered!.includes(k)) }),
+    ...(d.answered === undefined
+      ? {}
+      : { answered: Array.isArray(d.answered) ? SPHERE_KEYS.filter((k) => d.answered!.includes(k)) : [] }),
   };
 }
 
 /** True when the user set this sphere on that day (see CheckInData.answered). */
 export function isAnswered(d: Pick<CheckInData, "answered">, key: SphereKey): boolean {
-  return d.answered === undefined || d.answered.includes(key);
+  if (d.answered === undefined) return true;
+  return Array.isArray(d.answered) && d.answered.includes(key);
 }
