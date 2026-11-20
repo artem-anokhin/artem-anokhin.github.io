@@ -34,6 +34,26 @@ describe("CheckInWizard", () => {
     expect(saved.caffeine.lastAt).toBe("14:00");
   });
 
+  it("marks only touched spheres as answered when values were carried over", async () => {
+    const onSave = vi.fn<(d: CheckInData) => Promise<void>>().mockResolvedValue();
+    render(<CheckInWizard initial={{ ...emptyCheckIn(), answered: [] }} mode="study" onSave={onSave} />);
+    next(); // food
+    fireEvent.click(screen.getByRole("radio", { name: "Нет" }));
+    for (let i = 0; i < 6; i++) next();
+    fireEvent.click(screen.getByRole("button", { name: "Сохранить" }));
+    await waitFor(() => expect(onSave).toHaveBeenCalledTimes(1));
+    expect((onSave.mock.calls[0]?.[0] as CheckInData).answered).toEqual(["food"]);
+  });
+
+  it("treats a first check-in with neutral defaults as fully answered", async () => {
+    const onSave = vi.fn<(d: CheckInData) => Promise<void>>().mockResolvedValue();
+    render(<CheckInWizard initial={emptyCheckIn()} mode="study" onSave={onSave} />);
+    for (let i = 0; i < 7; i++) next();
+    fireEvent.click(screen.getByRole("button", { name: "Сохранить" }));
+    await waitFor(() => expect(onSave).toHaveBeenCalledTimes(1));
+    expect((onSave.mock.calls[0]?.[0] as CheckInData).answered).toBeUndefined();
+  });
+
   it("keeps answers and shows an error when saving fails", async () => {
     const onSave = vi.fn().mockRejectedValue(new Error("quota"));
     render(<CheckInWizard initial={emptyCheckIn()} mode="work" onSave={onSave} />);

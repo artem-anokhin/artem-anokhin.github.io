@@ -1,4 +1,4 @@
-import { emptyCheckIn, formatHours, sanitizeCheckIn, sleepHours, type CheckInData } from "./checkin";
+import { emptyCheckIn, formatHours, isAnswered, sanitizeCheckIn, sleepHours, type CheckInData } from "./checkin";
 
 describe("sleepHours", () => {
   it("crosses midnight", () => {
@@ -51,5 +51,17 @@ describe("sanitizeCheckIn", () => {
       const s = sanitizeCheckIn({ ...emptyCheckIn(), caffeine: { cups, lastAt: "15:00", water: 2 } });
       expect(s.caffeine).toEqual({ cups: 0, lastAt: null, water: 2 });
     }
+  });
+});
+
+describe("answered spheres", () => {
+  it("sanitizes the answered list and keeps undefined as 'all answered'", () => {
+    const base = emptyCheckIn();
+    expect(sanitizeCheckIn(base).answered).toBeUndefined();
+    const s = sanitizeCheckIn({ ...base, answered: ["rest", "sleep", "bogus" as never, "sleep"] });
+    expect(s.answered).toEqual(["sleep", "rest"]);
+    expect(isAnswered(s, "sleep")).toBe(true);
+    expect(isAnswered(s, "food")).toBe(false);
+    expect(isAnswered(base, "food")).toBe(true);
   });
 });

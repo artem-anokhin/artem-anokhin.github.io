@@ -19,9 +19,11 @@ import {
   NOTE_MAX,
   REST_OPTIONS,
   SPHERES,
+  SPHERE_KEYS,
   formatHours,
   sleepHours,
   type CheckInData,
+  type SphereKey,
 } from "@/lib/checkin";
 import { hasCrisisWording } from "@/lib/crisis";
 import type { Mode } from "@/lib/settings";
@@ -39,6 +41,10 @@ export function CheckInWizard({
 }) {
   const [step, setStep] = useState(0);
   const [d, setD] = useState<CheckInData>(initial);
+  // Spheres the user touched; untouched carried-over values are not real answers for insights.
+  const [touched, setTouched] = useState<ReadonlySet<SphereKey> | null>(
+    initial.answered === undefined ? null : new Set(initial.answered),
+  );
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(false);
   const headingRef = useRef<HTMLHeadingElement>(null);
@@ -54,8 +60,10 @@ export function CheckInWizard({
     headingRef.current?.scrollIntoView?.({ block: "center" });
   }, [step]);
 
-  const patch = <K extends keyof CheckInData>(key: K, value: Partial<CheckInData[K]>) =>
+  const patch = <K extends SphereKey>(key: K, value: Partial<CheckInData[K]>) => {
     setD((prev) => ({ ...prev, [key]: { ...(prev[key] as object), ...value } }));
+    setTouched((prev) => (prev === null || prev.has(key) ? prev : new Set(prev).add(key)));
+  };
 
   const isNote = step === SPHERES.length;
   const title = isNote ? "Заметка" : step === 5 ? (mode === "work" ? "Работа" : "Учёба") : (SPHERES[step]?.title ?? "");
@@ -65,7 +73,7 @@ export function CheckInWizard({
     setSaving(true);
     setError(false);
     try {
-      await onSave(d);
+      await onSave({ ...d, answered: touched === null ? undefined : SPHERE_KEYS.filter((k) => touched.has(k)) });
     } catch {
       setError(true);
       setSaving(false);

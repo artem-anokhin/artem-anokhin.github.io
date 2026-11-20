@@ -15,8 +15,8 @@ type State =
 
 /** Strip storage fields so a row can seed the wizard. */
 function toData(row: CheckIn): CheckInData {
-  const { sleep, food, caffeine, mind, activity, work, rest, note } = row;
-  return { sleep, food, caffeine, mind, activity, work, rest, note };
+  const { sleep, food, caffeine, mind, activity, work, rest, note, answered } = row;
+  return { sleep, food, caffeine, mind, activity, work, rest, note, ...(answered ? { answered } : {}) };
 }
 
 export function TodayScreen() {
@@ -31,7 +31,8 @@ export function TodayScreen() {
       const today = (await db.checkins.get(dayKey())) ?? null;
       // Prefill a new check-in from the latest previous day (minus the private note).
       const last = today ?? (await db.checkins.orderBy("date").last()) ?? null;
-      const prefill = last ? { ...toData(last), note: today ? last.note : "" } : emptyCheckIn();
+      // Values carried over from another day start as "not answered" until the user touches them.
+      const prefill = today ? toData(today) : last ? { ...toData(last), note: "", answered: [] } : emptyCheckIn();
       if (alive) setState({ kind: "ready", profile, today, prefill, editing: !today });
     })().catch(() => alive && setState({ kind: "error" }));
     return () => {

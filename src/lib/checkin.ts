@@ -21,6 +21,12 @@ export interface CheckInData {
   rest: { type: RestType };
   /** Optional free-text note; never leaves the device. */
   note: string;
+  /**
+   * Spheres the user actually set today. Values carried over from a previous
+   * day and left untouched are not listed. Undefined = all answered (first
+   * check-in with neutral defaults, or rows saved before M4).
+   */
+  answered?: SphereKey[];
 }
 
 export const SPHERES = [
@@ -34,6 +40,7 @@ export const SPHERES = [
 ] as const;
 
 export type SphereKey = (typeof SPHERES)[number]["key"];
+export const SPHERE_KEYS: readonly SphereKey[] = SPHERES.map((s) => s.key);
 
 export const FOOD_OPTIONS: readonly { value: FoodRegularity; label: string }[] = [
   { value: "poor", label: "Скудное" },
@@ -132,5 +139,11 @@ export function sanitizeCheckIn(d: CheckInData): CheckInData {
     },
     rest: { type: pick(d.rest.type, REST_OPTIONS, "none") },
     note: d.note.trim().slice(0, NOTE_MAX),
+    ...(d.answered === undefined ? {} : { answered: SPHERE_KEYS.filter((k) => d.answered!.includes(k)) }),
   };
+}
+
+/** True when the user set this sphere on that day (see CheckInData.answered). */
+export function isAnswered(d: Pick<CheckInData, "answered">, key: SphereKey): boolean {
+  return d.answered === undefined || d.answered.includes(key);
 }
