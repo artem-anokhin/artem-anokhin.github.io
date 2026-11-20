@@ -34,3 +34,12 @@ describe("demo data", () => {
     await db.delete();
   });
 });
+
+it("does not load demo over existing habits", async () => {
+  const db = new FocusDB("demo-habits");
+  await db.settings.put({ key: "profile", value: { mode: "study", consentAt: 1 } });
+  await db.habits.add({ title: "Моя", sphere: "rest", createdAt: 1, archived: 0 });
+  expect(await loadDemo(db, today)).toBe(false);
+  expect(await db.habits.count()).toBe(1);
+  await db.delete();
+});

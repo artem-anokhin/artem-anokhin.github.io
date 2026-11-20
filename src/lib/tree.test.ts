@@ -124,3 +124,10 @@ describe("focus sessions water the tree", () => {
     expect(s.week.sessions).toBe(2);
   });
 });
+
+describe("habits water the tree", () => {
+  it("adds one drop per day with a habit, separate from the check-in drop", () => {
+    const s = treeState({ checkinDates: ["2026-11-21"], tests: [], experiment: null, habitDates: ["2026-11-21", "2026-11-21", "2026-11-20"], today: "2026-11-21" });
+    expect(s.drops).toBe(3);
+  });
+});

@@ -71,7 +71,8 @@ export async function isDemo(database: FocusDB = defaultDb): Promise<boolean> {
 export async function loadDemo(database: FocusDB = defaultDb, today = new Date()): Promise<boolean> {
   return database.transaction("rw", [database.checkins, database.focusTests, database.settings, database.sessions, database.habits, database.habitLogs], async () => {
     if (!(await getProfile(database))) return false;
-    if ((await database.checkins.count()) || (await database.focusTests.count())) return false;
+    const counts = await Promise.all([database.checkins.count(), database.focusTests.count(), database.sessions.count(), database.habits.count()]);
+    if (counts.some((n) => n > 0)) return false;
     const { checkins, tests, sessions } = buildDemo(today);
     await database.checkins.bulkPut(checkins);
     await database.focusTests.bulkAdd(tests);

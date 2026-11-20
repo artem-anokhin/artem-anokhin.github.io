@@ -81,7 +81,7 @@ export const HABIT_IDEAS: readonly HabitIdea[] = [
   {
     id: "breakfast",
     title: "Позавтракать утром",
-    why: "Завтрак связан с вниманием и памятью в то же утро (у подростков, данные умеренные).",
+    why: "Завтрак связан с вниманием и памятью в то же утро (обзор про детей и подростков, данные умеренные).",
     sphere: "food",
     source: BREAKFAST,
     url: BREAKFAST_URL,
@@ -137,7 +137,7 @@ export const HABIT_IDEAS: readonly HabitIdea[] = [
 ];
 
 export const HABIT_FORMATION: { text: string; source: string; url: string } = {
-  text: "Привычка закрепляется в среднем за 66 дней, у разных людей — от 18 до 254. Один пропущенный день её не ломает.",
+  text: "Привычка закрепляется в типичном случае за 66 дней (медиана), у разных людей — от 18 до 254. Один пропущенный день её не ломает.",
   source: "Lally, 2010",
   url: "https://core.ac.uk/download/70653523.pdf",
 };

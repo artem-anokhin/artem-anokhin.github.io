@@ -272,7 +272,13 @@ export function FocusScreen() {
             <h1 className="title text-[30px] text-night-ink">
               {view.minutes} {plural(view.minutes, ["минута", "минуты", "минут"])} фокуса
             </h1>
-            <p className="text-[17px] text-night-muted">Отличная работа. Сделайте перерыв 5 минут: встаньте, попейте воды.</p>
+            <p className="text-[17px] text-night-muted">
+              Отличная работа. Сделайте перерыв 5 минут: встаньте, разомнитесь. Короткие перерывы связаны с бодростью.{" "}
+              <a href="https://pubmed.ncbi.nlm.nih.gov/36044424/" target="_blank" rel="noopener noreferrer" className="underline">
+                Мета-анализ микро-перерывов
+                <span className="sr-only"> (откроется в новой вкладке)</span>
+              </a>
+            </p>
             <button type="button" onClick={() => setView({ kind: "setup" })} className={`${btnNight} w-full max-w-sm`}>
               Готово
             </button>

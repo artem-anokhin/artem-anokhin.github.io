@@ -75,3 +75,32 @@ describe("importData", () => {
     await dst.delete();
   });
 });
+
+describe("importData habits", () => {
+  it("caps active habits, drops duplicate ids and orphan logs", async () => {
+    const { importData } = await import("./privacy");
+    const dst = new FocusDB("privacy-import-habits");
+    await dst.settings.put({ key: "profile", value: { mode: "study", consentAt: 1 } });
+    const habits = Array.from({ length: 7 }, (_, i) => ({ id: i + 1, title: `H${i}`, sphere: "rest", createdAt: i, archived: 0 }));
+    habits.push({ id: 1, title: "dup", sphere: "rest", createdAt: 9, archived: 0 });
+    const res = await importData(
+      {
+        format: "focusai-export",
+        version: 1,
+        checkins: [],
+        focusTests: [],
+        settings: [],
+        habits,
+        habitLogs: [
+          { habitId: 1, date: "2026-11-20", doneAt: 1 },
+          { habitId: 99, date: "2026-11-20", doneAt: 1 },
+        ],
+      },
+      dst,
+    );
+    expect(res?.skipped).toBe(2);
+    expect(await dst.habits.where("archived").equals(0).count()).toBe(5);
+    expect(await dst.habitLogs.count()).toBe(1);
+    await dst.delete();
+  });
+});

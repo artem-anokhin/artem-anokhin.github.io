@@ -30,7 +30,8 @@ export function HabitsToday({ onChange }: { onChange?: () => void }) {
   }, [rev]);
 
   async function toggle(id: number) {
-    const res = await toggleHabit(id, today).catch(() => null);
+    // Date at tap time, not render time (a screen left open past midnight).
+    const res = await toggleHabit(id, dayKey()).catch(() => null);
     if (res === null) return;
     setRev((n) => n + 1);
     onChange?.();

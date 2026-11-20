@@ -5,9 +5,11 @@ import { latestTestByDay } from "./today";
  * The motivation tree. Pure functions: growth is computed from stored days,
  * nothing extra is saved.
  *
- * Drops (max 3 per day): +1 check-in, +1 Focus test, +1 experiment day
- * (a check-in on a day inside a current or past experiment window).
- * Drops are never taken away. A single missed day changes nothing; the tree
+ * Drops (max 5 per day): +1 check-in, +1 Focus test, +1 experiment day
+ * (a check-in on a day inside a current or past experiment window),
+ * +1 finished focus session, +1 at least one habit done.
+ * Drops are never taken away by time or missed days; they mirror stored
+ * activity, so un-marking a mistaken habit tap removes that day's habit drop. A single missed day changes nothing; the tree
  * only looks wilted after 3 silent days in a row and recovers on the next activity
  * (Lally 2010: one missed day does not break habit formation).
  */

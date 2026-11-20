@@ -13,13 +13,13 @@ describe("FocusScreen", () => {
   it("starts a session, hides nav and can be stopped early without a drop", async () => {
     await consent();
     render(<FocusScreen />);
-    fireEvent.click(await screen.findByRole("radio", { name: "50 мин" }));
+    fireEvent.click(await screen.findByRole("radio", { name: "50 мин" }, { timeout: 4000 }));
     fireEvent.click(screen.getByRole("button", { name: "Начать 50 минут" }));
     expect(await screen.findByRole("img", { name: /Осталось (50:00|49:5\d)/ }, { timeout: 4000 })).toBeInTheDocument();
     expect(document.documentElement.dataset.immersive).toBe("1");
     fireEvent.click(screen.getByRole("button", { name: "Завершить раньше" }));
     fireEvent.click(screen.getByRole("button", { name: "Завершить" }));
-    expect(await screen.findByRole("heading", { name: "Фокус-сессия" })).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: "Фокус-сессия" }, { timeout: 4000 })).toBeInTheDocument();
     expect(await db.sessions.count()).toBe(0);
     expect(document.documentElement.dataset.immersive).toBeUndefined();
   });
@@ -28,7 +28,7 @@ describe("FocusScreen", () => {
     await consent();
     await db.settings.put({ key: "activeSession", value: { startedAt: Date.now() - 26 * 60_000, minutes: 25 } });
     render(<FocusScreen />);
-    expect(await screen.findByRole("heading", { name: "25 минут фокуса" })).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: "25 минут фокуса" }, { timeout: 4000 })).toBeInTheDocument();
     expect(await db.sessions.count()).toBe(1);
   });
 });

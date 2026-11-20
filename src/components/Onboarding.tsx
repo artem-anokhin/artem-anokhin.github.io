@@ -92,7 +92,7 @@ export function Onboarding({ onDone }: { onDone: () => void }) {
               <h1 className="title mt-8 text-[32px] text-balance">
                 Фокус растёт, <span className="text-accent">как сад</span>
               </h1>
-              <p className="mt-3 text-[17px] text-muted">Узнайте, что помогает именно вашей концентрации — по вашим же данным.</p>
+              <p className="mt-3 text-[17px] text-muted">Узнайте, что связано с вашей концентрацией — по вашим же данным.</p>
               <ul className="mt-6 space-y-3">
                 {[
                   ["1 минута", "чек-ин дня: сон, еда, кофе, настроение…"],

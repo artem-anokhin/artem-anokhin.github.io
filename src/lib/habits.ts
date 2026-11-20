@@ -31,7 +31,8 @@ export async function addHabit(
     const active = await activeHabits(db);
     if (active.length >= MAX_HABITS) return { ok: false as const, reason: "limit" as const };
     if (active.some((h) => h.title.toLowerCase() === clean.toLowerCase())) return { ok: false as const, reason: "duplicate" as const };
-    const habit: Habit = { title: clean, sphere: s, createdAt: now, archived: 0, ...(ideaId ? { ideaId } : {}) };
+    const idea = ideaId && /^[a-z0-9-]{1,40}$/.test(ideaId) ? ideaId : undefined;
+    const habit: Habit = { title: clean, sphere: s, createdAt: now, archived: 0, ...(idea ? { ideaId: idea } : {}) };
     habit.id = await db.habits.add(habit);
     return { ok: true as const, habit };
   });
@@ -39,7 +40,10 @@ export async function addHabit(
 
 /** Removes a habit from the active list; its past marks stay (they already watered the tree). */
 export async function archiveHabit(id: number, db: FocusDB = defaultDb): Promise<void> {
-  await db.habits.update(id, { archived: 1 });
+  await db.transaction("rw", db.habits, db.settings, async () => {
+    if (!(await getProfile(db))) return; // no consent → no writes
+    await db.habits.update(id, { archived: 1 });
+  });
 }
 
 /** Marks or unmarks a habit for a day. Returns the new state (true = done), null without consent. */
