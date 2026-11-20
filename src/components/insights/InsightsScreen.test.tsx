@@ -36,7 +36,7 @@ describe("InsightsScreen", () => {
     }
     render(<InsightsScreen />);
     expect(await screen.findByText("В ваших данных Focus Score чаще был выше в дни, когда вы спали дольше.")).toBeInTheDocument();
-    expect(screen.getByText("сильная связь в ваших данных")).toBeInTheDocument();
+    expect(screen.getAllByText("сильная связь")[0]!).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Начать на 7 дней" })).toBeInTheDocument();
     expect(screen.queryByText(/вызыва/)).toBeNull();
   });

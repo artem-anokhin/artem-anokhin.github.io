@@ -61,9 +61,9 @@ function StrengthChip({ strength, days }: { strength: Strength; days: number }) 
             <span key={i} className={`h-1.5 w-4 rounded-full ${i <= filled ? "bg-navy" : "bg-line"}`} />
           ))}
         </span>
-        {strength} связь в ваших данных
+        <span className="first-letter:uppercase">{strength} связь</span>
       </span>
-      <span className="text-muted">
+      <span className="sr-only">
         по {days} {plural(days, DAYS_GEN)}
       </span>
     </div>

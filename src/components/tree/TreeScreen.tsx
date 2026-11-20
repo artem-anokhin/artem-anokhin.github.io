@@ -14,13 +14,6 @@ import { ShareWeek } from "./ShareWeek";
 
 type State = { kind: "loading" } | { kind: "error" } | { kind: "ready"; tree: TreeState };
 
-const WEEKDAY = ["вс", "пн", "вт", "ср", "чт", "пт", "сб"];
-
-function weekday(key: string): string {
-  const [y, m, d] = key.split("-").map(Number);
-  return WEEKDAY[new Date(y!, m! - 1, d!).getDay()]!;
-}
-
 export function TreeScreen() {
   const [state, setState] = useState<State>({ kind: "loading" });
   const [reload, setReload] = useState(0);
@@ -57,7 +50,8 @@ export function TreeScreen() {
   }
 
   const { tree } = state;
-  const messages = treeMessages(tree);
+  // Week facts are already shown as numbers below; keep only the other messages.
+  const messages = treeMessages(tree).filter((m) => !/^(За 7 дней|Лучший Focus Score недели)/.test(m.text));
   const next = tree.nextAt === null ? null : STAGES[tree.stage + 1];
   const title = `Дерево: ${tree.stageName}${tree.wilting ? ", отдыхает" : ""}`;
 
@@ -153,7 +147,6 @@ export function TreeScreen() {
               </div>
             ))}
           </dl>
-          {tree.week.best && <p className="mt-2 text-[13px] text-muted">Лучший Focus Score — {weekday(tree.week.best.date)}.</p>}
           <ShareWeek stageName={tree.stageName} activeDays={tree.week.checkins} />
         </section>
 

@@ -159,7 +159,6 @@ export function FocusScreen() {
         {view.kind === "setup" && (
           <div className="stagger space-y-7">
             <header>
-              <p className="eyebrow text-night-muted">Фокус</p>
               <h1 className="title mt-1 text-[32px] text-night-ink">Фокус-сессия</h1>
               <p className="mt-2 text-[17px] text-night-muted">Учитесь без отвлечений. Сессия до конца — капля для дерева.</p>
             </header>

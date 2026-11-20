@@ -180,11 +180,9 @@ export function ScaleField({
           );
         })}
       </div>
-      <div aria-hidden className="mt-2 flex items-baseline justify-between text-[13px] text-muted">
-        <span>{low}</span>
-        <span className={`text-[15px] font-semibold ${theme.ink}`}>{word}</span>
-        <span>{high}</span>
-      </div>
+      <p aria-hidden className={`mt-2 text-center text-[15px] font-semibold ${theme.ink}`}>
+        {word}
+      </p>
     </fieldset>
   );
 }

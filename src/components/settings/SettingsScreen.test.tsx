@@ -56,7 +56,7 @@ describe("SettingsScreen", () => {
   it("shows the disclaimer and help lines", async () => {
     await seed();
     render(<SettingsScreen />);
-    expect(await screen.findByText("Не является медицинской консультацией.")).toBeInTheDocument();
+    expect(await screen.findByText("или психолог вашего вуза")).toBeInTheDocument();
     expect(screen.getByRole("link", { name: /111/ })).toHaveAttribute("href", "tel:111");
     expect(screen.getByRole("link", { name: /150/ })).toHaveAttribute("href", "tel:150");
   });

@@ -16,7 +16,7 @@ const IMPORT_MAX_BYTES = 5 * 1024 * 1024;
 const MODES = (Object.keys(MODE_LABEL) as Mode[]).map((value) => ({ value, label: MODE_LABEL[value] }));
 
 const btnDangerSolid =
-  "pressable inline-flex min-h-[50px] items-center justify-center rounded-[14px] bg-[#d70015] px-5 text-[17px] font-semibold text-white disabled:cursor-not-allowed disabled:opacity-50";
+  "pressable inline-flex min-h-[50px] items-center justify-center rounded-[14px] bg-red px-5 text-[17px] font-semibold text-white disabled:cursor-not-allowed disabled:opacity-50";
 
 const consentDate = (t: number) =>
   new Date(t).toLocaleDateString("ru-RU", { day: "numeric", month: "long", year: "numeric" });
@@ -203,7 +203,7 @@ export function SettingsScreen() {
         </label>
         {(dataKind === "empty" || dataKind === "demo") && (
           <button type="button" disabled={busy} onClick={onDemo} className={`${row} disabled:opacity-50`}>
-            <span className={icon("bg-[#ff9f0a]")}>
+            <span className={icon("bg-orange")}>
               <Presentation aria-hidden size={18} />
             </span>
             <span className="flex-1">
@@ -254,7 +254,7 @@ export function SettingsScreen() {
         )}
       </Group>
 
-      <Group id="s-about" title="Поддержка" footer="Не является медицинской консультацией.">
+      <Group id="s-about" title="Поддержка">
         {HELP_LINES.map((l) => (
           <a key={l.phone} href={`tel:${l.phone}`} className={row}>
             <span className="w-12 text-[22px] font-bold text-link tabular-nums">{l.phone}</span>

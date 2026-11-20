@@ -59,11 +59,11 @@ export function HabitsToday({ onChange }: { onChange?: () => void }) {
 
   return (
     <section aria-labelledby="habits-h">
-      <div className="mb-2 flex items-end justify-between">
-        <h2 id="habits-h" className="title text-[22px]">
-          Привычки <span className="text-[17px] font-medium text-muted tabular-nums">{done}/{habits.length}</span>
+      <div className="flex items-baseline justify-between px-4">
+        <h2 id="habits-h" className="pb-1.5 text-[13px] text-muted uppercase">
+          Привычки · <span className="tabular-nums">{done}/{habits.length}</span>
         </h2>
-        <Link href="/habits/" className="inline-flex min-h-11 items-center text-[17px] text-link">
+        <Link href="/habits/" className="-my-3 inline-flex min-h-11 items-center text-[15px] text-link">
           Изменить
         </Link>
       </div>

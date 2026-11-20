@@ -30,6 +30,9 @@
   --color-danger-tint: #fdecec;
   --color-accent-weak: #c9d7ff;
   --color-garden: #eef6ec;
+  --color-orange: #f08a00;
+  --color-red: #d70015;
+  --color-tab-off: #8a8a8e;
 
   /* «Спокойный сад фокуса» (docs/DESIGN.md) */
   --color-surface: #ffffff;

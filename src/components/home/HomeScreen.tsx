@@ -134,10 +134,9 @@ function Loaded({ data, onChange }: { data: Data; onChange: () => void }) {
           >
             <ProgressRing value={(score ?? 0) / 100} size={112} stroke={12}>
               {score === null ? (
-                <span className="text-[13px] leading-tight font-semibold text-link">
-                  Пройти
-                  <br />
-                  тест
+                <span>
+                  <span className="stat block text-[34px] text-chevron">—</span>
+                  <span className="text-[13px] font-medium text-muted">фокус</span>
                 </span>
               ) : (
                 <span>
@@ -160,19 +159,19 @@ function Loaded({ data, onChange }: { data: Data; onChange: () => void }) {
 
       {!today && (
         <Link href="/checkin/" className={`${btnPrimary} w-full`}>
-          <ClipboardCheck aria-hidden size={20} /> Отметить день · 1 минута
+          Отметить день
         </Link>
       )}
 
       <section aria-labelledby="actions-h">
-        <h2 id="actions-h" className="title mb-2 text-[22px]">
+        <h2 id="actions-h" className="px-4 pb-1.5 text-[13px] text-muted uppercase">
           Действия
         </h2>
         <nav aria-label="Действия" className="group-list">
           {today && (
             <Row href="/checkin/" icon={<ClipboardCheck aria-hidden size={18} />} tint="bg-accent text-white" title="Чек-ин готов" sub="Изменить ответы" done />
           )}
-          <Row href="/test/" icon={<Zap aria-hidden size={18} />} tint="bg-[#ff9f0a] text-white" title="Тест реакции" sub={score === null ? "90 секунд · Focus Score" : `Сегодня ${score} из 100`} done={score !== null} />
+          <Row href="/test/" icon={<Zap aria-hidden size={18} />} tint="bg-orange text-white" title="Тест реакции" sub={score === null ? "90 секунд · Focus Score" : `Сегодня ${score} из 100`} done={score !== null} />
           <Row href="/focus/" icon={<Timer aria-hidden size={18} />} tint="bg-s-sleep text-white" title="Фокус-сессия" sub={focusToday ? `Сегодня ${focusToday} мин` : "15, 25 или 50 минут"} />
         </nav>
       </section>
@@ -183,14 +182,14 @@ function Loaded({ data, onChange }: { data: Data; onChange: () => void }) {
       {today && <Tip data={today} />}
 
       <section aria-labelledby="more-h">
-        <h2 id="more-h" className="title mb-2 text-[22px]">
+        <h2 id="more-h" className="px-4 pb-1.5 text-[13px] text-muted uppercase">
           Обзор
         </h2>
         <nav aria-label="Обзор" className="group-list">
           <Row href="/tree/" icon={<Sprout aria-hidden size={18} />} tint="bg-leaf text-white" title="Сад" sub={`${tree.stageName[0]!.toUpperCase()}${tree.stageName.slice(1)} · ${tree.drops} ${plural(tree.drops, ["капля", "капли", "капель"])}`} />
           <Row href="/week/" icon={<CalendarRange aria-hidden size={18} />} tint="bg-s-mind text-white" title="Итоги недели" sub="Как прошли ваши 7 дней" />
           <Row href="/history/" icon={<ChartLine aria-hidden size={18} />} tint="bg-accent text-white" title="История" sub="Focus Score за 30 дней" />
-          <Row href="/settings/#reminder" icon={<BellRing aria-hidden size={18} />} tint="bg-[#ff3b30] text-white" title="Напоминание" sub="Каждый день в удобное время" plain />
+          <Row href="/settings/#reminder" icon={<BellRing aria-hidden size={18} />} tint="bg-red text-white" title="Напоминание" sub="Каждый день в удобное время" plain />
         </nav>
       </section>
     </>
@@ -275,7 +274,7 @@ function Tip({ data }: { data: CheckInData }) {
   return (
     <section aria-labelledby="tip-h" className="rounded-card-lg bg-surface p-4">
       <p className="flex items-center gap-1.5 text-[13px] font-semibold text-muted">
-        <Lightbulb aria-hidden size={15} className="text-[#ff9f0a]" /> Совет на завтра
+        <Lightbulb aria-hidden size={15} className="text-orange" /> Совет на завтра
       </p>
       <h2 id="tip-h" className="mt-1.5 text-[17px] font-semibold text-ink">
         {tip.title}

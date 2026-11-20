@@ -13,7 +13,6 @@ import { latestTestByDay } from "@/lib/today";
 import type { TreeState } from "@/lib/tree";
 import { weeklyReview, type WeeklyReview } from "@/lib/weekly";
 import { btnPrimary } from "@/components/ui/controls";
-import { TreeSvg } from "@/components/tree/TreeSvg";
 
 type Data = { review: WeeklyReview; scores: (number | null)[]; tree: TreeState; top: Insight | null; usable: number };
 
@@ -72,7 +71,7 @@ export function WeekScreen() {
 }
 
 function Story({ data }: { data: Data }) {
-  const { review, scores, tree, top, usable } = data;
+  const { review, scores, top, usable } = data;
   const { current: c, scoreDelta } = review;
   const max = Math.max(...scores.map((s) => s ?? 0), 1);
   const bestDate = c.best?.date;
@@ -81,11 +80,11 @@ function Story({ data }: { data: Data }) {
     <div className="stagger mt-4 space-y-8">
       {/* 1. Average Focus Score */}
       <section aria-labelledby="avg-h">
-        <h1 id="avg-h" className="title text-[34px]">
+        <h1 id="avg-h" className="text-[15px] font-medium text-muted">
           {c.avgScore === null ? "Неделя без теста" : "Средний Focus Score"}
         </h1>
         {c.avgScore !== null ? (
-          <div className="mt-3 flex items-baseline gap-3">
+          <div className="mt-1 flex items-baseline gap-3">
             <span className="stat text-[72px] text-ink">{c.avgScore}</span>
             {scoreDelta !== null && scoreDelta !== 0 && (
               <span
@@ -159,19 +158,6 @@ function Story({ data }: { data: Data }) {
           <p className="mt-1 text-[15px] text-muted">Нужны дни, где есть и чек-ин, и тест.</p>
         </section>
       )}
-
-      {/* 5. Tree */}
-      <section aria-label="Сад" className="flex items-center gap-4 rounded-card-lg bg-surface p-4">
-        <div className="w-24 shrink-0">
-          <TreeSvg stage={tree.stage} wilting={tree.wilting} title={`Дерево: ${tree.stageName}`} />
-        </div>
-        <div>
-          <p className="font-semibold text-ink first-letter:uppercase">{tree.stageName}</p>
-          <p className="text-[15px] text-muted">
-            {tree.drops} {plural(tree.drops, ["капля", "капли", "капель"])} всего
-          </p>
-        </div>
-      </section>
 
       <Link href="/insights/" className={`${btnPrimary} w-full`}>
         Выбрать эксперимент

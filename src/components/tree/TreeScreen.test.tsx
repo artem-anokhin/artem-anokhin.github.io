@@ -22,6 +22,6 @@ describe("TreeScreen", () => {
     await db.focusTests.add({ date, takenAt: 1, score: 70 });
     render(<TreeScreen />);
     expect(await screen.findByText("До стадии «росток»: 2 из 6")).toBeInTheDocument();
-    expect(screen.getByText("За 7 дней чек-инов: 1, тестов: 1.")).toBeInTheDocument();
+    expect(screen.getByText("Чек-ины").previousSibling).toHaveTextContent("1");
   });
 });

@@ -1,6 +1,6 @@
 "use client";
 
-import { BellRing, CalendarPlus } from "lucide-react";
+import { CalendarPlus } from "lucide-react";
 import { useState } from "react";
 import { TimeField } from "@/components/ui/controls";
 import { buildIcs, googleCalendarUrl, isTime } from "@/lib/reminder";
@@ -33,13 +33,8 @@ export function ReminderCard() {
         Напоминание
       </h2>
       <div className="group-list">
-        <div className="flex items-center gap-3 px-4 py-3">
-          <span className="grid size-[30px] shrink-0 place-items-center rounded-[7px] bg-[#d70015] text-white">
-            <BellRing aria-hidden size={18} />
-          </span>
-          <div className="min-w-0 flex-1">
-            <TimeField label="Время чек-ина" value={time} onChange={(v) => { setTime(v); setDone(false); }} />
-          </div>
+        <div className="px-4 py-3">
+          <TimeField label="Время чек-ина" value={time} onChange={(v) => { setTime(v); setDone(false); }} />
         </div>
         <a
           href={ok ? googleCalendarUrl(time, appUrl()) : undefined}

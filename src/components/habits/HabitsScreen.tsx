@@ -108,19 +108,21 @@ export function HabitsScreen() {
             const Icon = st.icon;
             const has = taken.has(idea.id);
             return (
-              <li key={idea.id} className="px-4 py-3">
+              <li key={idea.id} className="px-4 py-2">
                 <div className="flex items-start gap-3">
-                  <span className={`mt-0.5 grid size-[30px] shrink-0 place-items-center rounded-[7px] text-white ${st.base}`}>
+                  <span className={`mt-2.5 grid size-[30px] shrink-0 place-items-center rounded-[7px] text-white ${st.base}`}>
                     <Icon aria-hidden size={18} />
                   </span>
-                  <div className="min-w-0 flex-1">
-                    <p className="text-[17px] text-ink">{idea.title}</p>
-                    <p className="mt-0.5 text-[13px] leading-snug text-muted">{idea.why}</p>
-                    <a href={idea.url} target="_blank" rel="noopener noreferrer" className="mt-1 inline-flex min-h-11 items-center text-[13px] text-muted underline">
+                  <details className="group min-w-0 flex-1">
+                    <summary className="flex min-h-11 cursor-pointer list-none items-center text-[17px] text-ink [&::-webkit-details-marker]:hidden">
+                      {idea.title}
+                    </summary>
+                    <p className="text-[13px] leading-snug text-muted">{idea.why}</p>
+                    <a href={idea.url} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-11 items-center text-[13px] text-muted underline">
                       Источник: {idea.source}
                       <span className="sr-only"> (откроется в новой вкладке)</span>
                     </a>
-                  </div>
+                  </details>
                   <button
                     type="button"
                     disabled={has || full}
@@ -167,13 +169,12 @@ export function HabitsScreen() {
             <legend className="mb-2 text-[15px] font-semibold text-ink">Сфера</legend>
             <div className="flex flex-wrap gap-2">
               {SPHERES.map(({ key, title: t }) => {
-                const st = SPHERE_STYLE[key];
                 const on = key === sphere;
                 return (
                   <label
                     key={key}
                     className={`pressable inline-flex min-h-11 cursor-pointer items-center rounded-full px-3 text-[14px] font-semibold has-[:focus-visible]:outline-3 has-[:focus-visible]:outline-accent ${
-                      on ? `${st.base} text-white` : `${st.tint} ${st.ink}`
+                      on ? "bg-accent text-white" : "bg-fill text-ink"
                     }`}
                   >
                     <input type="radio" name="sphere" value={key} checked={on} onChange={() => setSphere(key)} className="sr-only" />

@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { CrisisCard } from "@/components/CrisisCard";
 import Link from "next/link";
-import { PenLine, X } from "lucide-react";
+import { X } from "lucide-react";
 import { ChoiceField, ScaleField, Stepper, TimeField, YesNoField } from "@/components/ui/controls";
 import { SPHERE_STYLE } from "@/lib/spheres";
 import {
@@ -78,7 +78,6 @@ export function CheckInWizard({
   const sphereKey = isNote ? null : SPHERES[step]!.key;
   const st = sphereKey ? SPHERE_STYLE[sphereKey] : null;
   const theme = st ?? { base: "bg-navy", tint: "bg-bg", ink: "text-link" };
-  const Icon = st?.icon ?? PenLine;
   const question = isNote ? "Как прошёл день?" : QUESTIONS[sphereKey!];
 
   return (
@@ -116,10 +115,7 @@ export function CheckInWizard({
 
         <section key={step} className="stagger mt-6 space-y-6 pb-6" aria-labelledby="sphere-title">
           <div>
-            <span className={`grid size-14 place-items-center rounded-[14px] text-white ${st?.base ?? "bg-accent"}`}>
-              <Icon aria-hidden size={28} strokeWidth={2.2} />
-            </span>
-            <p className="mt-4 text-[13px] font-semibold text-muted">{isNote ? "Последний шаг" : `Сфера ${step + 1} из ${SPHERES.length}`}</p>
+            <p className={`text-[13px] font-semibold ${st?.text ?? "text-link"}`}>{isNote ? "Последний шаг" : `Сфера ${step + 1} из ${SPHERES.length}`}</p>
             <h2 id="sphere-title" ref={headingRef} tabIndex={-1} className="title text-[34px] focus:outline-none">
               {title}
             </h2>
