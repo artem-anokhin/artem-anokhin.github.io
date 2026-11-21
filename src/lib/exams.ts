@@ -73,3 +73,18 @@ export async function removeExam(id: string, db: FocusDB = defaultDb): Promise<v
     await db.settings.put({ key: EXAMS_KEY, value: list });
   });
 }
+
+/** True when a focus-session task belongs to an exam (either label contains the other, case-insensitive). */
+export function taskMatchesExam(task: string | undefined, examTitle: string): boolean {
+  if (!task) return false;
+  const a = task.toLowerCase().replace(/ё/g, "е");
+  const b = examTitle.toLowerCase().replace(/ё/g, "е");
+  return a.length >= 3 && b.length >= 3 && (a.includes(b) || b.includes(a));
+}
+
+/** Focus minutes per exam from sessions whose task matches the exam title. */
+export function prepMinutes(exams: Exam[], sessions: { task?: string; minutes: number }[]): Map<string, number> {
+  const m = new Map<string, number>();
+  for (const e of exams) m.set(e.id, sessions.filter((s) => taskMatchesExam(s.task, e.title)).reduce((a, s) => a + s.minutes, 0));
+  return m;
+}

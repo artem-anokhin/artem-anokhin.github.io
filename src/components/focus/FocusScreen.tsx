@@ -7,6 +7,7 @@ import { db, dayKey } from "@/lib/db";
 import {
   SESSION_LENGTHS,
   TASK_MAX,
+  cleanTask,
   cancelSession,
   finishSession,
   getActiveSession,
@@ -130,6 +131,8 @@ export function FocusScreen() {
       if (!alive) return;
       if (isNoiseId(saved)) setNoise(saved);
       if (!active) setInvite(parseTogether(window.location.search));
+      const preset = cleanTask(new URLSearchParams(window.location.search).get("task"));
+      if (preset) setTask(preset);
       setView(active ? { kind: "running", active } : { kind: "setup" });
     })().catch(() => alive && setView({ kind: "setup" }));
     return () => {

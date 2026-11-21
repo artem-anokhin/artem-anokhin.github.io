@@ -1,15 +1,16 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { GraduationCap, Plus, Trash2 } from "lucide-react";
-import { dayKey } from "@/lib/db";
-import { EXAM_TITLE_MAX, MAX_EXAMS, addExam, daysUntil, removeExam, upcomingExams, type Exam } from "@/lib/exams";
+import Link from "next/link";
+import { GraduationCap, Plus, Timer, Trash2 } from "lucide-react";
+import { db, dayKey } from "@/lib/db";
+import { EXAM_TITLE_MAX, MAX_EXAMS, addExam, daysUntil, prepMinutes, removeExam, upcomingExams, type Exam } from "@/lib/exams";
 import { hasCrisisWording } from "@/lib/crisis";
 import { plural } from "@/lib/plural";
 import { CrisisCard } from "@/components/CrisisCard";
 import { btnPrimary } from "@/components/ui/controls";
 
-const dateFmt = new Intl.DateTimeFormat("ru-RU", { day: "numeric", month: "long", weekday: "short" });
+const dateFmt = new Intl.DateTimeFormat("ru-RU", { day: "numeric", month: "short" });
 
 function when(days: number): string {
   if (days === 0) return "Сегодня";
@@ -20,6 +21,7 @@ function when(days: number): string {
 /** «Экзамены и дедлайны» on Today: countdown to a few dates the student cares about. */
 export function ExamsCard({ onChange }: { onChange?: () => void } = {}) {
   const [exams, setExams] = useState<Exam[] | null>(null);
+  const [prep, setPrep] = useState<Map<string, number>>(new Map());
   const [adding, setAdding] = useState(false);
   const [title, setTitle] = useState("");
   const [date, setDate] = useState("");
@@ -29,8 +31,12 @@ export function ExamsCard({ onChange }: { onChange?: () => void } = {}) {
 
   useEffect(() => {
     let alive = true;
-    upcomingExams()
-      .then((e) => alive && setExams(e))
+    Promise.all([upcomingExams(), db.sessions.toArray()])
+      .then(([e, s]) => {
+        if (!alive) return;
+        setExams(e);
+        setPrep(prepMinutes(e, s));
+      })
       .catch(() => alive && setExams([]));
     return () => {
       alive = false;
@@ -160,8 +166,16 @@ export function ExamsCard({ onChange }: { onChange?: () => void } = {}) {
                   <span className="block truncate text-[17px] text-ink">{e.title}</span>
                   <span className="block text-[13px] text-muted first-letter:uppercase">
                     {when(d)} · {dateFmt.format(new Date(`${e.date}T12:00:00`))}
+                    {(prep.get(e.id) ?? 0) > 0 && ` · готовились ${prep.get(e.id)} мин`}
                   </span>
                 </span>
+                <Link
+                  href={`/focus/?task=${encodeURIComponent(e.title)}`}
+                  aria-label={`Фокус-сессия: ${e.title}`}
+                  className="grid size-11 shrink-0 place-items-center text-link"
+                >
+                  <Timer aria-hidden size={20} />
+                </Link>
                 <button
                   type="button"
                   onClick={() => onRemove(e.id)}

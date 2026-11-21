@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { FocusDB } from "./db";
-import { MAX_EXAMS, addExam, daysUntil, removeExam, sanitizeExams, upcomingExams } from "./exams";
+import { MAX_EXAMS, addExam, daysUntil, prepMinutes, removeExam, sanitizeExams, taskMatchesExam, upcomingExams } from "./exams";
 
 describe("exams", () => {
   it("needs consent, validates, sorts and removes", async () => {
@@ -29,5 +29,17 @@ describe("exams", () => {
     expect(daysUntil("2026-11-21", "2026-11-21")).toBe(0);
     expect(daysUntil("2026-12-01", "2026-11-21")).toBe(10);
     expect(daysUntil("2027-03-29", "2027-03-27")).toBe(2); // across DST change in some zones
+  });
+});
+
+describe("exam prep", () => {
+  it("matches tasks to exams loosely and sums minutes", () => {
+    expect(taskMatchesExam("Матанализ, глава 3", "матанализ")).toBe(true);
+    expect(taskMatchesExam("Мат", "Матанализ")).toBe(true);
+    expect(taskMatchesExam("ма", "Матанализ")).toBe(false);
+    expect(taskMatchesExam(undefined, "Матанализ")).toBe(false);
+    const exams = [{ id: "a", title: "Матанализ", date: "2026-12-01" }];
+    const m = prepMinutes(exams, [{ task: "матанализ", minutes: 25 }, { task: "Английский", minutes: 50 }, { minutes: 15 }]);
+    expect(m.get("a")).toBe(25);
   });
 });
