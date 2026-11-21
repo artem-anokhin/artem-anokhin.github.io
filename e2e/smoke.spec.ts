@@ -77,3 +77,11 @@ test("onboarding → demo → every screen fits 375px → check-in → focus →
   await (await download).saveAs("test-results/share-card.png");
   await expect(page.getByText(/Картинка сохранена/)).toBeVisible();
 });
+
+test("a challenge link opens the test without onboarding; the rest of the app still needs consent", async ({ page }) => {
+  await page.goto("/tests/stroop/?vs=74");
+  await expect(page.getByText(/Вас вызвали: у друга 74/)).toBeVisible();
+  await expect(page).toHaveURL(/\/tests\/stroop\/\?vs=74$/);
+  await page.goto("/notes/");
+  await expect(page).toHaveURL(/\/welcome\/$/);
+});

@@ -2,7 +2,9 @@
 
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
-import { X } from "lucide-react";
+import { Swords, X } from "lucide-react";
+import { challengeVerdict, parseChallenge, shareChallenge } from "@/lib/challenge";
+import { getProfile } from "@/lib/settings";
 import { STROOP_COLORS, brainHistory, nowMs, saveBrainTest, scoreStroop, stroopTrials, type StroopAnswer, type StroopColor, type StroopSummary, type StroopTrial } from "@/lib/brainTests";
 import { cardHref } from "@/lib/libraryLinks";
 import { tap } from "@/lib/haptics";
@@ -19,6 +21,19 @@ export function StroopTest() {
   const [trials, setTrials] = useState<StroopTrial[]>(() => stroopTrials());
   const answers = useRef<StroopAnswer[]>([]);
   const shownAt = useRef(0);
+  const [vs, setVs] = useState<number | null>(null);
+  const [guest, setGuest] = useState(false);
+  const [shareStatus, setShareStatus] = useState<"" | "copied" | "error">("");
+
+  useEffect(() => {
+    const read = (guestNow: boolean) => {
+      setGuest(guestNow);
+      setVs(parseChallenge(window.location.search));
+    };
+    getProfile()
+      .then((p) => read(!p))
+      .catch(() => read(true));
+  }, []);
 
   useEffect(() => {
     if (view.kind !== "run") return;
@@ -59,7 +74,7 @@ export function StroopTest() {
   }
 
   const close = (
-    <Link href="/tests/" aria-label="Закрыть тест" className="pressable grid size-11 place-items-center rounded-full bg-white/10 text-night-ink">
+    <Link href={guest ? "/welcome/" : "/tests/"} aria-label="Закрыть тест" className="pressable grid size-11 place-items-center rounded-full bg-white/10 text-night-ink">
       <X aria-hidden size={22} />
     </Link>
   );
@@ -72,6 +87,11 @@ export function StroopTest() {
           <p aria-hidden className="text-[44px] font-black tracking-tight" style={{ color: "#409CFF" }}>
             КРАСНЫЙ
           </p>
+          {vs !== null && (
+            <p className="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-[15px] font-semibold text-night-ink" role="status">
+              <Swords aria-hidden size={18} /> Вас вызвали: у друга {vs}. Сможете больше?
+            </p>
+          )}
           <div>
             <h1 className="title text-[32px] text-night-ink">Цвет и слово</h1>
             <p className="mt-2 text-[17px] text-night-muted">
@@ -136,6 +156,7 @@ export function StroopTest() {
           <>
             <p className="text-[15px] text-night-muted">Результат</p>
             <p className="stat text-[72px] text-night-ink">{s.score}</p>
+            {vs !== null && <p className="-mt-2 text-[20px] font-semibold text-night-ink">{challengeVerdict(s.score, vs)}</p>}
             <dl className="grid w-full max-w-sm grid-cols-3 gap-2">
               {[
                 ["Точность", `${Math.round(s.accuracy * 100)}%`],
@@ -157,12 +178,39 @@ export function StroopTest() {
         )}
       </div>
       <div className="grid gap-2">
-        <button type="button" className={`${btnNight} w-full`} onClick={start}>
+        {s && guest && (
+          <div className="rounded-card bg-white/8 p-4 text-left">
+            <p className="text-[15px] text-night-ink">Результат не сохранён: мы храним данные только после вашего согласия, и только на этом телефоне.</p>
+            <Link href="/welcome/" className={`${btnNight} mt-3 w-full`}>
+              Следить за прогрессом
+            </Link>
+          </div>
+        )}
+        {s && (
+          <button
+            type="button"
+            className={`${guest ? btnNightGhost : btnNight} w-full gap-2`}
+            onClick={async () => {
+              const r = await shareChallenge(s.score);
+              setShareStatus(r === "copied" ? "copied" : r === "error" ? "error" : "");
+            }}
+          >
+            <Swords aria-hidden size={18} /> Вызвать друга
+          </button>
+        )}
+        {shareStatus && (
+          <p role="status" className="text-center text-[13px] text-night-muted">
+            {shareStatus === "copied" ? "Ссылка скопирована — отправьте её другу" : "Не получилось поделиться"}
+          </p>
+        )}
+        <button type="button" className={`${btnNightGhost} w-full`} onClick={start}>
           Ещё раз
         </button>
-        <Link href="/tests/" className={`${btnNightGhost} w-full`}>
-          Все тесты
-        </Link>
+        {!guest && (
+          <Link href="/tests/" className={`${btnNightGhost} w-full`}>
+            Все тесты
+          </Link>
+        )}
       </div>
     </NightShell>
   );

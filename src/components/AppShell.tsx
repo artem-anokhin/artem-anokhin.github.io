@@ -5,6 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { isDemo } from "@/lib/demo";
 import { rememberReturn } from "@/lib/returnTo";
+import { isTryPath } from "@/lib/challenge";
 import { IMMERSIVE, NAV_ITEMS, SIDEBAR_EXTRA, isActive, isTabActive } from "@/lib/nav";
 import { Info } from "lucide-react";
 import { getProfile } from "@/lib/settings";
@@ -27,6 +28,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     getProfile()
       .then((p) => {
         if (!alive) return;
+        // A challenge link opens the test right away; storage still needs consent.
+        if (!p && isTryPath(window.location.pathname)) return setReady(true);
         if (!p) {
           rememberReturn(`${window.location.pathname}${window.location.search}`);
           return router.replace(WELCOME);
@@ -41,7 +44,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     return () => {
       alive = false;
     };
-  }, [onWelcome, router]);
+  }, [onWelcome, router, pathname]); // re-check on navigation: a try path must not open the rest of the app
 
   // Re-check the demo flag on client navigation (e.g. after «убрать» on another screen).
   useEffect(() => {
