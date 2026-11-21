@@ -1,7 +1,7 @@
 import Link from "next/link";
 
 /** Segmented control «Инсайты | Библиотека» (both live under the Инсайты tab). */
-export function InsightsTabs({ current }: { current: "insights" | "library" }) {
+export function InsightsTabs({ current }: { current: "insights" | "stats" | "library" }) {
   const item = (href: string, label: string, on: boolean) => (
     <Link
       href={href}
@@ -16,6 +16,7 @@ export function InsightsTabs({ current }: { current: "insights" | "library" }) {
   return (
     <nav aria-label="Раздел" className="flex gap-0.5 rounded-[9px] bg-seg p-0.5">
       {item("/insights/", "Инсайты", current === "insights")}
+      {item("/stats/", "Статистика", current === "stats")}
       {item("/library/", "Библиотека", current === "library")}
     </nav>
   );

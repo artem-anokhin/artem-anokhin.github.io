@@ -7,7 +7,7 @@ export const NAV_ITEMS: readonly NavItem[] = [
   { href: "/", label: "Сегодня", icon: Sun, also: ["/settings/", "/checkin/", "/habits/", "/goals/", "/notes/"] },
   { href: "/focus/", label: "Фокус", icon: Timer, also: ["/test/", "/breathe/", "/tests/"] },
   { href: "/tree/", label: "Сад", icon: Sprout },
-  { href: "/insights/", label: "Инсайты", icon: ChartLine, also: ["/library/", "/week/", "/history/"] },
+  { href: "/insights/", label: "Инсайты", icon: ChartLine, also: ["/library/", "/week/", "/history/", "/stats/"] },
 ];
 
 /** Extra desktop-sidebar items (mobile reaches them from screens). */

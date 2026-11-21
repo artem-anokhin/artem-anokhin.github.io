@@ -60,7 +60,7 @@ export function buildDemo(today: Date = new Date(), days = DEMO_DAYS, seed = 7) 
       // Task and away come from the day index, not rng, so the rest of the demo stays the same.
       r(); // keep the rng sequence stable for the rest of the demo
       const minutes = i % 2 === 0 ? 25 : 50;
-      sessions.push({ date, startedAt: t - 3 * 3_600_000, minutes, task: DEMO_TASKS[i % DEMO_TASKS.length], away: i % 3, feel: (minutes === 50 ? [1, 2, 2][i % 3] : [3, 2, 3][i % 3]) as 1 | 2 | 3, demo: true });
+      sessions.push({ date, startedAt: t - [3, 9, 11, 1][i % 4]! * 3_600_000, minutes, task: DEMO_TASKS[i % DEMO_TASKS.length], away: i % 3, feel: (minutes === 50 ? [1, 2, 2][i % 3] : [3, 2, 3][i % 3]) as 1 | 2 | 3, demo: true });
     }
     if (r() > 0.12) {
       // Test hour rotates morning/day/evening by day index; mornings run a little higher (demo only).
