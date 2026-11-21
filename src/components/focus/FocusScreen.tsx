@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { ChevronRight, Coffee, Volume2, VolumeX, Wind, Zap } from "lucide-react";
+import { ChevronRight, Coffee, Users, Volume2, VolumeX, Wind, Zap } from "lucide-react";
 import { db, dayKey } from "@/lib/db";
 import {
   SESSION_LENGTHS,
@@ -14,6 +14,9 @@ import {
   markAway,
   minutesByDay,
   rateSession,
+  parseTogether,
+  togetherLink,
+  type Together,
   recentTasks,
   remainingMs,
   startSession,
@@ -92,6 +95,8 @@ export function FocusScreen() {
   const [recent, setRecent] = useState<string[]>([]);
   const [noise, setNoise] = useState<NoiseId>("off");
   const [muted, setMuted] = useState(false);
+  const [invite, setInvite] = useState<Together | null>(null);
+  const [inviteStatus, setInviteStatus] = useState<"" | "copied" | "error">("");
   const [now, setNow] = useState(() => Date.now());
   const [confirmStop, setConfirmStop] = useState(false);
   const [error, setError] = useState(false);
@@ -124,6 +129,7 @@ export function FocusScreen() {
       const saved = (await db.settings.get(NOISE_KEY))?.value;
       if (!alive) return;
       if (isNoiseId(saved)) setNoise(saved);
+      if (!active) setInvite(parseTogether(window.location.search));
       setView(active ? { kind: "running", active } : { kind: "setup" });
     })().catch(() => alive && setView({ kind: "setup" }));
     return () => {
@@ -202,6 +208,33 @@ export function FocusScreen() {
     };
   }, [view, now]);
 
+  async function onJoin() {
+    if (!invite?.ok) return;
+    setError(false);
+    finishing.current = false;
+    unlockAudio();
+    const active = await startSession(invite.minutes, undefined, invite.startedAt, task).catch(() => null);
+    if (!active) return setError(true);
+    window.history.replaceState(null, "", "/focus/");
+    setInvite(null);
+    setNow(Date.now());
+    setView({ kind: "running", active });
+  }
+
+  async function onInvite(a: ActiveSession) {
+    const url = togetherLink(window.location.origin, a);
+    try {
+      if (typeof navigator.share === "function") {
+        await navigator.share({ title: "Учимся вместе в FocusAI", text: `Фокус-сессия ${a.minutes} минут — присоединяйся`, url });
+      } else {
+        await navigator.clipboard.writeText(url);
+        setInviteStatus("copied");
+      }
+    } catch (e) {
+      if (!(e instanceof DOMException && e.name === "AbortError")) setInviteStatus("error");
+    }
+  }
+
   async function onStart() {
     setError(false);
     finishing.current = false;
@@ -246,6 +279,30 @@ export function FocusScreen() {
               <h1 className="title mt-1 text-[32px] text-night-ink">Фокус-сессия</h1>
               <p className="mt-2 text-[17px] text-night-muted">Учитесь без отвлечений: за сессию из семени вырастет росток, а дерево получит каплю.</p>
             </header>
+
+            {invite && (
+              <section aria-labelledby="together-h" className="rounded-card-lg bg-accent/25 p-4">
+                <h2 id="together-h" className="flex items-center gap-2 text-[17px] font-semibold text-night-ink">
+                  <Users aria-hidden size={20} /> Учимся вместе
+                </h2>
+                {invite.ok ? (
+                  <>
+                    <p className="mt-1 text-[15px] text-night-ink/85">
+                      Друг начал сессию на {invite.minutes} минут. Присоединяйтесь — закончите одновременно.
+                    </p>
+                    <button type="button" onClick={onJoin} className={`${btnNight} mt-3 w-full`}>
+                      Присоединиться
+                    </button>
+                  </>
+                ) : (
+                  <p className="mt-1 text-[15px] text-night-ink/85">
+                    {invite.reason === "late"
+                      ? "Эта совместная сессия уже идёт дольше 3 минут. Начните свою — и позовите друга в ответ."
+                      : "Ссылка из будущего — проверьте время на телефоне."}
+                  </p>
+                )}
+              </section>
+            )}
 
             <TreeScene night stage={stage} wilting={false} title="Ваше дерево ночью" className="h-56 rounded-card-lg" />
 
@@ -396,6 +453,16 @@ export function FocusScreen() {
                 {muted ? "Звук выключен" : NOISES.find((n) => n.id === noise)?.label}
               </button>
             )}
+            <button
+              type="button"
+              onClick={() => onInvite(view.active)}
+              className="pressable inline-flex min-h-11 items-center gap-2 rounded-full bg-white/8 px-4 text-[15px] text-night-ink/90"
+            >
+              <Users aria-hidden size={18} /> Позвать друга
+            </button>
+            <p role="status" className="-mt-4 text-[13px] text-night-muted empty:hidden">
+              {inviteStatus === "copied" ? "Ссылка скопирована — отправьте её другу." : inviteStatus === "error" ? "Не получилось поделиться ссылкой." : ""}
+            </p>
             {!confirmStop ? (
               <button type="button" onClick={() => setConfirmStop(true)} className={btnNightGhost}>
                 Завершить раньше

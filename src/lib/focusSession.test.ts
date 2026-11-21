@@ -1,5 +1,5 @@
 import { FocusDB } from "./db";
-import { TASK_MAX, cancelSession, cleanTask, finishSession, getActiveSession, markAway, minutesByDay, minutesByTask, feelByLength, rateSession, recentTasks, remainingMs, startSession } from "./focusSession";
+import { TASK_MAX, cancelSession, cleanTask, finishSession, getActiveSession, markAway, minutesByDay, minutesByTask, feelByLength, parseTogether, rateSession, togetherLink, recentTasks, remainingMs, startSession } from "./focusSession";
 
 const T0 = new Date(2026, 10, 21, 10, 0).getTime();
 
@@ -101,5 +101,19 @@ describe("feel by length", () => {
     const r = feelByLength(s);
     expect(r.find((x) => x.minutes === 25)).toMatchObject({ rated: 3, avg: 8 / 3 });
     expect(r.find((x) => x.minutes === 50)).toMatchObject({ rated: 2, avg: null });
+  });
+});
+
+describe("study together link", () => {
+  it("round-trips and rejects late, future or junk links", () => {
+    const now = 1_800_000_000_000;
+    const link = togetherLink("https://x.kz", { startedAt: now - 60_000, minutes: 25 });
+    expect(link).toBe(`https://x.kz/focus/?together=${now - 60_000}&m=25`);
+    expect(parseTogether(new URL(link).search, now)).toEqual({ ok: true, startedAt: now - 60_000, minutes: 25 });
+    expect(parseTogether(`?together=${now - 10 * 60_000}&m=25`, now)).toEqual({ ok: false, reason: "late" });
+    expect(parseTogether(`?together=${now + 5 * 60_000}&m=25`, now)).toEqual({ ok: false, reason: "future" });
+    expect(parseTogether(`?together=${now}&m=33`, now)).toBeNull();
+    expect(parseTogether(`?together=abc&m=25`, now)).toBeNull();
+    expect(parseTogether("", now)).toBeNull();
   });
 });

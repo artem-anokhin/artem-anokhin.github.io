@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { isDemo } from "@/lib/demo";
+import { rememberReturn } from "@/lib/returnTo";
 import { IMMERSIVE, NAV_ITEMS, SIDEBAR_EXTRA, isActive, isTabActive } from "@/lib/nav";
 import { Info } from "lucide-react";
 import { getProfile } from "@/lib/settings";
@@ -26,7 +27,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     getProfile()
       .then((p) => {
         if (!alive) return;
-        if (!p) return router.replace(WELCOME);
+        if (!p) {
+          rememberReturn(`${window.location.pathname}${window.location.search}`);
+          return router.replace(WELCOME);
+        }
         setReady(true);
         return isDemo().then((d) => alive && setDemo(d));
       })

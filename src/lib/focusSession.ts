@@ -162,3 +162,23 @@ export function feelByLength(sessions: Pick<FocusSession, "minutes" | "feel">[])
     return { minutes: m, rated: xs.length, avg: xs.length >= MIN_RATED ? xs.reduce((a, b) => a + b, 0) / xs.length : null };
   });
 }
+
+/** «Учиться вместе»: a link carries only the start time and length (no task, no data). */
+export const JOIN_LATE_MS = 3 * 60_000;
+
+export function togetherLink(origin: string, a: Pick<ActiveSession, "startedAt" | "minutes">): string {
+  return `${origin}/focus/?together=${a.startedAt}&m=${a.minutes}`;
+}
+
+export type Together = { ok: true; startedAt: number; minutes: SessionLength } | { ok: false; reason: "late" | "future" };
+
+/** Reads `?together=<ms>&m=<min>`; null when absent or malformed. */
+export function parseTogether(search: string, now = Date.now()): Together | null {
+  const q = new URLSearchParams(search);
+  const ts = Number(q.get("together"));
+  const m = Number(q.get("m"));
+  if (!q.has("together") || !Number.isInteger(ts) || ts <= 0 || !SESSION_LENGTHS.includes(m as SessionLength)) return null;
+  if (ts > now + 60_000) return { ok: false, reason: "future" };
+  if (now - ts > JOIN_LATE_MS) return { ok: false, reason: "late" };
+  return { ok: true, startedAt: Math.min(ts, now), minutes: m as SessionLength };
+}
