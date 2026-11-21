@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { db } from "@/lib/db";
-import { AWARDS_SEEN_KEY, awards, type Award } from "@/lib/awards";
-import { countGoalsDone } from "@/lib/goals";
+import { AWARDS_SEEN_KEY, type Award } from "@/lib/awards";
+import { loadAwards } from "@/lib/awardsData";
 import { plural } from "@/lib/plural";
 import { tap } from "@/lib/haptics";
 import { getProfile } from "@/lib/settings";
@@ -18,15 +18,7 @@ export function Awards({ stage }: { stage: number }) {
   useEffect(() => {
     let alive = true;
     (async () => {
-      const [checkins, tests, sessions, habitLogs, goalsDone, seenRow] = await Promise.all([
-        db.checkins.toArray(),
-        db.focusTests.toArray(),
-        db.sessions.toArray(),
-        db.habitLogs.toArray(),
-        countGoalsDone(),
-        db.settings.get(AWARDS_SEEN_KEY),
-      ]);
-      const l = awards({ checkins, tests, sessions, habitLogs, stage, goalsDone });
+      const [l, seenRow] = await Promise.all([loadAwards(db, stage), db.settings.get(AWARDS_SEEN_KEY)]);
       const seen = new Set(Array.isArray(seenRow?.value) ? (seenRow.value as unknown[]).filter((x): x is string => typeof x === "string") : []);
       const earned = l.filter((a) => a.done).map((a) => a.id);
       // First visit with many earned awards (existing users): mark them seen quietly.

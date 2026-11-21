@@ -13,6 +13,7 @@ import { MIN_DAYS, pairDays, usableDays } from "@/lib/insights";
 import { plural } from "@/lib/plural";
 import { loadTree } from "@/lib/garden";
 import { CheckInWizard } from "./CheckInWizard";
+import { NewAwardChip } from "@/components/tree/NewAwardChip";
 
 type State =
   | { kind: "loading" }
@@ -121,6 +122,11 @@ function Done({ isEdit, stage, next }: { isEdit: boolean; stage: number; next: s
         <p className="mt-2 text-[17px] text-muted">
           {isEdit ? "Изменения сохранены только на этом устройстве." : "Ещё 90 секунд — и узнаете свой Focus Score на сегодня."}
         </p>
+        {!isEdit && (
+          <div className="mt-5">
+            <NewAwardChip />
+          </div>
+        )}
         {!isEdit && next.length > 0 && (
           <ul className="group-list mt-6 text-left" aria-label="Что дальше">
             {next.map((t) => (

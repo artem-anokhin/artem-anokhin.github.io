@@ -32,6 +32,7 @@ import { CrisisCard } from "@/components/CrisisCard";
 import { loadTree } from "@/lib/garden";
 import { GrowingSprout, sproutPhase } from "./GrowingSprout";
 import { ShareSession } from "./ShareSession";
+import { NewAwardChip } from "@/components/tree/NewAwardChip";
 import { btnNight, btnNightGhost } from "@/components/ui/controls";
 import { DropIcon, ProgressRing, TreeScene } from "@/components/ui/visuals";
 
@@ -508,6 +509,7 @@ export function FocusScreen() {
               {view.minutes} {plural(view.minutes, ["минута", "минуты", "минут"])} фокуса
             </h1>
             {view.task && <p className="-mt-4 text-[17px] text-night-ink/85">{view.task}</p>}
+            <NewAwardChip night />
             {view.task && hasCrisisWording(view.task) && <CrisisCard />}
             {view.id !== undefined && (
               <fieldset className="w-full max-w-sm">
