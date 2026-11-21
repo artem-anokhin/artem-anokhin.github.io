@@ -56,7 +56,7 @@ export function GoalsScreen() {
   const reached = goals.filter((g) => g.done);
 
   async function reach(g: Goal) {
-    await setGoalDone(g.id!, true).catch(() => {});
+    if (!(await setGoalDone(g.id!, true).catch(() => false))) return setError("Не получилось сохранить. Попробуйте ещё раз.");
     tap("success");
     setCheer(g.id!);
     load();
@@ -280,7 +280,15 @@ function NewGoal({ onDone, onCancel }: { onDone: (ok: boolean, msg?: string) => 
         e.preventDefault();
         const r = await addGoal({ title, why, due: due || undefined, steps: steps.filter((s) => s.trim()) }).catch(() => null);
         if (r?.ok) onDone(true);
-        else onDone(false, r?.reason === "full" ? `Не больше ${MAX_GOALS} целей сразу.` : "Проверьте название и дату (не раньше сегодня).");
+        else
+          onDone(
+            false,
+            r?.reason === "full"
+              ? `Не больше ${MAX_GOALS} целей сразу.`
+              : r?.reason === "consent"
+                ? "Нет согласия на хранение данных — откройте приложение заново."
+                : "Проверьте название и дату (не раньше сегодня).",
+          );
       }}
     >
       <div>

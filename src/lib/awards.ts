@@ -74,7 +74,7 @@ export function awards({ checkins, tests, sessions, habitLogs, stage, goalsDone 
     { id: "first-goal", title: "Цель достигнута", hint: "Отметить первую цель выполненной", have: goalsDone, need: 1 },
     // Secret ones: described only after they are earned.
     { id: "night-owl", secret: true, title: "Сова", hint: "Фокус-сессия после полуночи. Сон тоже важен 😉", have: yes(sessions.some((s) => hour(s.startedAt) < 4)), need: 1 },
-    { id: "early-bird", secret: true, title: "Жаворонок", hint: "Тест реакции до 7 утра", have: yes(tests.some((t) => t.takenAt > 0 && hour(t.takenAt) >= 4 && hour(t.takenAt) < 7)), need: 1 },
+    { id: "early-bird", secret: true, title: "Жаворонок", hint: "Тест реакции рано утром, с 4 до 7", have: yes(tests.some((t) => t.takenAt > 0 && hour(t.takenAt) >= 4 && hour(t.takenAt) < 7)), need: 1 },
     { id: "marathon", secret: true, title: "Марафонец", hint: "Фокус-сессия на 50 минут", have: yes(sessions.some((s) => s.minutes >= 50)), need: 1 },
     { id: "hat-trick", secret: true, title: "Хет-трик", hint: "Три фокус-сессии за один день", have: yes([...perDay.values()].some((n) => n >= 3)), need: 1 },
     { id: "together", secret: true, title: "Вместе веселее", hint: "Сессия с другом по ссылке", have: yes(sessions.some((s) => s.together === true)), need: 1 },

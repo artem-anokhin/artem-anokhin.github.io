@@ -4,7 +4,7 @@ import { HABIT_TITLE_MAX, MAX_HABITS } from "./habits";
 import { PROFILE_KEY, db as defaultDb, dayKey, type CheckIn, type FocusDB, type FocusSession, type Habit, type HabitLog, type FocusTestResult, type Setting } from "./db";
 import { getProfile, isExperiment, isWindow } from "./settings";
 import { EXAMS_KEY, sanitizeExams } from "./exams";
-import { sanitizeGoal } from "./goals";
+import { MAX_GOALS, sanitizeGoal } from "./goals";
 import { MAX_NOTES, sanitizeNote } from "./notes";
 import { GOAL_KEY, isGoal } from "./focusGoal";
 
@@ -190,7 +190,9 @@ export async function importData(raw: unknown, database: FocusDB = defaultDb): P
     } else skipped++;
   }
 
-  const goals = arr(f.goals).map(sanitizeGoal).filter((g): g is NonNullable<typeof g> => g !== null).slice(0, 100);
+  const allGoals = arr(f.goals).map(sanitizeGoal).filter((g): g is NonNullable<typeof g> => g !== null);
+  // Same limit as in the app: at most MAX_GOALS active, plus up to 100 reached.
+  const goals = [...allGoals.filter((g) => g.done === 0).slice(0, MAX_GOALS), ...allGoals.filter((g) => g.done === 1).slice(0, 100)];
   const notes = arr(f.notes).map(sanitizeNote).filter((n): n is NonNullable<typeof n> => n !== null).slice(0, MAX_NOTES);
   skipped += arr(f.goals).length - goals.length + arr(f.notes).length - Math.min(notes.length, arr(f.notes).length);
 

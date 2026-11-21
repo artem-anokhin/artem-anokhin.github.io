@@ -17,6 +17,7 @@ export function NotesScreen() {
   const [editing, setEditing] = useState<number | null>(null);
   const [query, setQuery] = useState("");
   const [error, setError] = useState(false);
+  const [confirmId, setConfirmId] = useState<number | null>(null);
 
   const load = useCallback(() => {
     listNotes()
@@ -109,6 +110,29 @@ export function NotesScreen() {
               <div className="min-w-0 flex-1">
                 <p className="text-[17px] break-words whitespace-pre-wrap text-ink">{n.text}</p>
                 <p className="mt-1 text-[13px] text-muted">{whenFmt.format(n.updatedAt)}</p>
+                {confirmId === n.id && (
+                  <div role="group" aria-label="Удалить заметку?" className="mt-2 flex items-center gap-2 rounded-[12px] bg-danger-tint p-2 pl-3">
+                    <span className="flex-1 text-[15px] text-ink">Удалить заметку?</span>
+                    <button type="button" onClick={() => setConfirmId(null)} className="min-h-11 px-3 text-[15px] text-link">
+                      Нет
+                    </button>
+                    <button
+                      type="button"
+                      onClick={async () => {
+                        await deleteNote(n.id!).catch(() => {});
+                        if (editing === n.id) {
+                          setEditing(null);
+                          setText("");
+                        }
+                        setConfirmId(null);
+                        load();
+                      }}
+                      className="min-h-11 px-3 text-[15px] font-semibold text-danger"
+                    >
+                      Удалить
+                    </button>
+                  </div>
+                )}
               </div>
               <button
                 type="button"
@@ -125,15 +149,7 @@ export function NotesScreen() {
               <button
                 type="button"
                 aria-label="Удалить заметку"
-                onClick={async () => {
-                  if (!window.confirm("Удалить заметку?")) return;
-                  await deleteNote(n.id!).catch(() => {});
-                  if (editing === n.id) {
-                    setEditing(null);
-                    setText("");
-                  }
-                  load();
-                }}
+                onClick={() => setConfirmId(n.id!)}
                 className="grid size-11 shrink-0 place-items-center text-muted"
               >
                 <Trash2 aria-hidden size={18} />

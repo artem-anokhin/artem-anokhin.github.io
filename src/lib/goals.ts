@@ -74,7 +74,8 @@ export async function addGoal(input: { title: string; why?: string; due?: string
 }
 
 export async function toggleStep(id: number, index: number, db: FocusDB = defaultDb): Promise<Goal | null> {
-  return db.transaction("rw", db.goals, async () => {
+  return db.transaction("rw", db.goals, db.settings, async () => {
+    if (!(await getProfile(db))) return null;
     const g = await db.goals.get(id);
     if (!g || !g.steps[index]) return null;
     const steps = g.steps.map((s, i) => (i === index ? { ...s, done: !s.done } : s));
@@ -86,7 +87,8 @@ export async function toggleStep(id: number, index: number, db: FocusDB = defaul
 export async function addStep(id: number, text: string, db: FocusDB = defaultDb): Promise<Goal | null> {
   const t = clip(text, STEP_MAX);
   if (!t) return null;
-  return db.transaction("rw", db.goals, async () => {
+  return db.transaction("rw", db.goals, db.settings, async () => {
+    if (!(await getProfile(db))) return null;
     const g = await db.goals.get(id);
     if (!g || g.steps.length >= MAX_STEPS) return null;
     const steps = [...g.steps, { text: t, done: false }];
@@ -96,8 +98,11 @@ export async function addStep(id: number, text: string, db: FocusDB = defaultDb)
 }
 
 /** Marks a goal reached (or back to active). */
-export async function setGoalDone(id: number, done: boolean, db: FocusDB = defaultDb, now = Date.now()): Promise<void> {
-  await db.goals.update(id, done ? { done: 1, doneAt: now } : { done: 0, doneAt: undefined });
+export async function setGoalDone(id: number, done: boolean, db: FocusDB = defaultDb, now = Date.now()): Promise<boolean> {
+  return db.transaction("rw", db.goals, db.settings, async () => {
+    if (!(await getProfile(db))) return false;
+    return (await db.goals.update(id, done ? { done: 1, doneAt: now } : { done: 0, doneAt: undefined })) === 1;
+  });
 }
 
 export async function deleteGoal(id: number, db: FocusDB = defaultDb): Promise<void> {

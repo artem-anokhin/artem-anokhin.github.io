@@ -6,6 +6,7 @@ import { AWARDS_SEEN_KEY, awards, type Award } from "@/lib/awards";
 import { countGoalsDone } from "@/lib/goals";
 import { plural } from "@/lib/plural";
 import { tap } from "@/lib/haptics";
+import { getProfile } from "@/lib/settings";
 import { AwardArt } from "./AwardArt";
 
 /** «Награды»: illustrated milestones (no streaks, never lost) + secret ones shown as «???» until earned. */
@@ -28,12 +29,14 @@ export function Awards({ stage }: { stage: number }) {
       const l = awards({ checkins, tests, sessions, habitLogs, stage, goalsDone });
       const seen = new Set(Array.isArray(seenRow?.value) ? (seenRow.value as unknown[]).filter((x): x is string => typeof x === "string") : []);
       const earned = l.filter((a) => a.done).map((a) => a.id);
-      const newOnes = new Set<string>(earned.filter((id) => !seen.has(id)));
+      // First visit with many earned awards (existing users): mark them seen quietly.
+      const quiet = !seenRow && earned.length > 3;
+      const newOnes = new Set<string>(quiet ? [] : earned.filter((id) => !seen.has(id)));
       if (!alive) return;
       setList(l);
       setFresh(newOnes);
-      if (newOnes.size > 0) {
-        tap("success");
+      if ((newOnes.size > 0 || quiet) && (await getProfile())) {
+        if (newOnes.size > 0) tap("success");
         await db.settings.put({ key: AWARDS_SEEN_KEY, value: earned });
       }
     })().catch(() => alive && setList(null));

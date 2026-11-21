@@ -43,3 +43,15 @@ describe("awards", () => {
     expect(done).toEqual(expect.arrayContaining(["night-owl", "early-bird", "marathon", "hat-trick", "together", "answer-42"]));
   });
 });
+
+describe("secret award hour edges", () => {
+  const one = (tests: { date: string; takenAt: number }[], sessions: { minutes: number; startedAt: number; date: string }[]) =>
+    Object.fromEntries(awards({ checkins: [], tests, sessions, habitLogs: [], stage: 0 }).map((a) => [a.id, a.done]));
+  it("night owl is 00:00–03:59, early bird 04:00–06:59", () => {
+    expect(one([], [{ minutes: 15, startedAt: at(3) + 59 * 60_000, date: "d" }])["night-owl"]).toBe(true);
+    expect(one([], [{ minutes: 15, startedAt: at(4), date: "d" }])["night-owl"]).toBe(false);
+    expect(one([], [{ minutes: 15, startedAt: at(23) + 59 * 60_000, date: "d" }])["night-owl"]).toBe(false);
+    expect(one([{ date: "d", takenAt: at(6) + 59 * 60_000 }], [])["early-bird"]).toBe(true);
+    expect(one([{ date: "d", takenAt: at(7) }], [])["early-bird"]).toBe(false);
+  });
+});

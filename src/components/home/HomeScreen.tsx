@@ -18,6 +18,7 @@ import type { TreeState } from "@/lib/tree";
 import { weeklyReview, type WeeklyReview } from "@/lib/weekly";
 import { btnPrimary } from "@/components/ui/controls";
 import { ExamsCard } from "./ExamsCard";
+import { GoalPeek } from "./GoalPeek";
 import { getFocusGoal } from "@/lib/focusGoal";
 import { daysUntil, upcomingExams } from "@/lib/exams";
 import { DayRings, ProgressRing, WeekStrip } from "@/components/ui/visuals";
@@ -223,6 +224,8 @@ function Loaded({ data, onChange }: { data: Data; onChange: () => void }) {
       </section>
 
       <HabitsToday onChange={onChange} />
+
+      <GoalPeek />
 
       <ExamsCard onChange={onChange} />
 
