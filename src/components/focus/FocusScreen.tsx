@@ -11,6 +11,7 @@ import {
   finishSession,
   getActiveSession,
   markAway,
+  minutesByDay,
   recentTasks,
   remainingMs,
   startSession,
@@ -83,7 +84,7 @@ function useWakeLock(on: boolean) {
 export function FocusScreen() {
   const [view, setView] = useState<View>({ kind: "loading" });
   const [length, setLength] = useState<SessionLength>(25);
-  const [stats, setStats] = useState({ today: 0, week: 0, stage: 0 });
+  const [stats, setStats] = useState({ today: 0, week: 0, stage: 0, days: [] as { label: string; min: number }[] });
   const [task, setTask] = useState("");
   const [recent, setRecent] = useState<string[]>([]);
   const [noise, setNoise] = useState<NoiseId>("off");
@@ -98,7 +99,13 @@ export function FocusScreen() {
     const key = dayKey();
     const n = new Date();
     const weekAgo = dayKey(new Date(n.getFullYear(), n.getMonth(), n.getDate() - 6));
+    const byDay = minutesByDay(sessions);
+    const days = Array.from({ length: 7 }, (_, i) => {
+      const d = new Date(n.getFullYear(), n.getMonth(), n.getDate() - (6 - i));
+      return { label: WD[d.getDay()]!, min: byDay.get(dayKey(d)) ?? 0 };
+    });
     setStats({
+      days,
       today: sessions.filter((s) => s.date === key).reduce((a, s) => a + s.minutes, 0),
       week: sessions.filter((s) => s.date >= weekAgo && s.date <= key).reduce((a, s) => a + s.minutes, 0),
       stage: tree.stage,
@@ -324,22 +331,25 @@ export function FocusScreen() {
               </p>
             )}
 
-            <dl className="grid grid-cols-2 gap-3">
-              <div className="rounded-card bg-white/6 p-4">
-                <dt className="text-[13px] text-night-muted">Сегодня</dt>
-                <dd className="stat mt-1 text-[32px] text-night-ink">
-                  {stats.today}
-                  <span className="ml-1 font-sans text-[15px] font-semibold tracking-normal text-night-muted">мин</span>
-                </dd>
-              </div>
-              <div className="rounded-card bg-white/6 p-4">
-                <dt className="text-[13px] text-night-muted">За 7 дней</dt>
-                <dd className="stat mt-1 text-[32px] text-night-ink">
-                  {stats.week}
-                  <span className="ml-1 font-sans text-[15px] font-semibold tracking-normal text-night-muted">мин</span>
-                </dd>
-              </div>
-            </dl>
+            <section aria-label="Фокус за 7 дней" className="rounded-card bg-white/6 p-4">
+              <dl className="flex gap-6">
+                <div>
+                  <dt className="text-[13px] text-night-muted">Сегодня</dt>
+                  <dd className="stat mt-1 text-[28px] text-night-ink">
+                    {stats.today}
+                    <span className="ml-1 font-sans text-[15px] font-semibold tracking-normal text-night-muted">мин</span>
+                  </dd>
+                </div>
+                <div>
+                  <dt className="text-[13px] text-night-muted">За 7 дней</dt>
+                  <dd className="stat mt-1 text-[28px] text-night-ink">
+                    {stats.week}
+                    <span className="ml-1 font-sans text-[15px] font-semibold tracking-normal text-night-muted">мин</span>
+                  </dd>
+                </div>
+              </dl>
+              <WeekBars days={stats.days} />
+            </section>
 
             <Link href="/breathe/" className="pressable flex min-h-18 items-center gap-4 rounded-card bg-white/6 p-4">
               <span className="grid size-11 shrink-0 place-items-center rounded-full bg-s-caffeine/30 text-night-ink">
@@ -537,6 +547,27 @@ function BreakView({
       <button type="button" onClick={onEnd} className={`${btnNightGhost} -mt-3 w-full max-w-sm`}>
         Закончить перерыв
       </button>
+    </div>
+  );
+}
+
+const WD = ["вс", "пн", "вт", "ср", "чт", "пт", "сб"];
+
+/** Tiny 7-day bar chart of focus minutes (night surface). */
+function WeekBars({ days }: { days: { label: string; min: number }[] }) {
+  if (days.length === 0) return null;
+  const max = Math.max(25, ...days.map((d) => d.min));
+  return (
+    <div className="mt-4 flex h-20 items-end gap-2" role="img" aria-label={`Минуты фокуса по дням: ${days.map((d) => `${d.label} ${d.min}`).join(", ")}`}>
+      {days.map((d, i) => (
+        <div key={i} className="flex flex-1 flex-col items-center gap-1" aria-hidden>
+          <div
+            className={`w-full rounded-[4px] ${d.min === 0 ? "bg-white/10" : i === 6 ? "bg-[#9BDB7E]" : "bg-[#9BDB7E]/55"}`}
+            style={{ height: `${d.min === 0 ? 4 : Math.max(8, (d.min / max) * 56)}px` }}
+          />
+          <span className={`text-[12px] ${i === 6 ? "font-semibold text-night-ink" : "text-night-muted"}`}>{d.label}</span>
+        </div>
+      ))}
     </div>
   );
 }
