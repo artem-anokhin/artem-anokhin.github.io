@@ -11,6 +11,7 @@ import { btnPrimary } from "@/components/ui/controls";
 import { DropIcon, TreeScene } from "@/components/ui/visuals";
 import { plural } from "@/lib/plural";
 import { ShareWeek } from "./ShareWeek";
+import { Awards } from "./Awards";
 
 type State = { kind: "loading" } | { kind: "error" } | { kind: "ready"; tree: TreeState };
 
@@ -149,6 +150,8 @@ export function TreeScreen() {
           </dl>
           <ShareWeek stageName={tree.stageName} activeDays={tree.week.checkins} />
         </section>
+
+        <Awards stage={tree.stage} />
 
         <section aria-labelledby="how-title">
           <h2 id="how-title" className="px-4 pb-1.5 text-[13px] text-muted uppercase">
