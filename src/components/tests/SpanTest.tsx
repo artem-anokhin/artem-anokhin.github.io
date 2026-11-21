@@ -127,9 +127,14 @@ export function SpanTest() {
           <p className="text-[15px] text-night-muted">Самая длинная последовательность</p>
           <p className="stat text-[72px] text-night-ink">{level.best || "—"}</p>
           <p className="max-w-sm text-[15px] text-night-muted">
-            {level.best >= 6 ? "Очень цепкая память сегодня!" : level.best >= 4 ? "Хороший результат. Обычно люди удерживают около 4 элементов." : "Попробуйте ещё раз в спокойной обстановке."}
+            {level.best >= 6
+              ? "Отличная серия! Сравните с прошлыми попытками."
+              : level.best >= 4
+                ? "Хороший результат. По данным Коуэна (2001), кратковременная память вмещает около 4 блоков."
+                : "Результат зависит от дня. Попробуйте ещё раз, когда будет спокойно."}
           </p>
           {prev.length >= 2 && <Sparkline values={prev} label="Ваши результаты «Запомни порядок»" />}
+          <p className="text-[13px] text-night-muted">Не является медицинской консультацией.</p>
         </div>
         <div className="grid gap-2">
           <button type="button" className={`${btnNight} w-full`} onClick={start}>

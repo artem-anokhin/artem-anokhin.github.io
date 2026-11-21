@@ -83,7 +83,7 @@ export function StroopTest() {
             Начать
           </button>
           <p className="text-center text-[13px] text-night-muted">
-            Классический тест Струпа на контроль внимания. Шкала наша, сравнивайте себя с собой.{" "}
+            Классический тест Струпа: избирательное внимание и торможение лишних реакций. Шкала наша, сравнивайте себя с собой.{" "}
             <a href={cardHref("stroop")} className="underline">
               Подробнее
             </a>
@@ -138,13 +138,14 @@ export function StroopTest() {
                 ["Помеха", s.interference === null ? "—" : `${s.interference > 0 ? "+" : ""}${s.interference} мс`],
               ].map(([k, v]) => (
                 <div key={k} className="rounded-card bg-white/6 p-3">
-                  <dt className="text-[12px] text-night-muted">{k}</dt>
+                  <dt className="text-[13px] text-night-muted">{k}</dt>
                   <dd className="mt-0.5 text-[17px] font-semibold text-night-ink tabular-nums">{v}</dd>
                 </div>
               ))}
             </dl>
             <p className="max-w-sm text-[13px] text-night-muted">«Помеха» — насколько медленнее вы отвечаете, когда слово и цвет не совпадают. Меньше — лучше.</p>
             {prev.length >= 2 && <Sparkline values={prev} label="Ваши результаты «Цвет и слово»" />}
+            <p className="text-[13px] text-night-muted">Шкала наша, не клиническая. Не является медицинской консультацией.</p>
           </>
         ) : (
           <p className="text-[17px] text-night-ink">Слишком мало ответов для результата. Попробуйте ещё раз.</p>

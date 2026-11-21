@@ -105,8 +105,8 @@ export function StatsScreen() {
       {/* 2. Calendar heatmap */}
       <Card id="st-cal" title="Календарь фокуса" sub="12 недель · каждый квадрат — день">
         <div className="flex gap-1.5">
-          <div className="grid grid-rows-7 gap-1 pt-0.5 text-[10px] leading-none text-muted" aria-hidden>
-            {["пн", "", "ср", "", "пт", "", "вс"].map((d, i) => (
+          <div className="grid grid-rows-7 gap-1 text-[13px] leading-none text-muted" aria-hidden>
+            {["пн", "вт", "ср", "чт", "пт", "сб", "вс"].map((d, i) => (
               <span key={i} className="flex h-full items-center">
                 {d}
               </span>
@@ -123,7 +123,7 @@ export function StatsScreen() {
             ))}
           </div>
         </div>
-        <div className="mt-2 flex items-center justify-end gap-1 text-[12px] text-muted" aria-hidden>
+        <div className="mt-2 flex items-center justify-end gap-1 text-[13px] text-muted" aria-hidden>
           меньше
           {HEAT.map((h, i) => (
             <span key={i} className="size-3 rounded-[3px]" style={{ background: h }} />
@@ -176,7 +176,7 @@ export function StatsScreen() {
                 </LineChart>
               </ResponsiveContainer>
             </div>
-            <div className="mt-2 flex gap-4 text-[12px] text-muted" aria-hidden>
+            <div className="mt-2 flex gap-4 text-[13px] text-muted" aria-hidden>
               <span className="inline-flex items-center gap-1.5">
                 <span className="size-2.5 rounded-full bg-muted" /> тест дня
               </span>
@@ -190,6 +190,9 @@ export function StatsScreen() {
 
       {/* 5. When you study */}
       <Card id="st-hours" title="Когда вы учитесь" sub={peak.minutes > 0 ? `Чаще всего — ${peak.from}:00–${peak.from + 2}:00` : "Пока нет фокус-сессий"}>
+        {sessions < 3 ? (
+          <p className="text-[15px] text-muted">Завершите хотя бы 3 фокус-сессии в разное время — здесь появится ваш ритм.</p>
+        ) : (
         <div className="h-[150px]" role="img" aria-label={`Минуты фокус-сессий по времени начала: ${hours.map((h) => `${h.from}–${h.from + 2} ч: ${h.minutes}`).join(", ")}.`}>
           <ResponsiveContainer width="100%" height="100%">
             <BarChart accessibilityLayer={false} data={hours.map((h) => ({ ...h, label: `${h.from}` }))} margin={{ top: 8, right: 4, bottom: 0, left: -20 }}>
@@ -200,6 +203,7 @@ export function StatsScreen() {
             </BarChart>
           </ResponsiveContainer>
         </div>
+        )}
       </Card>
 
       {/* 6. Sleep vs score */}
@@ -228,8 +232,13 @@ export function StatsScreen() {
         )}
       </Card>
 
-      <details className="rounded-card-lg bg-surface p-4">
-        <summary className="min-h-11 cursor-pointer text-[15px] text-link">Показать данные таблицей</summary>
+      <details className="group rounded-card-lg bg-surface px-4 py-1">
+        <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between text-[17px] text-link">
+          Показать данные таблицей
+          <span aria-hidden className="text-chevron transition-transform group-open:rotate-90">
+            ›
+          </span>
+        </summary>
         <table className="mt-2 w-full text-left text-[13px] text-ink">
           <caption className="sr-only">Минуты фокуса по неделям</caption>
           <thead className="text-muted">
