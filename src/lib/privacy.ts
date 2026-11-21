@@ -1,7 +1,7 @@
 import { SPHERE_KEYS, sanitizeCheckIn } from "./checkin";
 import { SESSION_LENGTHS, cleanTask, type SessionLength } from "./focusSession";
 import { HABIT_TITLE_MAX, MAX_HABITS } from "./habits";
-import { db as defaultDb, dayKey, type CheckIn, type FocusDB, type FocusSession, type Habit, type HabitLog, type FocusTestResult, type Setting } from "./db";
+import { PROFILE_KEY, db as defaultDb, dayKey, type CheckIn, type FocusDB, type FocusSession, type Habit, type HabitLog, type FocusTestResult, type Setting } from "./db";
 import { getProfile, isExperiment, isWindow } from "./settings";
 import { EXAMS_KEY, sanitizeExams } from "./exams";
 import { GOAL_KEY, isGoal } from "./focusGoal";
@@ -180,7 +180,7 @@ export async function importData(raw: unknown, database: FocusDB = defaultDb): P
   }
 
   const settings = new Map(arr(f.settings).map((s) => [(s as Setting)?.key, (s as Setting)?.value]));
-  const mode = (settings.get("profile") as { mode?: unknown } | undefined)?.mode;
+  const mode = (settings.get(PROFILE_KEY) as { mode?: unknown } | undefined)?.mode;
   const experiment = settings.get("experiment");
   const history = arr(settings.get("experimentHistory")).filter(isWindow);
 
@@ -194,7 +194,7 @@ export async function importData(raw: unknown, database: FocusDB = defaultDb): P
     await database.habitLogs.clear();
     await database.settings.clear();
     await database.settings.put({
-      key: "profile",
+      key: PROFILE_KEY,
       value: { mode: mode === "study" || mode === "work" ? mode : profile.mode, consentAt: profile.consentAt },
     });
     if (isExperiment(experiment)) await database.settings.put({ key: "experiment", value: experiment });

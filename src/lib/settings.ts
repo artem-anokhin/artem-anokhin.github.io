@@ -1,4 +1,4 @@
-import { db as defaultDb, dayKey, type FocusDB } from "./db";
+import { PROFILE_KEY, db as defaultDb, dayKey, type FocusDB } from "./db";
 import { METRICS } from "./insights";
 import { TIPS } from "./tips";
 
@@ -10,7 +10,6 @@ export interface Profile {
   consentAt: number;
 }
 
-const PROFILE_KEY = "profile";
 
 function isProfile(v: unknown): v is Profile {
   if (!v || typeof v !== "object") return false;

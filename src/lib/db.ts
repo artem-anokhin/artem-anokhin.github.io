@@ -104,9 +104,12 @@ export function dayKey(d: Date = new Date()): DayKey {
   return `${y}-${m}-${day}`;
 }
 
+/** Settings key of the consented profile (shared with settings.ts and privacy.ts). */
+export const PROFILE_KEY = "profile";
+
 /** True when a consented profile exists (kept here to avoid a settings ↔ db import cycle). */
 async function hasConsent(database: FocusDB): Promise<boolean> {
-  const v = (await database.settings.get("profile"))?.value as { consentAt?: unknown } | undefined;
+  const v = (await database.settings.get(PROFILE_KEY))?.value as { consentAt?: unknown } | undefined;
   return typeof v?.consentAt === "number";
 }
 
