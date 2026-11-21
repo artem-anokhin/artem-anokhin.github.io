@@ -33,22 +33,23 @@ export function Awards({ stage }: { stage: number }) {
         {list.map((a) => {
           const Icon = a.done ? ICON[a.icon] : Lock;
           return (
-            <li key={a.id} className="rounded-card-lg bg-surface p-4" aria-label={`${a.title}: ${a.done ? "получена" : `${a.have} из ${a.need}`}. ${a.hint}`}>
+            <li key={a.id} className="flex flex-col rounded-card-lg bg-surface p-4">
               <span
                 aria-hidden
                 className={`grid size-11 place-items-center rounded-full ${a.done ? "bg-leaf text-white" : "bg-fill text-chevron"}`}
               >
                 <Icon size={22} strokeWidth={a.done ? 2.4 : 2} />
               </span>
-              <p aria-hidden className={`mt-3 text-[15px] leading-tight font-semibold ${a.done ? "text-ink" : "text-muted"}`}>
+              <p className={`mt-3 text-[15px] leading-tight font-semibold ${a.done ? "text-ink" : "text-muted"}`}>
                 {a.title}
+                <span className="sr-only">{a.done ? ". Получена." : `. Пока ${a.have} из ${a.need}.`}</span>
               </p>
-              <p aria-hidden className="mt-0.5 text-[13px] leading-snug text-muted">
+              <p className="mt-0.5 text-[13px] leading-snug text-muted">
                 {a.hint}
               </p>
               {!a.done && a.need > 1 && (
-                <div aria-hidden className="mt-2 flex items-center gap-2">
-                  <div className="h-1.5 flex-1 rounded-full bg-fill">
+                <div aria-hidden className="mt-auto flex items-center gap-2 pt-2">
+                  <div className="h-1.5 flex-1 rounded-full bg-fill-strong">
                     <div className="h-full rounded-full bg-leaf" style={{ width: `${(a.have / a.need) * 100}%` }} />
                   </div>
                   <span className="text-[12px] text-muted tabular-nums">

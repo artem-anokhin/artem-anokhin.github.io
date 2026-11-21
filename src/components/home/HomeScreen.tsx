@@ -141,9 +141,9 @@ function Loaded({ data, onChange }: { data: Data; onChange: () => void }) {
               size={116}
               stroke={13}
               rings={[
-                { value: today ? 1 : 0, color: "var(--color-s-mind)", track: "color-mix(in srgb, var(--color-s-mind) 18%, transparent)" },
-                { value: focusToday / FOCUS_GOAL, color: "var(--color-s-sleep)", track: "color-mix(in srgb, var(--color-s-sleep) 18%, transparent)" },
-                { value: habitsTotal ? habitsDone / habitsTotal : 0, color: "var(--color-s-activity)", track: "color-mix(in srgb, var(--color-s-activity) 18%, transparent)" },
+                { value: today ? 1 : 0, color: "var(--color-s-mind)", track: "color-mix(in srgb, var(--color-s-mind) 26%, transparent)" },
+                { value: focusToday / FOCUS_GOAL, color: "var(--color-s-sleep)", track: "color-mix(in srgb, var(--color-s-sleep) 26%, transparent)" },
+                { value: habitsTotal ? habitsDone / habitsTotal : 0, color: "var(--color-s-activity)", track: "color-mix(in srgb, var(--color-s-activity) 26%, transparent)" },
               ]}
             />
           </div>

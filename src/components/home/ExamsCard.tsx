@@ -146,12 +146,13 @@ export function ExamsCard() {
             return (
               <li key={e.id} className="flex min-h-[60px] items-center gap-3 py-2 pl-4 pr-1">
                 <span
-                  className={`grid size-11 shrink-0 place-items-center rounded-[10px] text-[17px] font-bold tabular-nums ${
-                    d <= 3 ? "bg-s-rest-ink text-white" : "bg-s-rest-tint text-s-rest-ink"
+                  className={`flex size-11 shrink-0 flex-col items-center justify-center rounded-[10px] leading-none tabular-nums ${
+                    d <= 3 ? "bg-accent text-white" : "bg-fill text-ink"
                   }`}
                   aria-hidden
                 >
-                  {d}
+                  <span className="text-[17px] font-bold">{d}</span>
+                  <span className={`mt-0.5 text-[10px] font-medium ${d <= 3 ? "text-white/85" : "text-muted"}`}>дн.</span>
                 </span>
                 <span className="min-w-0 flex-1">
                   <span className="block truncate text-[17px] text-ink">{e.title}</span>
@@ -163,7 +164,7 @@ export function ExamsCard() {
                   type="button"
                   onClick={() => onRemove(e.id)}
                   aria-label={`Удалить «${e.title}»`}
-                  className="grid size-11 shrink-0 place-items-center text-chevron"
+                  className="grid size-11 shrink-0 place-items-center text-muted"
                 >
                   <Trash2 aria-hidden size={18} />
                 </button>

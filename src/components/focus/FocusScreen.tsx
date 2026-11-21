@@ -280,7 +280,7 @@ export function FocusScreen() {
                       type="button"
                       onClick={() => setTask(r)}
                       aria-pressed={task === r}
-                      className={`pressable min-h-11 rounded-full px-4 text-[15px] ${task === r ? "bg-white text-accent" : "bg-white/8 text-night-ink/85"}`}
+                      className={`pressable min-h-11 rounded-full px-4 text-[15px] ${task === r ? "bg-white text-accent" : "bg-white/12 text-night-ink/90"}`}
                     >
                       {r}
                     </button>
