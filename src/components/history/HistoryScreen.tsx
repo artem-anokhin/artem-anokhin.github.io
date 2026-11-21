@@ -27,6 +27,7 @@ function parseDay(key: string): Date {
 export function HistoryScreen() {
   const [state, setState] = useState<State>({ kind: "loading" });
   const [reload, setReload] = useState(0);
+  const [allDays, setAllDays] = useState(false);
 
   // Returning to a tab left open overnight must show fresh days.
   useEffect(() => {
@@ -106,7 +107,7 @@ export function HistoryScreen() {
           Дни
         </h2>
         <ul className="group-list">
-          {[...days].reverse().map((d) => (
+          {[...days].reverse().slice(0, allDays ? days.length : 7).map((d) => (
             <li key={d.date} className="flex min-h-11 items-center gap-3 px-4 py-2.5">
               <span className="flex-1 text-[17px] text-ink first-letter:uppercase">{longFmt.format(parseDay(d.date))}</span>
               <span className="text-[13px] text-muted">
@@ -127,6 +128,11 @@ export function HistoryScreen() {
             </li>
           ))}
         </ul>
+        {!allDays && days.length > 7 && (
+          <button type="button" onClick={() => setAllDays(true)} className="mt-1 flex min-h-11 items-center px-4 text-[15px] text-link">
+            Показать все {days.length} дней
+          </button>
+        )}
       </section>
     </div>
   );

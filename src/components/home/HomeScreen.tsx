@@ -158,7 +158,7 @@ function Loaded({ data, onChange }: { data: Data; onChange: () => void }) {
                   aria-label={score === null ? "Пройти тест" : `Focus Score ${score}, история`}
                   className="inline-flex min-h-11 items-center text-[15px] font-semibold whitespace-nowrap text-link tabular-nums"
                 >
-                  {score === null ? "Пройти тест" : score}
+                  {score === null ? "Пройти" : score}
                 </Link>
               </dd>
             </div>

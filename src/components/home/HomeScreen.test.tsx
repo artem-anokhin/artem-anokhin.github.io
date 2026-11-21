@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it } from "vitest";
 import { emptyCheckIn } from "@/lib/checkin";
 import { db, dayKey } from "@/lib/db";
@@ -61,9 +61,11 @@ describe("HomeScreen", () => {
 });
 
 describe("HistoryScreen", () => {
-  it("shows the empty state and 30 day rows without data", async () => {
+  it("shows the empty state, 7 day rows and all 30 on demand", async () => {
     render(<HistoryScreen />);
     expect(await screen.findByText(/Пока мало данных/)).toBeInTheDocument();
+    expect(screen.getAllByText("Чек-ин: нет")).toHaveLength(7);
+    fireEvent.click(screen.getByRole("button", { name: "Показать все 30 дней" }));
     expect(screen.getAllByText("Чек-ин: нет")).toHaveLength(30);
   });
 });
