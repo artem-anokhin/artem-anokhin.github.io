@@ -18,7 +18,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   // Onboarding and the public privacy policy work without consent and without navigation.
   const onWelcome = isActive(pathname, WELCOME) || isActive(pathname, "/privacy/");
   // Render page content only after consent is confirmed (no first-run flash).
-  const [ready, setReady] = useState(false);
+  // "all" after consent; a single try path (challenge link) for a guest. Content renders only when it matches.
+  const [allowed, setAllowed] = useState<"all" | "try" | null>(null);
+  const ready = allowed === "all" || (allowed === "try" && isTryPath(pathname));
   const [demo, setDemo] = useState(false);
 
   // Send first-time users (no consent yet) to onboarding.
@@ -29,12 +31,12 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       .then((p) => {
         if (!alive) return;
         // A challenge link opens the test right away; storage still needs consent.
-        if (!p && isTryPath(window.location.pathname)) return setReady(true);
+        if (!p && isTryPath(window.location.pathname)) return setAllowed("try");
         if (!p) {
           rememberReturn(`${window.location.pathname}${window.location.search}`);
           return router.replace(WELCOME);
         }
-        setReady(true);
+        setAllowed("all");
         return isDemo().then((d) => alive && setDemo(d));
       })
       // Fail closed: if storage can't be read, go to onboarding rather than the app.

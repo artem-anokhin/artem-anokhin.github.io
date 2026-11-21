@@ -15,6 +15,9 @@ import { latestTestByDay } from "@/lib/today";
 import type { TreeState } from "@/lib/tree";
 import { weeklyReview, type WeeklyReview } from "@/lib/weekly";
 import { btnPrimary } from "@/components/ui/controls";
+import { weekPersona, type Persona } from "@/lib/wrapped";
+import { daysBetween, weekTags } from "@/lib/homeExtras";
+import { ShareWrapped } from "./ShareWrapped";
 
 type Data = {
   review: WeeklyReview;
@@ -25,6 +28,9 @@ type Data = {
   /** Task with the most focus minutes this week (labelled sessions only). */
   topTask: { task: string; minutes: number } | null;
   nextExam: { title: string; days: number } | null;
+  persona: Persona;
+  weekTop: ReturnType<typeof weekTags>;
+  sessionsCount: number;
 };
 
 const WD = ["вс", "пн", "вт", "ср", "чт", "пт", "сб"];
@@ -56,6 +62,9 @@ export function WeekScreen() {
       const labelled = sessions.filter((s) => s.date >= from && s.date <= key && s.task);
       const topTask = labelled.length ? minutesByTask(labelled)[0]! : null;
       const exam = (await upcomingExams())[0];
+      const inWeek = (d: string) => daysBetween(d, key) >= 0 && daysBetween(d, key) < 7;
+      const weekSessions = sessions.filter((s) => inWeek(s.date));
+      const weekCheckins = checkins.filter((c) => inWeek(c.date));
       if (alive)
         setData({
           review,
@@ -65,6 +74,9 @@ export function WeekScreen() {
           usable,
           topTask,
           nextExam: exam ? { title: exam.title, days: daysUntil(exam.date, key) } : null,
+          persona: weekPersona(weekSessions, weekCheckins),
+          weekTop: weekTags(checkins, key),
+          sessionsCount: weekSessions.length,
         });
     })().catch(() => {});
     return () => {
@@ -116,6 +128,15 @@ function Story({ data }: { data: Data }) {
           <p className="mt-2 text-[17px] text-muted">Пройдите тест реакции хотя бы раз — и здесь появится ваш средний результат.</p>
         )}
       </section>
+
+      <ShareWrapped
+        persona={data.persona}
+        focusMinutes={c.focusMinutes}
+        sessions={data.sessionsCount}
+        checkinDays={c.checkinDays}
+        bestScore={c.best?.score ?? null}
+        tags={data.weekTop}
+      />
 
       {/* 2. 7-day bars */}
       <section aria-label="Focus Score по дням" className="rounded-card-lg bg-surface p-4">
