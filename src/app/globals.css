@@ -95,6 +95,7 @@
   --animate-breathe: breathe 4s cubic-bezier(0.65, 0, 0.35, 1) infinite;
   --animate-sway: sway 6s cubic-bezier(0.65, 0, 0.35, 1) infinite;
   --animate-drop: drop 700ms var(--ease-out) both;
+  --animate-water: water 1600ms var(--ease-out) both;
 
   @keyframes rise {
     from { opacity: 0; transform: translateY(6px); }
@@ -116,6 +117,12 @@
   @keyframes sway {
     0%, 100% { transform: rotate(-1.5deg); }
     50% { transform: rotate(1.5deg); }
+  }
+  @keyframes water {
+    0% { opacity: 0; transform: translateY(-36px); }
+    20% { opacity: 1; }
+    75% { opacity: 1; transform: translateY(44px); }
+    100% { opacity: 0; transform: translateY(52px) scale(0.6); }
   }
   @keyframes drop {
     0% { opacity: 0; transform: translateY(-48px); }

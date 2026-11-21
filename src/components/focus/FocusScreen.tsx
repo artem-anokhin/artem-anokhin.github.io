@@ -17,6 +17,7 @@ import {
 import { plural } from "@/lib/plural";
 import { tap } from "@/lib/haptics";
 import { loadTree } from "@/lib/garden";
+import { GrowingSprout, sproutPhase } from "./GrowingSprout";
 import { btnNight, btnNightGhost } from "@/components/ui/controls";
 import { DropIcon, ProgressRing, TreeScene } from "@/components/ui/visuals";
 
@@ -121,8 +122,8 @@ export function FocusScreen() {
       .catch(() => {
         setError(true);
         setView({ kind: "setup" });
-      })
-      .finally(() => (finishing.current = false));
+      });
+    // `finishing` stays true until the next start: a late tick must not finish twice.
   }, [view, now, loadStats]);
 
   // Show the time left in the tab title while running.
@@ -137,6 +138,7 @@ export function FocusScreen() {
 
   async function onStart() {
     setError(false);
+    finishing.current = false;
     const active = await startSession(length).catch(() => null);
     if (!active) return setError(true);
     setNow(Date.now());
@@ -160,7 +162,7 @@ export function FocusScreen() {
           <div className="stagger space-y-7">
             <header>
               <h1 className="title mt-1 text-[32px] text-night-ink">Фокус-сессия</h1>
-              <p className="mt-2 text-[17px] text-night-muted">Учитесь без отвлечений. Сессия до конца — капля для дерева.</p>
+              <p className="mt-2 text-[17px] text-night-muted">Учитесь без отвлечений: за сессию из семени вырастет росток, а дерево получит каплю.</p>
             </header>
 
             <TreeScene night stage={stage} wilting={false} title="Ваше дерево ночью" className="h-56 rounded-card-lg" />
@@ -225,25 +227,10 @@ export function FocusScreen() {
         )}
 
         {view.kind === "running" && (
-          <div className="flex flex-1 flex-col items-center justify-center gap-8 text-center">
+          <div className="flex flex-1 flex-col items-center justify-center gap-6 text-center">
             <p className="eyebrow text-night-muted">Фокус · {view.active.minutes} минут</p>
-            <div className="animate-breathe">
-              <ProgressRing
-                night
-                size={280}
-                stroke={14}
-                value={1 - remainingMs(view.active, now) / (view.active.minutes * 60_000)}
-                label={`Осталось ${fmt(remainingMs(view.active, now))}`}
-              >
-                <span>
-                  <span className="stat block text-[64px] text-night-ink" aria-live="off">
-                    {fmt(remainingMs(view.active, now))}
-                  </span>
-                  <span className="text-[15px] text-night-muted">осталось</span>
-                </span>
-              </ProgressRing>
-            </div>
-            <p className="max-w-xs text-[17px] text-night-muted">Телефон отложен — дерево растёт. Можно закрыть вкладку: таймер продолжится.</p>
+            <RunningSprout active={view.active} now={now} />
+            <p className="max-w-xs text-[15px] text-night-muted">Телефон отложен — росток растёт. Можно закрыть вкладку: таймер продолжится.</p>
             {!confirmStop ? (
               <button type="button" onClick={() => setConfirmStop(true)} className={btnNightGhost}>
                 Завершить раньше
@@ -266,10 +253,14 @@ export function FocusScreen() {
 
         {view.kind === "done" && (
           <div className="flex flex-1 flex-col items-center justify-center gap-6 text-center" role="status">
+            <div className="animate-pop">
+              <ProgressRing night size={200} stroke={8} value={1} color="#83CF6E">
+                <GrowingSprout progress={1} className="w-[136px]" />
+              </ProgressRing>
+            </div>
             <p className="inline-flex animate-drop items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-[15px] font-semibold text-night-ink">
-              <DropIcon size={20} /> +1 капля
+              <DropIcon size={20} /> +1 капля в ваше дерево
             </p>
-            <TreeScene stage={stage} wilting={false} title="Дерево после сессии" className="h-64 w-full animate-rise rounded-card-lg" />
             <h1 className="title text-[30px] text-night-ink">
               {view.minutes} {plural(view.minutes, ["минута", "минуты", "минут"])} фокуса
             </h1>
@@ -280,12 +271,46 @@ export function FocusScreen() {
                 <span className="sr-only"> (откроется в новой вкладке)</span>
               </a>
             </p>
-            <button type="button" onClick={() => setView({ kind: "setup" })} className={`${btnNight} w-full max-w-sm`}>
-              Готово
-            </button>
+            <div className="grid w-full max-w-sm gap-2">
+              <button type="button" onClick={() => setView({ kind: "setup" })} className={`${btnNight} w-full`}>
+                Готово
+              </button>
+              <Link href="/tree/" className={`${btnNightGhost} w-full`}>
+                Посмотреть дерево
+              </Link>
+            </div>
           </div>
         )}
       </div>
     </div>
+  );
+}
+
+/** Running view centrepiece: the sprout grows with the ring; a drop waters it every 20%. */
+function RunningSprout({ active, now }: { active: ActiveSession; now: number }) {
+  const left = remainingMs(active, now);
+  const p = 1 - left / (active.minutes * 60_000);
+  const milestone = Math.floor(Math.max(0, Math.min(1, p)) * 5);
+  return (
+    <>
+      <ProgressRing night size={280} stroke={10} value={p} label={`Осталось ${fmt(left)}`}>
+        <span className="relative block">
+          <GrowingSprout progress={p} className="w-[210px]" />
+          {milestone > 0 && (
+            <span key={milestone} className="absolute top-6 left-1/2 -ml-2.5 animate-water" aria-hidden>
+              <DropIcon size={20} />
+            </span>
+          )}
+        </span>
+      </ProgressRing>
+      <div>
+        <p className="stat text-[56px] text-night-ink" aria-live="off">
+          {fmt(left)}
+        </p>
+        <p className="mt-2 text-[17px] font-semibold text-[#9BDB7E]" aria-live="polite">
+          {sproutPhase(p)}
+        </p>
+      </div>
+    </>
   );
 }
