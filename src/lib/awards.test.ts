@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { awards } from "./awards";
 
+const at = (h: number, day = 1) => new Date(2026, 10, day, h, 0).getTime();
+
 describe("awards", () => {
   it("starts locked and unlocks by totals, capping progress", () => {
     const empty = awards({ checkins: [], tests: [], sessions: [], habitLogs: [], stage: 0 });
@@ -9,9 +11,10 @@ describe("awards", () => {
     const r = awards({
       checkins: Array.from({ length: 8 }, (_, i) => ({ date: `d${i}` })),
       tests: [],
-      sessions: Array.from({ length: 12 }, () => ({ minutes: 25, away: 0 })),
+      sessions: Array.from({ length: 12 }, (_, i) => ({ minutes: 25, away: 0, startedAt: at(12, i + 1), date: `d${i}` })),
       habitLogs: [{ date: "a" }, { date: "a" }],
       stage: 4,
+      goalsDone: 1,
     });
     const by = Object.fromEntries(r.map((a) => [a.id, a]));
     expect(by["week-checkins"]!.done).toBe(true);
@@ -20,5 +23,23 @@ describe("awards", () => {
     expect(by["calm-five"]!.have).toBe(5);
     expect(by["habit-ten"]!.have).toBe(1);
     expect(by["bloom"]!.done).toBe(true);
+    expect(by["first-goal"]!.done).toBe(true);
+    expect(r.filter((a) => a.secret).every((a) => !a.done)).toBe(true);
+  });
+
+  it("unlocks the secret ones (пасхалки)", () => {
+    const r = awards({
+      checkins: [],
+      tests: [{ date: "d", takenAt: at(6) }],
+      sessions: [
+        { minutes: 50, startedAt: at(1), date: "d" },
+        { minutes: 15, startedAt: at(10), date: "d", task: " 42 " },
+        { minutes: 15, startedAt: at(11), date: "d", together: true },
+      ],
+      habitLogs: [],
+      stage: 0,
+    });
+    const done = r.filter((a) => a.done).map((a) => a.id);
+    expect(done).toEqual(expect.arrayContaining(["night-owl", "early-bird", "marathon", "hat-trick", "together", "answer-42"]));
   });
 });

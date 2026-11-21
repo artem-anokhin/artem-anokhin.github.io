@@ -15,7 +15,7 @@ async function setup(page: Page) {
   await page.waitForURL(/\/$/);
 }
 
-const PAGES = ["/", "/checkin/", "/focus/", "/test/", "/tree/", "/insights/", "/library/", "/week/", "/history/", "/settings/", "/habits/", "/privacy/", "/breathe/"];
+const PAGES = ["/", "/checkin/", "/focus/", "/test/", "/tree/", "/insights/", "/library/", "/week/", "/history/", "/settings/", "/habits/", "/privacy/", "/breathe/", "/goals/", "/notes/"];
 
 for (const scheme of ["light", "dark"] as const) {
   test(`no serious accessibility violations (${scheme})`, async ({ page }) => {

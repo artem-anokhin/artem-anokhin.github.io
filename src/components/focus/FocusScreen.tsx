@@ -216,7 +216,7 @@ export function FocusScreen() {
     setError(false);
     finishing.current = false;
     unlockAudio();
-    const active = await startSession(invite.minutes, undefined, invite.startedAt, task).catch(() => null);
+    const active = await startSession(invite.minutes, undefined, invite.startedAt, task, true).catch(() => null);
     if (!active) return setError(true);
     // A session already running (e.g. in another tab) keeps its own timer.
     if (active.startedAt !== invite.startedAt) setInviteStatus("busy");

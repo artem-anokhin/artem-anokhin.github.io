@@ -18,6 +18,8 @@ export interface ActiveSession {
   task?: string;
   /** Times the user left the app while it ran (page hidden). */
   away?: number;
+  /** Joined from a «Учиться вместе» link. */
+  together?: true;
 }
 
 /** Longest task label we keep. */
@@ -56,6 +58,7 @@ export async function startSession(
   db: FocusDB = defaultDb,
   now = Date.now(),
   task?: string,
+  together = false,
 ): Promise<ActiveSession | null> {
   if (!SESSION_LENGTHS.includes(minutes)) return null;
   // Consent check and write in one transaction, so «Удалить все данные» can't race in.
@@ -65,7 +68,7 @@ export async function startSession(
     const running = await getActiveSession(db);
     if (running) return running;
     const label = cleanTask(task);
-    const a: ActiveSession = { startedAt: now, minutes, away: 0, ...(label ? { task: label } : {}) };
+    const a: ActiveSession = { startedAt: now, minutes, away: 0, ...(label ? { task: label } : {}), ...(together ? { together: true as const } : {}) };
     await db.settings.put({ key: ACTIVE_KEY, value: a });
     return a;
   });
@@ -101,6 +104,7 @@ export async function finishSession(db: FocusDB = defaultDb, now = Date.now()): 
       minutes: a.minutes,
       away: a.away ?? 0,
       ...(task ? { task } : {}),
+      ...(a.together === true ? { together: true as const } : {}),
     };
     row.id = await db.sessions.add(row);
     return row;

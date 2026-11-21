@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { BellRing, CalendarRange, ChartLine, Check, ChevronRight, ClipboardCheck, Lightbulb, Settings, Sprout, Timer, Wind, Zap } from "lucide-react";
+import { BellRing, Flag, NotebookPen, CalendarRange, ChartLine, Check, ChevronRight, ClipboardCheck, Lightbulb, Settings, Sprout, Timer, Wind, Zap } from "lucide-react";
 import type { CheckInData } from "@/lib/checkin";
 import { db, dayKey, type CheckIn } from "@/lib/db";
 import { MIN_DAYS, pairDays, usableDays } from "@/lib/insights";
@@ -237,6 +237,8 @@ function Loaded({ data, onChange }: { data: Data; onChange: () => void }) {
           <Tile href="/tree/" icon={<Sprout aria-hidden size={18} />} tint="bg-leaf text-white" title="Сад" sub={`${tree.stageName[0]!.toUpperCase()}${tree.stageName.slice(1)} · ${tree.drops} ${plural(tree.drops, ["капля", "капли", "капель"])}`} />
           <Tile href="/week/" icon={<CalendarRange aria-hidden size={18} />} tint="bg-s-mind text-white" title="Итоги недели" sub="Ваши 7 дней" />
           <Tile href="/history/" icon={<ChartLine aria-hidden size={18} />} tint="bg-accent text-white" title="История" sub="30 дней" />
+          <Tile href="/goals/" icon={<Flag aria-hidden size={18} />} tint="bg-s-rest text-white" title="Цели" sub="Шаг за шагом" />
+          <Tile href="/notes/" icon={<NotebookPen aria-hidden size={18} />} tint="bg-s-caffeine text-white" title="Заметки" sub="Только для вас" />
           <Tile href="/settings/#reminder" icon={<BellRing aria-hidden size={18} />} tint="bg-red text-white" title="Напоминание" sub="В удобное время" plain />
         </nav>
       </section>

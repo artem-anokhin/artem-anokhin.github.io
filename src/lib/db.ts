@@ -42,6 +42,8 @@ export interface FocusSession {
   task?: string;
   /** Times the user left the app during the session (non-indexed). */
   away?: number;
+  /** Joined via a «Учиться вместе» link (non-indexed). */
+  together?: true;
   /** Self-rating after the session: 1 трудно, 2 нормально, 3 отлично (non-indexed). */
   feel?: 1 | 2 | 3;
   /** Synthetic demo row (see demo.ts). */
@@ -69,6 +71,28 @@ export interface HabitLog {
   demo?: true;
 }
 
+/** «Цели»: a personal goal with optional due date and small steps. */
+export interface Goal {
+  id?: number;
+  title: string;
+  /** Optional «зачем» line. */
+  why?: string;
+  due?: DayKey;
+  steps: { text: string; done: boolean }[];
+  /** 0 = active, 1 = reached (number so Dexie can index it). */
+  done: 0 | 1;
+  doneAt?: number;
+  createdAt: number;
+}
+
+/** «Заметки»: free-text notes, local only. */
+export interface Note {
+  id?: number;
+  text: string;
+  createdAt: number;
+  updatedAt: number;
+}
+
 export interface Setting {
   key: string;
   value: unknown;
@@ -81,6 +105,8 @@ export class FocusDB extends Dexie {
   sessions!: EntityTable<FocusSession, "id">;
   habits!: EntityTable<Habit, "id">;
   habitLogs!: Dexie.Table<HabitLog, [number, string]>;
+  goals!: EntityTable<Goal, "id">;
+  notes!: EntityTable<Note, "id">;
 
   constructor(name = "focusai") {
     super(name);
@@ -93,6 +119,8 @@ export class FocusDB extends Dexie {
     this.version(2).stores({ sessions: "++id, date" });
     // v3: habits and their daily marks.
     this.version(3).stores({ habits: "++id, archived", habitLogs: "&[habitId+date], date, habitId" });
+    // v4: goals and notes.
+    this.version(4).stores({ goals: "++id, done", notes: "++id, updatedAt" });
   }
 }
 

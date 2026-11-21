@@ -1,23 +1,42 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Check, Flower2, Leaf, Lock, Moon, Sprout, Target, Timer, Zap, type LucideIcon } from "lucide-react";
 import { db } from "@/lib/db";
-import { awards, type Award, type AwardIcon } from "@/lib/awards";
+import { AWARDS_SEEN_KEY, awards, type Award } from "@/lib/awards";
+import { countGoalsDone } from "@/lib/goals";
 import { plural } from "@/lib/plural";
+import { tap } from "@/lib/haptics";
+import { AwardArt } from "./AwardArt";
 
-const ICON: Record<AwardIcon, LucideIcon> = { check: Check, timer: Timer, zap: Zap, sprout: Sprout, leaf: Leaf, moon: Moon, flower: Flower2, target: Target };
-
-/** «Награды»: a grid of total-based milestones (no streaks, never lost). */
+/** «Награды»: illustrated milestones (no streaks, never lost) + secret ones shown as «???» until earned. */
 export function Awards({ stage }: { stage: number }) {
   const [list, setList] = useState<Award[] | null>(null);
+  const [fresh, setFresh] = useState<Set<string>>(new Set());
   const [all, setAll] = useState(false);
 
   useEffect(() => {
     let alive = true;
-    Promise.all([db.checkins.toArray(), db.focusTests.toArray(), db.sessions.toArray(), db.habitLogs.toArray()])
-      .then(([checkins, tests, sessions, habitLogs]) => alive && setList(awards({ checkins, tests, sessions, habitLogs, stage })))
-      .catch(() => alive && setList(null));
+    (async () => {
+      const [checkins, tests, sessions, habitLogs, goalsDone, seenRow] = await Promise.all([
+        db.checkins.toArray(),
+        db.focusTests.toArray(),
+        db.sessions.toArray(),
+        db.habitLogs.toArray(),
+        countGoalsDone(),
+        db.settings.get(AWARDS_SEEN_KEY),
+      ]);
+      const l = awards({ checkins, tests, sessions, habitLogs, stage, goalsDone });
+      const seen = new Set(Array.isArray(seenRow?.value) ? (seenRow.value as unknown[]).filter((x): x is string => typeof x === "string") : []);
+      const earned = l.filter((a) => a.done).map((a) => a.id);
+      const newOnes = new Set<string>(earned.filter((id) => !seen.has(id)));
+      if (!alive) return;
+      setList(l);
+      setFresh(newOnes);
+      if (newOnes.size > 0) {
+        tap("success");
+        await db.settings.put({ key: AWARDS_SEEN_KEY, value: earned });
+      }
+    })().catch(() => alive && setList(null));
     return () => {
       alive = false;
     };
@@ -25,9 +44,9 @@ export function Awards({ stage }: { stage: number }) {
 
   if (!list) return null;
   const got = list.filter((a) => a.done).length;
-  // Earned first, then the closest locked ones; the rest behind «Ещё».
-  const locked = list.filter((a) => !a.done).sort((a, b) => b.have / b.need - a.have / a.need);
-  const ordered = [...list.filter((a) => a.done), ...locked];
+  // New first, then earned, then the closest locked ones; secrets last; the rest behind «Ещё».
+  const score = (a: Award) => (fresh.has(a.id) ? 3 : a.done ? 2 : a.secret ? 0 : 1 + a.have / a.need / 2);
+  const ordered = [...list].sort((a, b) => score(b) - score(a));
   const shown = all ? ordered : ordered.slice(0, got + 2);
   const hidden = ordered.length - shown.length;
 
@@ -38,25 +57,27 @@ export function Awards({ stage }: { stage: number }) {
       </h2>
       <ul className="group-list">
         {shown.map((a) => {
-          const Icon = a.done ? ICON[a.icon] : Lock;
+          const masked = a.secret && !a.done;
+          const isNew = fresh.has(a.id);
           return (
-            <li key={a.id} className="flex min-h-[60px] items-center gap-3 px-4 py-2.5">
-              <span aria-hidden className={`grid size-9 shrink-0 place-items-center rounded-full ${a.done ? "bg-leaf text-white" : "bg-fill text-chevron"}`}>
-                <Icon size={18} strokeWidth={a.done ? 2.4 : 2} />
+            <li key={a.id} className="flex min-h-[68px] items-center gap-3 px-4 py-2.5">
+              <span className={`shrink-0 ${isNew ? "animate-pop" : ""}`}>
+                <AwardArt id={a.id} done={a.done} secret={a.secret} size={48} />
               </span>
               <span className="min-w-0 flex-1">
-                <span className={`block text-[17px] ${a.done ? "text-ink" : "text-muted"}`}>
-                  {a.title}
-                  <span className="sr-only">{a.done ? ". Получена." : `. Пока ${a.have} из ${a.need}.`}</span>
+                <span className={`flex flex-wrap items-center gap-x-2 text-[17px] ${a.done ? "text-ink" : "text-muted"}`}>
+                  {masked ? "Секретная награда" : a.title}
+                  {isNew && <span className="rounded-full bg-leaf px-2 py-0.5 text-[11px] font-semibold text-white">Новая</span>}
+                  <span className="sr-only">{a.done ? ". Получена." : masked ? ". Пока скрыта." : `. Пока ${a.have} из ${a.need}.`}</span>
                 </span>
-                <span className="block text-[13px] text-muted">{a.hint}</span>
-                {!a.done && a.need > 1 && (
+                <span className="block text-[13px] text-muted">{masked ? "Откроется сама. Попробуйте разное время и длину сессий" : a.hint}</span>
+                {!a.done && !a.secret && a.need > 1 && (
                   <span aria-hidden className="mt-1.5 block h-1.5 rounded-full bg-fill-strong">
                     <span className="block h-full rounded-full bg-leaf" style={{ width: `${(a.have / a.need) * 100}%` }} />
                   </span>
                 )}
               </span>
-              {!a.done && a.need > 1 && (
+              {!a.done && !a.secret && a.need > 1 && (
                 <span aria-hidden className="text-[13px] text-muted tabular-nums">
                   {a.have}/{a.need}
                 </span>
