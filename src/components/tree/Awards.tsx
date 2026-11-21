@@ -36,33 +36,30 @@ export function Awards({ stage }: { stage: number }) {
       <h2 id="awards-title" className="px-4 pb-1.5 text-[13px] text-muted uppercase">
         Награды · {got} из {list.length}
       </h2>
-      <ul className="grid grid-cols-2 gap-3">
+      <ul className="group-list">
         {shown.map((a) => {
           const Icon = a.done ? ICON[a.icon] : Lock;
           return (
-            <li key={a.id} className="flex flex-col rounded-card-lg bg-surface p-4">
-              <span
-                aria-hidden
-                className={`grid size-11 place-items-center rounded-full ${a.done ? "bg-leaf text-white" : "bg-fill text-chevron"}`}
-              >
-                <Icon size={22} strokeWidth={a.done ? 2.4 : 2} />
+            <li key={a.id} className="flex min-h-[60px] items-center gap-3 px-4 py-2.5">
+              <span aria-hidden className={`grid size-9 shrink-0 place-items-center rounded-full ${a.done ? "bg-leaf text-white" : "bg-fill text-chevron"}`}>
+                <Icon size={18} strokeWidth={a.done ? 2.4 : 2} />
               </span>
-              <p className={`mt-3 text-[15px] leading-tight font-semibold ${a.done ? "text-ink" : "text-muted"}`}>
-                {a.title}
-                <span className="sr-only">{a.done ? ". Получена." : `. Пока ${a.have} из ${a.need}.`}</span>
-              </p>
-              <p className="mt-0.5 text-[13px] leading-snug text-muted">
-                {a.hint}
-              </p>
-              {!a.done && a.need > 1 && (
-                <div aria-hidden className="mt-auto flex items-center gap-2 pt-2">
-                  <div className="h-1.5 flex-1 rounded-full bg-fill-strong">
-                    <div className="h-full rounded-full bg-leaf" style={{ width: `${(a.have / a.need) * 100}%` }} />
-                  </div>
-                  <span className="text-[12px] text-muted tabular-nums">
-                    {a.have}/{a.need}
+              <span className="min-w-0 flex-1">
+                <span className={`block text-[17px] ${a.done ? "text-ink" : "text-muted"}`}>
+                  {a.title}
+                  <span className="sr-only">{a.done ? ". Получена." : `. Пока ${a.have} из ${a.need}.`}</span>
+                </span>
+                <span className="block text-[13px] text-muted">{a.hint}</span>
+                {!a.done && a.need > 1 && (
+                  <span aria-hidden className="mt-1.5 block h-1.5 rounded-full bg-fill-strong">
+                    <span className="block h-full rounded-full bg-leaf" style={{ width: `${(a.have / a.need) * 100}%` }} />
                   </span>
-                </div>
+                )}
+              </span>
+              {!a.done && a.need > 1 && (
+                <span aria-hidden className="text-[13px] text-muted tabular-nums">
+                  {a.have}/{a.need}
+                </span>
               )}
             </li>
           );

@@ -153,11 +153,12 @@ export function TreeScreen() {
 
         <Awards stage={tree.stage} />
 
-        <section aria-labelledby="how-title">
-          <h2 id="how-title" className="px-4 pb-1.5 text-[13px] text-muted uppercase">
+        <details className="group">
+          <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between px-4 text-[15px] text-link">
             Откуда капли
-          </h2>
-          <ul className="group-list">
+            <span aria-hidden className="transition-transform group-open:rotate-90">›</span>
+          </summary>
+          <ul className="group-list mt-1">
             {[
               ["Чек-ин", "+1 в день", "bg-navy"],
               ["Тест реакции", "+1 в день", "bg-accent"],
@@ -172,8 +173,8 @@ export function TreeScreen() {
               </li>
             ))}
           </ul>
-          <p className="mt-2 text-[13px] text-muted">Капли не пропадают. Один пропуск ничего не меняет.</p>
-        </section>
+          <p className="mt-2 px-4 text-[13px] text-muted">Капли не пропадают. Один пропуск ничего не меняет.</p>
+        </details>
       </div>
     </div>
   );
