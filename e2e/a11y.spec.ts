@@ -12,7 +12,7 @@ async function setup(page: Page) {
   await page.getByRole("link", { name: /Отметить день/ }).waitFor();
   await page.goto("/settings/");
   await page.getByRole("button", { name: /Показать демо-данные/ }).click();
-  await page.waitForURL(/\/$/);
+  await page.waitForURL((u) => u.pathname === "/");
 }
 
 const PAGES = ["/", "/checkin/", "/focus/", "/test/", "/tree/", "/insights/", "/library/", "/week/", "/history/", "/settings/", "/habits/", "/privacy/", "/breathe/", "/goals/", "/notes/"];
