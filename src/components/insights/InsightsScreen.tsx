@@ -29,7 +29,7 @@ import { SPHERE_STYLE } from "@/lib/spheres";
 import { SPHERES } from "@/lib/checkin";
 import { ArrowRight, Clock, FlaskConical, Timer } from "lucide-react";
 import { MIN_GAP, timeOfDay, type TimeOfDay } from "@/lib/timeOfDay";
-import { FEELS, feelByLength } from "@/lib/focusSession";
+import { FEELS, feelByLength, isFeel } from "@/lib/focusSession";
 
 const LIMITS_URL = "https://www.frontiersin.org/journals/digital-health/articles/10.3389/fdgth.2020.00003/full";
 
@@ -46,6 +46,8 @@ type Ready = {
   week: (number | null)[];
   tod: TimeOfDay | null;
   fit: ReturnType<typeof feelByLength>;
+  /** Distinct days with a rated session. */
+  fitDays: number;
 };
 type State = { kind: "loading" } | { kind: "error" } | Ready;
 
@@ -185,6 +187,7 @@ export function InsightsScreen() {
           week,
           tod: timeOfDay(tests),
           fit: feelByLength(sessions),
+          fitDays: new Set(sessions.filter((s) => isFeel(s.feel)).map((s) => s.date)).size,
           splits: Object.fromEntries(top.map((i) => [i.metric.key, splitMeans(pairs, i.metric)])),
           insights: top,
           candidate: pickExperiment(all),
@@ -229,7 +232,7 @@ export function InsightsScreen() {
     );
   }
 
-  const { days, insights, candidate, experiment, splits, week, tod, fit } = state;
+  const { days, insights, candidate, experiment, splits, week, tod, fit, fitDays } = state;
   const locked = days < MIN_DAYS;
 
   return (
@@ -283,7 +286,7 @@ export function InsightsScreen() {
       )}
 
       {tod && <TimeOfDayCard tod={tod} />}
-      <SessionFitCard fit={fit} />
+      {fitDays >= MIN_DAYS && <SessionFitCard fit={fit} days={fitDays} />}
 
       {(experiment || candidate) && (
         <ExperimentCard
@@ -442,7 +445,7 @@ function TimeOfDayCard({ tod }: { tod: TimeOfDay }) {
 }
 
 /** «Длина сессии»: how the user rated 15/25/50-minute sessions (needs ≥2 lengths with ≥3 ratings). */
-function SessionFitCard({ fit }: { fit: ReturnType<typeof feelByLength> }) {
+function SessionFitCard({ fit, days }: { fit: ReturnType<typeof feelByLength>; days: number }) {
   const shown = fit.filter((f) => f.avg !== null).sort((a, b) => b.avg! - a.avg!);
   if (shown.length < 2) return null;
   const best = shown[0]!.avg! - shown[1]!.avg! >= 0.3 ? shown[0]! : null;
@@ -457,7 +460,7 @@ function SessionFitCard({ fit }: { fit: ReturnType<typeof feelByLength> }) {
         {best ? `Сессии по ${best.minutes} минут вы чаще оцениваете выше` : "Оценки сессий разной длины пока похожи"}
       </h2>
       <p className="mt-1 text-[13px] text-muted">
-        По {rated} {plural(rated, ["оценке", "оценкам", "оценкам"])} «Как прошла сессия?»
+        По {days} {plural(days, DAYS_GEN)} · {rated} {plural(rated, ["оценка", "оценки", "оценок"])} «Как прошла сессия?»
       </p>
       <ul className="group-list mt-3 !bg-fill/40">
         {fit.map((f) => (

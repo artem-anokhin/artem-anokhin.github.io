@@ -3,7 +3,7 @@ import { afterEach, describe, expect, it } from "vitest";
 import { emptyCheckIn } from "@/lib/checkin";
 import { db, dayKey } from "@/lib/db";
 import { TIPS } from "@/lib/tips";
-import { HomeScreen } from "./HomeScreen";
+import { HomeScreen, subline } from "./HomeScreen";
 import { HistoryScreen } from "@/components/history/HistoryScreen";
 
 const consent = () => db.settings.put({ key: "profile", value: { mode: "study", consentAt: 1 } });
@@ -67,5 +67,16 @@ describe("HistoryScreen", () => {
     expect(screen.getAllByText("Чек-ин: нет")).toHaveLength(7);
     fireEvent.click(screen.getByRole("button", { name: "Показать все 30 дней" }));
     expect(screen.getAllByText("Чек-ин: нет")).toHaveLength(30);
+  });
+});
+
+describe("subline", () => {
+  const base = { exam: null, focusToday: 0, goal: 25 };
+  it("prefers a close exam, then the reached goal", () => {
+    expect(subline(base)).toBeNull();
+    expect(subline({ ...base, focusToday: 25 })).toBe("Цель фокуса на сегодня выполнена");
+    expect(subline({ ...base, exam: { title: "Матан", days: 0 } })).toBe("Сегодня «Матан». Удачи!");
+    expect(subline({ ...base, exam: { title: "Матан", days: 1 } })).toBe("Завтра «Матан»");
+    expect(subline({ ...base, focusToday: 99, exam: { title: "Матан", days: 5 } })).toBe("До «Матан» 5 дней");
   });
 });

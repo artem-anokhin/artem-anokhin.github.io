@@ -85,6 +85,7 @@ describe("session rating", () => {
     expect(await rateSession(id, 3, db)).toBe(true);
     expect(await rateSession(id, 7, db)).toBe(false);
     expect(await rateSession(999, 2, db)).toBe(false);
+    expect(await rateSession(0, 2, db)).toBe(false);
     expect((await db.sessions.get(id))?.feel).toBe(3);
     await db.delete();
   });

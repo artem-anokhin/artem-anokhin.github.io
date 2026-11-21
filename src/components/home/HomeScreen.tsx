@@ -46,7 +46,7 @@ function greeting(h: number): string {
 }
 
 /** One calm line under the greeting: a close exam, or the focus goal reached. */
-function subline(d: Data): string | null {
+export function subline(d: Pick<Data, "exam" | "focusToday" | "goal">): string | null {
   if (d.exam) {
     const { title, days } = d.exam;
     if (days === 0) return `Сегодня «${title}». Удачи!`;

@@ -442,9 +442,10 @@ export function FocusScreen() {
                         type="button"
                         aria-pressed={on}
                         onClick={async () => {
-                          if (await rateSession(view.id!, f.value).catch(() => false)) {
+                          const id = view.id!;
+                          if (await rateSession(id, f.value).catch(() => false)) {
                             tap("light");
-                            setView({ ...view, feel: f.value });
+                            setView((v) => (v.kind === "done" && v.id === id ? { ...v, feel: f.value } : v));
                           }
                         }}
                         className={`pressable flex min-h-16 flex-col items-center justify-center rounded-card text-[13px] ${
