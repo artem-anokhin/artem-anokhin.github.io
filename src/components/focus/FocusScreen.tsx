@@ -455,7 +455,7 @@ export function FocusScreen() {
           </div>
         )}
 
-        {view.kind === "break" && <BreakView endsAt={view.endsAt} now={now} onEnd={() => setView({ kind: "setup" })} />}
+        {view.kind === "break" && <BreakView endsAt={view.endsAt} now={now} length={length} onEnd={() => setView({ kind: "setup" })} onNext={onStart} />}
       </div>
     </div>
   );
@@ -493,7 +493,19 @@ function RunningSprout({ active, now }: { active: ActiveSession; now: number }) 
 const BREAK_IDEAS = ["Встаньте и пройдитесь", "Выпейте воды", "Посмотрите в окно, вдаль", "Потянитесь, расправьте плечи"];
 
 /** Short break timer after a session (micro-breaks meta-analysis, docs/sources.md). */
-function BreakView({ endsAt, now, onEnd }: { endsAt: number; now: number; onEnd: () => void }) {
+function BreakView({
+  endsAt,
+  now,
+  length,
+  onEnd,
+  onNext,
+}: {
+  endsAt: number;
+  now: number;
+  length: number;
+  onEnd: () => void;
+  onNext: () => void;
+}) {
   const left = Math.max(0, endsAt - now);
   const p = 1 - left / (BREAK_MIN * 60_000);
   return (
@@ -519,7 +531,10 @@ function BreakView({ endsAt, now, onEnd }: { endsAt: number; now: number; onEnd:
           <span className="sr-only"> (откроется в новой вкладке)</span>
         </a>
       </p>
-      <button type="button" onClick={onEnd} className={`${btnNightGhost} w-full max-w-sm`}>
+      <button type="button" onClick={onNext} className={`${btnNight} w-full max-w-sm`}>
+        Ещё сессия · {length} мин
+      </button>
+      <button type="button" onClick={onEnd} className={`${btnNightGhost} -mt-3 w-full max-w-sm`}>
         Закончить перерыв
       </button>
     </div>

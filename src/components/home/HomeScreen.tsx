@@ -18,6 +18,7 @@ import type { TreeState } from "@/lib/tree";
 import { weeklyReview, type WeeklyReview } from "@/lib/weekly";
 import { btnPrimary } from "@/components/ui/controls";
 import { ExamsCard } from "./ExamsCard";
+import { getFocusGoal } from "@/lib/focusGoal";
 import { DayRings, ProgressRing, WeekStrip } from "@/components/ui/visuals";
 
 type Data = {
@@ -29,10 +30,8 @@ type Data = {
   focusToday: number;
   habitsDone: number;
   habitsTotal: number;
+  goal: number;
 };
-
-/** Daily focus ring goal: one standard session. */
-const FOCUS_GOAL = 25;
 
 const dateFmt = new Intl.DateTimeFormat("ru-RU", { weekday: "short", day: "numeric", month: "long" });
 
@@ -62,6 +61,7 @@ export function HomeScreen() {
         db.habitLogs.toArray(),
         activeHabits(),
       ]);
+      const goal = await getFocusGoal();
       if (!alive) return;
       setData({
         today: checkins.find((c) => c.date === key) ?? null,
@@ -71,6 +71,7 @@ export function HomeScreen() {
         usable: usableDays(pairDays(checkins, tests)),
         focusToday: sessions.filter((s) => s.date === key).reduce((a, s) => a + s.minutes, 0),
         habitsTotal: habits.length,
+        goal,
         habitsDone: habits.filter((h) => habitLogs.some((l) => l.habitId === h.id && l.date === key)).length,
       });
     })().catch(() => alive && setFailed(true));
@@ -123,7 +124,7 @@ export function HomeScreen() {
 }
 
 function Loaded({ data, onChange }: { data: Data; onChange: () => void }) {
-  const { today, score, tree, week, usable, focusToday, habitsDone, habitsTotal } = data;
+  const { today, score, tree, week, usable, focusToday, habitsDone, habitsTotal, goal: FOCUS_GOAL } = data;
   const strip = week.days.map((d, i) => ({ date: d.date, done: d.checkin || d.test || d.session || d.habit, today: i === 6 }));
 
   return (

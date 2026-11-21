@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import { ChoiceField, btnSecondary } from "@/components/ui/controls";
 import { HELP_LINES } from "@/lib/crisis";
 import { ReminderCard } from "./ReminderCard";
+import { FocusGoalCard } from "./FocusGoalCard";
 import { InstallRow } from "./InstallRow";
 import { db } from "@/lib/db";
 import { DEMO_DAYS, clearDemo, isDemo, loadDemo } from "@/lib/demo";
@@ -172,6 +173,8 @@ export function SettingsScreen() {
           </p>
         </div>
       </Group>
+
+      <FocusGoalCard />
 
       <ReminderCard />
 
