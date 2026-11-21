@@ -1,5 +1,6 @@
 "use client";
 
+import { tagEffects, type TagEffect } from "@/lib/tags";
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { db, dayKey } from "@/lib/db";
@@ -27,7 +28,7 @@ import { ProgressRing } from "@/components/ui/visuals";
 import { latestTestByDay } from "@/lib/today";
 import { SPHERE_STYLE } from "@/lib/spheres";
 import { SPHERES } from "@/lib/checkin";
-import { ArrowRight, Clock, FlaskConical, Timer } from "lucide-react";
+import { ArrowRight, Clock, FlaskConical, Sparkles, Timer } from "lucide-react";
 import { MIN_GAP, timeOfDay, type TimeOfDay } from "@/lib/timeOfDay";
 import { FEELS, feelByLength, isFeel } from "@/lib/focusSession";
 
@@ -48,6 +49,8 @@ type Ready = {
   fit: ReturnType<typeof feelByLength>;
   /** Distinct days with a rated session. */
   fitDays: number;
+  /** Check-in tags with the biggest score difference (≥7 usable days). */
+  tagFx: TagEffect[];
 };
 type State = { kind: "loading" } | { kind: "error" } | Ready;
 
@@ -187,6 +190,7 @@ export function InsightsScreen() {
           week,
           tod: timeOfDay(tests),
           fit: feelByLength(sessions),
+          tagFx: days >= MIN_DAYS ? tagEffects(pairs.map((p) => ({ data: p.checkin, score: p.score }))).filter((t) => Math.abs(t.diff) >= 3).slice(0, 5) : [],
           fitDays: new Set(sessions.filter((s) => isFeel(s.feel)).map((s) => s.date)).size,
           splits: Object.fromEntries(top.map((i) => [i.metric.key, splitMeans(pairs, i.metric)])),
           insights: top,
@@ -232,7 +236,7 @@ export function InsightsScreen() {
     );
   }
 
-  const { days, insights, candidate, experiment, splits, week, tod, fit, fitDays } = state;
+  const { days, insights, candidate, experiment, splits, week, tod, fit, fitDays, tagFx } = state;
   const locked = days < MIN_DAYS;
 
   return (
@@ -285,6 +289,7 @@ export function InsightsScreen() {
         </section>
       )}
 
+      {tagFx.length > 0 && <TagEffectsCard fx={tagFx} days={days} />}
       {tod && <TimeOfDayCard tod={tod} />}
       {fitDays >= MIN_DAYS && <SessionFitCard fit={fit} days={fitDays} />}
 
@@ -445,6 +450,44 @@ function TimeOfDayCard({ tod }: { tod: TimeOfDay }) {
 }
 
 /** «Длина сессии»: how the user rated 15/25/50-minute sessions (needs ≥2 lengths with ≥3 ratings). */
+function TagEffectsCard({ fx, days }: { fx: TagEffect[]; days: number }) {
+  return (
+    <section aria-labelledby="tagfx-h" className="rounded-card-lg bg-surface p-4">
+      <p className="flex items-center gap-1.5 text-[15px] font-semibold text-link">
+        <Sparkles aria-hidden size={18} /> Ваши занятия и фокус
+      </p>
+      <h2 id="tagfx-h" className="mt-1 text-[20px] font-bold text-ink">
+        Что было в дни с разным Focus Score
+      </h2>
+      <p className="mt-1 text-[13px] text-muted">
+        По {days} {plural(days, DAYS_GEN)} с чек-ином и тестом · отметки «что было сегодня»
+      </p>
+      <ul className="group-list mt-3 !bg-fill/40">
+        {fx.map((t) => (
+          <li key={`${t.sphere}-${t.key}`} className="flex min-h-11 items-center gap-3 px-3 py-2">
+            <span aria-hidden className="text-[20px]">
+              {t.emoji}
+            </span>
+            <span className="min-w-0 flex-1">
+              <span className="block text-[15px] font-semibold text-ink">{t.label}</span>
+              <span className="block text-[13px] text-muted">
+                {t.withDays} {plural(t.withDays, ["день", "дня", "дней"])} с этим · {t.withoutDays} без{t.withDays < 5 ? " · пока предварительно" : ""}
+              </span>
+            </span>
+            <span className={`text-[17px] font-semibold tabular-nums ${t.diff > 0 ? "text-s-activity-ink" : "text-ink"}`} aria-label={`в среднем на ${Math.abs(t.diff)} ${t.diff > 0 ? "выше" : "ниже"}`}>
+              {t.diff > 0 ? "+" : "−"}
+              {Math.abs(t.diff)}
+            </span>
+          </li>
+        ))}
+      </ul>
+      <p className="mt-3 text-[13px] text-muted">
+        Разница среднего Focus Score в дни с занятием и без. Это связь, а не причина: такие дни отличаются и другим — сном, нагрузкой, настроением.
+      </p>
+    </section>
+  );
+}
+
 function SessionFitCard({ fit, days }: { fit: ReturnType<typeof feelByLength>; days: number }) {
   const shown = fit.filter((f) => f.avg !== null).sort((a, b) => b.avg! - a.avg!);
   if (shown.length < 2) return null;

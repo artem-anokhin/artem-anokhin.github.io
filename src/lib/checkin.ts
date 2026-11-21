@@ -3,7 +3,14 @@
  * Pure helpers only — storage lives in db.ts.
  */
 
+import { sanitizeCustom, sanitizeKinds, type TagSphere } from "./tags";
+
 export type Scale5 = 1 | 2 | 3 | 4 | 5;
+/** Optional «что было сегодня» chips (src/lib/tags.ts): built-in ids + own short tags. */
+export interface Tagged {
+  kinds?: string[];
+  custom?: string[];
+}
 /** Local time of day, "HH:MM" (24 h). */
 export type TimeOfDay = string;
 
@@ -15,10 +22,10 @@ export interface CheckInData {
   sleep: { bedtime: TimeOfDay; wake: TimeOfDay; quality: Scale5 };
   food: { breakfast: boolean; regularity: FoodRegularity };
   caffeine: { cups: number; lastAt: TimeOfDay | null; water: number };
-  mind: { stress: Scale5; mood: Scale5 };
-  activity: { level: ActivityLevel; note: string };
-  work: { hours: number; difficulty: Scale5 };
-  rest: { type: RestType };
+  mind: { stress: Scale5; mood: Scale5 } & Tagged;
+  activity: { level: ActivityLevel; note: string } & Tagged;
+  work: { hours: number; difficulty: Scale5 } & Tagged;
+  rest: { type: RestType } & Tagged;
   /** Optional free-text note; never leaves the device. */
   note: string;
   /**
@@ -116,6 +123,11 @@ export function sanitizeCheckIn(d: CheckInData): CheckInData {
   const pick = <T extends string>(v: T, opts: readonly { value: T }[], fallback: T): T =>
     opts.some((o) => o.value === v) ? v : fallback;
   const cups = int(d.caffeine.cups, LIMITS.cups);
+  const tags = (sphere: TagSphere, v: Tagged | undefined): Tagged => {
+    const kinds = sanitizeKinds(sphere, v?.kinds);
+    const custom = sanitizeCustom(v?.custom);
+    return { ...(kinds ? { kinds } : {}), ...(custom ? { custom } : {}) };
+  };
   return {
     sleep: {
       bedtime: isTimeOfDay(d.sleep.bedtime) ? d.sleep.bedtime : "23:30",
@@ -128,16 +140,18 @@ export function sanitizeCheckIn(d: CheckInData): CheckInData {
       lastAt: cups > 0 && isTimeOfDay(d.caffeine.lastAt) ? d.caffeine.lastAt : null,
       water: int(d.caffeine.water, LIMITS.water),
     },
-    mind: { stress: scale(d.mind.stress), mood: scale(d.mind.mood) },
+    mind: { stress: scale(d.mind.stress), mood: scale(d.mind.mood), ...tags("mind", d.mind) },
     activity: {
       level: pick(d.activity.level, ACTIVITY_OPTIONS, "medium"),
-      note: d.activity.note.trim().slice(0, ACTIVITY_NOTE_MAX),
+      note: String(d.activity.note ?? "").trim().slice(0, ACTIVITY_NOTE_MAX),
+      ...tags("activity", d.activity),
     },
     work: {
       hours: clamp(Math.round((Number(d.work.hours) || 0) * 2) / 2, 0, LIMITS.workHours),
       difficulty: scale(d.work.difficulty),
+      ...tags("work", d.work),
     },
-    rest: { type: pick(d.rest.type, REST_OPTIONS, "none") },
+    rest: { type: pick(d.rest.type, REST_OPTIONS, "none"), ...tags("rest", d.rest) },
     note: d.note.trim().slice(0, NOTE_MAX),
     ...(d.answered === undefined
       ? {}

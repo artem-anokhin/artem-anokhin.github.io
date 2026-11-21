@@ -7,7 +7,6 @@ import { X } from "lucide-react";
 import { ChoiceField, ScaleField, Stepper, TimeField, YesNoField } from "@/components/ui/controls";
 import { SPHERE_STYLE } from "@/lib/spheres";
 import {
-  ACTIVITY_NOTE_MAX,
   ACTIVITY_OPTIONS,
   FOOD_OPTIONS,
   LIMITS,
@@ -21,6 +20,8 @@ import {
   type SphereKey,
 } from "@/lib/checkin";
 import { hasCrisisWording } from "@/lib/crisis";
+import { TAGS, customText, sphereTags, tagById, tagsFor, type TagSphere } from "@/lib/tags";
+import { TagPicker } from "./TagPicker";
 import type { Mode } from "@/lib/settings";
 
 const TOTAL = SPHERES.length + 1; // 7 spheres + optional note
@@ -29,9 +30,11 @@ export function CheckInWizard({
   initial,
   mode,
   onSave,
+  recent = { mind: [], activity: [], work: [], rest: [] },
 }: {
   initial: CheckInData;
   mode: Mode;
+  recent?: Record<TagSphere, string[]>;
   onSave: (data: CheckInData) => Promise<void>;
 }) {
   const [step, setStep] = useState(0);
@@ -58,6 +61,29 @@ export function CheckInWizard({
   const patch = <K extends SphereKey>(key: K, value: Partial<CheckInData[K]>) => {
     setD((prev) => ({ ...prev, [key]: { ...(prev[key] as object), ...value } }));
     setTouched((prev) => (prev === null || prev.has(key) ? prev : new Set(prev).add(key)));
+  };
+
+  const picker = (sphere: TagSphere, legend: string, extra?: { fold?: number; placeholder?: string }) => {
+    const { kinds, custom } = sphereTags(d, sphere);
+    return (
+      <TagPicker
+        legend={legend}
+        tags={sphere === "work" ? tagsFor("work", mode) : TAGS[sphere]}
+        kinds={kinds}
+        custom={custom}
+        recent={recent[sphere]}
+        activeClass={theme.base}
+        {...extra}
+        onChange={(next) => {
+          const v = { kinds: next.kinds.length ? next.kinds : undefined, custom: next.custom.length ? next.custom : undefined };
+          if (sphere === "rest") {
+            // A chosen rest activity implies the rest type when it is still «Не было».
+            const first = next.kinds.map((id) => tagById("rest", id)?.rest).find(Boolean);
+            patch("rest", { ...v, ...(d.rest.type === "none" && (first || next.custom.length) ? { type: first ?? "hobby" } : {}) });
+          } else patch(sphere, v);
+        }}
+      />
+    );
   };
 
   const isNote = step === SPHERES.length;
@@ -156,39 +182,30 @@ export function CheckInWizard({
             <>
               <ScaleField legend="Настроение" name="mood" value={d.mind.mood} onChange={(v) => patch("mind", { mood: v })} low="плохое" high="отличное" theme={theme} glyph="face" words={["Плохое", "Грустно", "Ровное", "Хорошее", "Отличное"]} />
               <ScaleField legend="Уровень стресса" name="stress" value={d.mind.stress} onChange={(v) => patch("mind", { stress: v })} low="спокойно" high="очень сильный" theme={theme} words={["Спокойно", "Немного", "Средний", "Высокий", "Очень сильный"]} />
+              {picker("mind", "Какие были чувства?", { fold: 8, placeholder: "Своё: например, гордость" })}
             </>
           )}
 
           {step === 4 && (
             <>
               <ChoiceField legend="Сколько двигались сегодня?" name="activity" columns={2} value={d.activity.level} options={ACTIVITY_OPTIONS} onChange={(v) => patch("activity", { level: v })} theme={theme} />
-              <label className="block">
-                <span className="mb-2 block text-[15px] font-semibold text-ink">
-                  Чем занимались? <span className="font-normal text-muted">необязательно</span>
-                </span>
-                <input
-                  type="text"
-                  maxLength={ACTIVITY_NOTE_MAX}
-                  value={d.activity.note}
-                  onChange={(e) => patch("activity", { note: e.target.value })}
-                  onKeyDown={(e) => e.key === "Enter" && e.preventDefault()}
-                  enterKeyHint="done"
-                  placeholder="Например: прогулка 30 минут"
-                  className="h-[50px] w-full rounded-[12px] bg-surface px-4 text-ink ring-1 ring-line ring-inset placeholder:text-muted"
-                />
-              </label>
+              {picker("activity", "Чем двигались?", { placeholder: "Своё: например, скалолазание" })}
             </>
           )}
 
           {step === 5 && (
             <>
               <Stepper label={mode === "work" ? "Часы работы" : "Часы учёбы"} unit="ч" step={0.5} value={d.work.hours} max={LIMITS.workHours} theme={theme} onChange={(v) => patch("work", { hours: v })} />
+              {picker("work", mode === "work" ? "Чем была занята работа?" : "Чем была занята учёба?", { fold: 8, placeholder: "Своё: например, олимпиада" })}
               <ScaleField legend="Насколько было сложно?" name="difficulty" value={d.work.difficulty} onChange={(v) => patch("work", { difficulty: v })} low="легко" high="очень сложно" theme={theme} words={["Легко", "Спокойно", "Средне", "Сложно", "Очень сложно"]} />
             </>
           )}
 
           {step === 6 && (
-            <ChoiceField legend="Какой отдых был сегодня?" name="rest" columns={2} value={d.rest.type} options={REST_OPTIONS} onChange={(v) => patch("rest", { type: v })} theme={theme} />
+            <>
+              {picker("rest", "Чем отдыхали?", { fold: 12, placeholder: "Своё: например, читал(а) фанфики" })}
+              <ChoiceField legend="Какой это был отдых?" name="rest" columns={2} value={d.rest.type} options={REST_OPTIONS} onChange={(v) => patch("rest", { type: v })} theme={theme} />
+            </>
           )}
 
           {isNote && (
@@ -206,7 +223,7 @@ export function CheckInWizard({
                   className="w-full rounded-[12px] bg-surface p-4 text-ink ring-1 ring-line ring-inset placeholder:text-muted"
                 />
               </label>
-              {hasCrisisWording(`${d.note} ${d.activity.note}`) && <CrisisCard />}
+              {hasCrisisWording(`${d.note} ${d.activity.note} ${customText(d)}`) && <CrisisCard />}
             </>
           )}
 
@@ -243,9 +260,9 @@ const QUESTIONS: Record<SphereKey, string> = {
   food: "Как вы ели сегодня?",
   caffeine: "Кофе, энергетики и вода",
   mind: "Как вы себя чувствуете?",
-  activity: "Сколько было движения?",
+  activity: "Сколько было движения и какого?",
   work: "Сколько и насколько тяжело?",
-  rest: "Как вы отдыхали?",
+  rest: "Что было для души?",
 };
 
 

@@ -34,6 +34,33 @@ describe("CheckInWizard", () => {
     expect(saved.caffeine.lastAt).toBe("14:00");
   });
 
+  it("lets you tell what the day was filled with: chips, own tags, rest type auto-filled", async () => {
+    const onSave = vi.fn<(d: CheckInData) => Promise<void>>().mockResolvedValue();
+    render(<CheckInWizard initial={emptyCheckIn()} mode="study" onSave={onSave} recent={{ mind: [], activity: [], work: [], rest: ["Фанфики"] }} />);
+    next(); next(); next(); // mind
+    fireEvent.click(screen.getByRole("button", { name: /Вдохновение/ }));
+    next(); // activity
+    fireEvent.click(screen.getByRole("button", { name: /Плавание/ }));
+    next(); // work
+    fireEvent.click(screen.getByRole("button", { name: /Лабы/ }));
+    next(); // rest
+    fireEvent.click(screen.getByRole("button", { name: /Манга/ }));
+    expect(screen.getByRole("radio", { name: "Хобби" })).toBeChecked();
+    fireEvent.click(screen.getByRole("button", { name: /Фанфики/ }));
+    fireEvent.click(screen.getByRole("button", { name: /Своё/ }));
+    fireEvent.change(screen.getByLabelText("Своё занятие"), { target: { value: "квиз с друзьями" } });
+    fireEvent.click(screen.getByRole("button", { name: "Добавить" }));
+    expect(screen.getByRole("button", { name: /Квиз с друзьями/ })).toHaveAttribute("aria-pressed", "true");
+    next();
+    fireEvent.click(screen.getByRole("button", { name: "Сохранить" }));
+    await waitFor(() => expect(onSave).toHaveBeenCalledTimes(1));
+    const saved = onSave.mock.calls[0]?.[0] as CheckInData;
+    expect(saved.mind.kinds).toEqual(["inspired"]);
+    expect(saved.activity.kinds).toEqual(["swim"]);
+    expect(saved.work.kinds).toEqual(["labs"]);
+    expect(saved.rest).toMatchObject({ type: "hobby", kinds: ["manga"], custom: ["Фанфики", "Квиз с друзьями"] });
+  });
+
   it("marks only touched spheres as answered when values were carried over", async () => {
     const onSave = vi.fn<(d: CheckInData) => Promise<void>>().mockResolvedValue();
     render(<CheckInWizard initial={{ ...emptyCheckIn(), answered: [] }} mode="study" onSave={onSave} />);

@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { Bar, BarChart, CartesianGrid, Line, LineChart, ResponsiveContainer, Scatter, ScatterChart, Tooltip, XAxis, YAxis, ZAxis } from "recharts";
-import { db, type DayKey } from "@/lib/db";
+import { db, dayKey, type CheckIn, type DayKey } from "@/lib/db";
+import { TagsCard } from "./TagsCard";
 import { MIN_DAYS } from "@/lib/insights";
 import { plural } from "@/lib/plural";
 import { focusCalendar, hourBins, level, scoreTrend, sleepVsScore, weeklyMinutes } from "@/lib/stats";
@@ -17,6 +18,7 @@ type Data = {
   trend: ReturnType<typeof scoreTrend>;
   hours: ReturnType<typeof hourBins>;
   sleep: ReturnType<typeof sleepVsScore>;
+  recentCheckins: CheckIn[];
 };
 
 const ACCENT = "var(--color-accent)";
@@ -69,6 +71,7 @@ export function StatsScreen() {
           trend: scoreTrend(tests),
           hours: hourBins(sessions),
           sleep: sleepVsScore(checkins, tests),
+          recentCheckins: checkins.filter((c) => c.date >= dayKey(new Date(Date.now() - 30 * 86_400_000))),
         });
       })
       .catch(() => alive && setFailed(true));
@@ -233,6 +236,9 @@ export function StatsScreen() {
           </>
         )}
       </Card>
+
+      {/* 7. What the days were filled with (check-in tags, 30 days) */}
+      <TagsCard rows={data.recentCheckins} />
 
       <details className="group rounded-card-lg bg-surface px-4 py-1">
         <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between text-[17px] text-link">

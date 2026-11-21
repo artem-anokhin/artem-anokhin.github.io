@@ -1,5 +1,6 @@
 "use client";
 
+import { TAG_SPHERES, tagLabels } from "@/lib/tags";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Check } from "lucide-react";
@@ -13,7 +14,7 @@ import { btnPrimary } from "@/components/ui/controls";
 type State =
   | { kind: "loading" }
   | { kind: "error" }
-  | { kind: "ready"; days: HistoryDay[]; moods: Map<string, number>; sessions: FocusSession[] };
+  | { kind: "ready"; days: HistoryDay[]; moods: Map<string, number>; sessions: FocusSession[]; tags: Map<string, string[]> };
 
 const shortFmt = new Intl.DateTimeFormat("ru-RU", { day: "numeric", month: "short" });
 const longFmt = new Intl.DateTimeFormat("ru-RU", { day: "numeric", month: "long", weekday: "short" });
@@ -47,6 +48,7 @@ export function HistoryScreen() {
           kind: "ready",
           days,
           moods: moodByDay(checkins),
+          tags: new Map(checkins.map((c) => [c.date, TAG_SPHERES.flatMap((sp) => tagLabels(c, sp))])),
           sessions: sessions.filter((s) => s.date >= from),
         });
       })
@@ -61,7 +63,7 @@ export function HistoryScreen() {
     return <p className="card p-5 text-ink">Не удалось загрузить данные. Обновите страницу.</p>;
   }
 
-  const { days, moods, sessions } = state;
+  const { days, moods, sessions, tags } = state;
   const scores = days.flatMap((d) => (d.score === null ? [] : [d.score]));
   const chartData = days.map((d) => ({ label: shortFmt.format(parseDay(d.date)), score: d.score }));
   const chartLabel =
@@ -109,7 +111,15 @@ export function HistoryScreen() {
         <ul className="group-list">
           {[...days].reverse().slice(0, allDays ? days.length : 7).map((d) => (
             <li key={d.date} className="flex min-h-11 items-center gap-3 px-4 py-2.5">
-              <span className="flex-1 text-[17px] text-ink first-letter:uppercase">{longFmt.format(parseDay(d.date))}</span>
+              <span className="min-w-0 flex-1">
+                <span className="block text-[17px] text-ink first-letter:uppercase">{longFmt.format(parseDay(d.date))}</span>
+                {(tags.get(d.date)?.length ?? 0) > 0 && (
+                  <span className="block truncate text-[13px] text-muted" title={tags.get(d.date)!.join(", ")}>
+                    {tags.get(d.date)!.slice(0, 4).join(" · ")}
+                    {tags.get(d.date)!.length > 4 ? ` +${tags.get(d.date)!.length - 4}` : ""}
+                  </span>
+                )}
+              </span>
               <span className="text-[13px] text-muted">
                 {d.checkedIn ? (
                   <span className="inline-flex items-center gap-1 text-s-activity-ink">

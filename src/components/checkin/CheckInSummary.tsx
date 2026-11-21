@@ -10,6 +10,12 @@ import {
   type CheckInData,
 } from "@/lib/checkin";
 import { hasCrisisWording } from "@/lib/crisis";
+import { customText, tagLabels, type TagSphere } from "@/lib/tags";
+
+const withTags = (base: string, d: CheckInData, s: TagSphere) => {
+  const t = tagLabels(d, s);
+  return t.length ? `${base} · ${t.join(", ")}` : base;
+};
 import type { Mode } from "@/lib/settings";
 
 const label = <T extends string>(opts: readonly { value: T; label: string }[], v: T) =>
@@ -23,10 +29,10 @@ export function summaryRows(d: CheckInData, mode: Mode): [string, string][] {
       "Кофеин и вода",
       `${d.caffeine.cups} чаш.${d.caffeine.lastAt ? ` (последняя в ${d.caffeine.lastAt})` : ""}, вода ${d.caffeine.water} стак.`,
     ],
-    ["Психосостояние", `стресс ${d.mind.stress}/5, настроение ${d.mind.mood}/5`],
-    ["Активность", label(ACTIVITY_OPTIONS, d.activity.level) + (d.activity.note ? ` — ${d.activity.note}` : "")],
-    [mode === "work" ? "Работа" : "Учёба", `${formatHours(d.work.hours)}, сложность ${d.work.difficulty}/5`],
-    ["Отдых", label(REST_OPTIONS, d.rest.type)],
+    ["Психосостояние", withTags(`стресс ${d.mind.stress}/5, настроение ${d.mind.mood}/5`, d, "mind")],
+    ["Активность", withTags(label(ACTIVITY_OPTIONS, d.activity.level) + (d.activity.note ? ` — ${d.activity.note}` : ""), d, "activity")],
+    [mode === "work" ? "Работа" : "Учёба", withTags(`${formatHours(d.work.hours)}, сложность ${d.work.difficulty}/5`, d, "work")],
+    ["Отдых", withTags(label(REST_OPTIONS, d.rest.type), d, "rest")],
   ];
 }
 
@@ -63,7 +69,7 @@ export function CheckInSummary({
           <Pencil aria-hidden size={18} /> Изменить
         </button>
       </section>
-      {hasCrisisWording(`${data.note} ${data.activity.note}`) && <CrisisCard />}
+      {hasCrisisWording(`${data.note} ${data.activity.note} ${customText(data)}`) && <CrisisCard />}
     </div>
   );
 }

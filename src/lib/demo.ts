@@ -48,10 +48,10 @@ export function buildDemo(today: Date = new Date(), days = DEMO_DAYS, seed = 7) 
       sleep: { bedtime: hhmm(bed), wake: hhmm(bed + sleepH * 60), quality: clamp5(sleepH - 3.5 + (r() - 0.5)) },
       food: { breakfast: r() > 0.35, regularity: r() > 0.7 ? "varied" : r() > 0.25 ? "normal" : "poor" },
       caffeine: { cups, lastAt: cups ? hhmm(10 * 60 + r() * 8 * 60) : null, water: 3 + Math.floor(r() * 6) },
-      mind: { stress, mood: clamp5(6 - stress + (r() - 0.5) * 2) },
-      activity: { level: r() > 0.6 ? "frequent" : r() > 0.3 ? "medium" : "minimal", note: "" },
-      work: { hours: 3 + Math.floor(r() * 6), difficulty: clamp5(2 + r() * 3) },
-      rest: { type: r() > 0.6 ? "physical" : r() > 0.3 ? "hobby" : "none" },
+      mind: { stress, mood: clamp5(6 - stress + (r() - 0.5) * 2), ...kindsOf(demoPick(r, stress >= 4 ? ["anxious", "tired", "irritated"] : ["joy", "calm", "inspired", "interest"], 2)) },
+      activity: { level: r() > 0.6 ? "frequent" : r() > 0.3 ? "medium" : "minimal", note: "", ...kindsOf(demoPick(r, ["walk", "swim", "gym", "run", "football", "yoga"], 1)) },
+      work: { ...kindsOf(demoPick(r, ["lectures", "seminars", "selfstudy", "labs", "homework"], 2)), hours: 3 + Math.floor(r() * 6), difficulty: clamp5(2 + r() * 3) },
+      rest: { type: r() > 0.6 ? "physical" : r() > 0.3 ? "hobby" : "none", ...kindsOf(demoPick(r, ["manga", "series", "movie", "games", "friends", "music", "book", "anime"], 2)) },
       note: "",
     };
     const t = d.getTime();
@@ -115,4 +115,15 @@ export async function clearDemo(database: FocusDB = defaultDb): Promise<void> {
     await database.focusTests.filter((t) => t.demo === true).delete();
     await database.settings.delete(DEMO_KEY);
   });
+}
+
+const kindsOf = (k: string[] | undefined) => (k ? { kinds: k } : {});
+
+/** 0..n random distinct tags for demo check-ins. */
+function demoPick(r: () => number, from: string[], n: number): string[] | undefined {
+  const k = Math.floor(r() * (n + 1));
+  const pool = [...from];
+  const out: string[] = [];
+  while (out.length < k && pool.length) out.push(pool.splice(Math.floor(r() * pool.length), 1)[0]!);
+  return out.length ? out : undefined;
 }

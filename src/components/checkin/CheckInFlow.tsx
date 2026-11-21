@@ -13,12 +13,13 @@ import { MIN_DAYS, pairDays, usableDays } from "@/lib/insights";
 import { plural } from "@/lib/plural";
 import { loadTree } from "@/lib/garden";
 import { CheckInWizard } from "./CheckInWizard";
+import { recentCustom, withoutTags, type TagSphere } from "@/lib/tags";
 import { NewAwardChip } from "@/components/tree/NewAwardChip";
 
 type State =
   | { kind: "loading" }
   | { kind: "error" }
-  | { kind: "wizard"; profile: Profile; prefill: CheckInData; isEdit: boolean }
+  | { kind: "wizard"; profile: Profile; prefill: CheckInData; isEdit: boolean; recent: Record<TagSphere, string[]> }
   | { kind: "done"; isEdit: boolean; stage: number; next: string[] };
 
 /** Strip storage fields so a row can seed the wizard. */
@@ -39,8 +40,9 @@ export function CheckInFlow() {
       const today = (await db.checkins.get(dayKey())) ?? null;
       // Prefill from the latest previous day (minus the private note); carried values start "not answered".
       const last = today ?? (await db.checkins.orderBy("date").last()) ?? null;
-      const prefill = today ? toData(today) : last ? { ...toData(last), note: "", answered: [] } : emptyCheckIn();
-      if (alive) setState({ kind: "wizard", profile, prefill, isEdit: !!today });
+      const prefill = today ? toData(today) : last ? { ...withoutTags(toData(last)), note: "", answered: [] } : emptyCheckIn();
+      const recent = recentCustom((await db.checkins.orderBy("date").reverse().limit(60).toArray()).map(toData));
+      if (alive) setState({ kind: "wizard", profile, prefill, isEdit: !!today, recent });
     })().catch(() => alive && setState({ kind: "error" }));
     return () => {
       alive = false;
@@ -66,6 +68,7 @@ export function CheckInFlow() {
     <CheckInWizard
       initial={state.prefill}
       mode={state.profile.mode}
+      recent={state.recent}
       onSave={async (data) => {
         const row = await saveCheckIn(data);
         if (!row) {
