@@ -8,7 +8,9 @@ import { getProfile, type Profile } from "@/lib/settings";
 import { btnPrimary, btnSecondary } from "@/components/ui/controls";
 import { DropIcon } from "@/components/ui/visuals";
 import { TreeSvg } from "@/components/tree/TreeSvg";
-import { STAGES } from "@/lib/tree";
+import { STAGES, STAGE_AT } from "@/lib/tree";
+import { MIN_DAYS, pairDays, usableDays } from "@/lib/insights";
+import { plural } from "@/lib/plural";
 import { loadTree } from "@/lib/garden";
 import { CheckInWizard } from "./CheckInWizard";
 
@@ -16,7 +18,7 @@ type State =
   | { kind: "loading" }
   | { kind: "error" }
   | { kind: "wizard"; profile: Profile; prefill: CheckInData; isEdit: boolean }
-  | { kind: "done"; isEdit: boolean; stage: number };
+  | { kind: "done"; isEdit: boolean; stage: number; next: string[] };
 
 /** Strip storage fields so a row can seed the wizard. */
 function toData(row: CheckIn): CheckInData {
@@ -57,7 +59,7 @@ export function CheckInFlow() {
       </div>
     );
   }
-  if (state.kind === "done") return <Done isEdit={state.isEdit} stage={state.stage} />;
+  if (state.kind === "done") return <Done isEdit={state.isEdit} stage={state.stage} next={state.next} />;
 
   return (
     <CheckInWizard
@@ -72,13 +74,36 @@ export function CheckInFlow() {
           return;
         }
         const tree = await loadTree().catch(() => null);
-        setState({ kind: "done", isEdit: state.isEdit, stage: tree?.stage ?? 0 });
+        const next = await whatsNext(tree?.stage ?? 0, tree?.drops ?? 0).catch(() => []);
+        setState({ kind: "done", isEdit: state.isEdit, stage: tree?.stage ?? 0, next });
       }}
     />
   );
 }
 
-function Done({ isEdit, stage }: { isEdit: boolean; stage: number }) {
+/** «Что дальше»: the next small milestones, so tomorrow has a reason (no streak pressure). */
+async function whatsNext(stage: number, drops: number): Promise<string[]> {
+  const out: string[] = [];
+  const [checkins, tests] = await Promise.all([db.checkins.toArray(), db.focusTests.toArray()]);
+  const usable = usableDays(pairDays(checkins, tests));
+  const hasTestToday = tests.some((t) => t.date === dayKey());
+  if (usable < MIN_DAYS) {
+    const left = MIN_DAYS - usable - (hasTestToday ? 0 : 1);
+    out.push(
+      left <= 0
+        ? "После теста сегодня откроются первые инсайты"
+        : `До первых инсайтов: ещё ${left} ${plural(left, ["день", "дня", "дней"])} с чек-ином и тестом`,
+    );
+  }
+  const nextAt = STAGE_AT[stage + 1];
+  if (nextAt !== undefined) {
+    const need = nextAt - drops;
+    out.push(`До стадии «${STAGES[stage + 1]}»: ${need} ${plural(need, ["капля", "капли", "капель"])}`);
+  }
+  return out;
+}
+
+function Done({ isEdit, stage, next }: { isEdit: boolean; stage: number; next: string[] }) {
   return (
     <div className="flex min-h-dvh flex-col bg-bg px-4 pt-16 pb-[calc(16px+env(safe-area-inset-bottom))] text-center">
       <div className="mx-auto w-full max-w-md flex-1">
@@ -96,6 +121,15 @@ function Done({ isEdit, stage }: { isEdit: boolean; stage: number }) {
         <p className="mt-2 text-[17px] text-muted">
           {isEdit ? "Изменения сохранены только на этом устройстве." : "Ещё 90 секунд — и узнаете свой Focus Score на сегодня."}
         </p>
+        {!isEdit && next.length > 0 && (
+          <ul className="group-list mt-6 text-left" aria-label="Что дальше">
+            {next.map((t) => (
+              <li key={t} className="px-4 py-3 text-[15px] text-ink">
+                {t}
+              </li>
+            ))}
+          </ul>
+        )}
       </div>
       <div className="mx-auto grid w-full max-w-md gap-3">
         {!isEdit && (
