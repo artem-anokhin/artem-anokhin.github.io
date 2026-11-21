@@ -26,9 +26,10 @@ describe("HomeScreen", () => {
     render(<HomeScreen />);
     expect(await screen.findByRole("link", { name: /Отметить день/ })).toHaveAttribute("href", expect.stringMatching(/^\/checkin\/?$/));
     expect(screen.getByRole("link", { name: /Фокус-сессия/ })).toHaveAttribute("href", expect.stringMatching(/^\/focus\/?$/));
-    expect(screen.getByRole("link", { name: /Focus Score сегодня ещё нет/ })).toHaveAttribute("href", expect.stringMatching(/^\/test\/?$/));
+    expect(screen.getByRole("link", { name: "Пройти тест" })).toHaveAttribute("href", expect.stringMatching(/^\/test\/?$/));
+    expect(screen.getByRole("img", { name: /Кольца дня: чек-ин не сделан, фокус 0 из 25 минут/ })).toBeInTheDocument();
     expect(screen.getByText("До инсайтов 7 дней")).toBeInTheDocument();
-    expect(screen.getByText("Не сделан")).toBeInTheDocument();
+    expect(screen.getByText("Нет")).toBeInTheDocument();
   });
 
   it("after check-in shows done state, a sourced tip and today's score", async () => {
@@ -41,7 +42,7 @@ describe("HomeScreen", () => {
     expect(await screen.findByText("Чек-ин готов")).toBeInTheDocument();
     expect(screen.getByText("Готов")).toBeInTheDocument();
     expect(screen.queryByRole("link", { name: /Отметить день/ })).not.toBeInTheDocument();
-    expect(screen.getByRole("link", { name: /Focus Score сегодня: 77 из 100/ })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /Focus Score 77/ })).toHaveAttribute("href", expect.stringMatching(/^\/history\/?$/));
     expect(screen.getByText(/Источник:/).closest("a")).toHaveAttribute("href");
     expect(Object.values(TIPS).some((t) => screen.queryByText(t.title))).toBe(true);
   });

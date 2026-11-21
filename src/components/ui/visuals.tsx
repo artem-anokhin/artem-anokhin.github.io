@@ -58,6 +58,38 @@ export function ProgressRing({
 const WD = ["Вс", "Пн", "Вт", "Ср", "Чт", "Пт", "Сб"];
 
 /** 7-day strip: done days are leaf circles with a check, today has a navy ring. */
+/** Apple Fitness–style concentric day rings (outer first). Values are 0–1; above 1 stays full. */
+export function DayRings({ rings, size = 120, stroke = 12, gap = 3 }: { rings: { value: number; color: string; track: string }[]; size?: number; stroke?: number; gap?: number }) {
+  return (
+    <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} className="-rotate-90" aria-hidden>
+      {rings.map((ring, i) => {
+        const r = size / 2 - stroke / 2 - i * (stroke + gap);
+        const c = 2 * Math.PI * r;
+        const v = Math.max(0, Math.min(1, ring.value));
+        return (
+          <g key={i}>
+            <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke={ring.track} strokeWidth={stroke} />
+            {v > 0 && (
+              <circle
+                cx={size / 2}
+                cy={size / 2}
+                r={r}
+                fill="none"
+                stroke={ring.color}
+                strokeWidth={stroke}
+                strokeLinecap="round"
+                strokeDasharray={c}
+                strokeDashoffset={c * (1 - v)}
+                className="transition-[stroke-dashoffset] duration-700 ease-out"
+              />
+            )}
+          </g>
+        );
+      })}
+    </svg>
+  );
+}
+
 export function WeekStrip({ days }: { days: { date: string; done: boolean; today: boolean }[] }) {
   return (
     <ol className="grid grid-cols-7 gap-1" aria-label="Последние 7 дней">

@@ -17,7 +17,7 @@ import { latestTestByDay, pickTip } from "@/lib/today";
 import type { TreeState } from "@/lib/tree";
 import { weeklyReview, type WeeklyReview } from "@/lib/weekly";
 import { btnPrimary } from "@/components/ui/controls";
-import { ProgressRing, WeekStrip } from "@/components/ui/visuals";
+import { DayRings, ProgressRing, WeekStrip } from "@/components/ui/visuals";
 
 type Data = {
   today: CheckIn | null;
@@ -29,6 +29,9 @@ type Data = {
   habitsDone: number;
   habitsTotal: number;
 };
+
+/** Daily focus ring goal: one standard session. */
+const FOCUS_GOAL = 25;
 
 const dateFmt = new Intl.DateTimeFormat("ru-RU", { weekday: "short", day: "numeric", month: "long" });
 
@@ -124,32 +127,40 @@ function Loaded({ data, onChange }: { data: Data; onChange: () => void }) {
 
   return (
     <>
-      {/* Summary: Focus Score ring + three facts (Apple Health style) */}
+      {/* Summary: three day rings + facts (Apple Fitness style) */}
       <section aria-label="Сводка за сегодня" className="rounded-card-lg bg-surface p-4">
         <div className="flex items-center gap-5">
-          <Link
-            href={score === null ? "/test/" : "/history/"}
-            aria-label={score === null ? "Focus Score сегодня ещё нет. Пройти тест" : `Focus Score сегодня: ${score} из 100. История`}
-            className="pressable shrink-0"
+          <div
+            role="img"
+            aria-label={`Кольца дня: чек-ин ${today ? "сделан" : "не сделан"}, фокус ${focusToday} из ${FOCUS_GOAL} минут${habitsTotal ? `, привычки ${habitsDone} из ${habitsTotal}` : ""}.`}
+            className="shrink-0"
           >
-            <ProgressRing value={(score ?? 0) / 100} size={112} stroke={12}>
-              {score === null ? (
-                <span>
-                  <span className="stat block text-[34px] text-chevron">—</span>
-                  <span className="text-[13px] font-medium text-muted">фокус</span>
-                </span>
-              ) : (
-                <span>
-                  <span className="stat block text-[34px] text-ink">{score}</span>
-                  <span className="text-[13px] font-medium text-muted">фокус</span>
-                </span>
-              )}
-            </ProgressRing>
-          </Link>
-          <dl className="min-w-0 flex-1 space-y-2.5">
-            <Fact label="Чек-ин" value={today ? "Готов" : "Не сделан"} dot={today ? "bg-leaf" : "bg-fill-strong"} />
-            <Fact label="Фокус" value={focusToday ? `${focusToday} мин` : "0 мин"} dot="bg-s-sleep" />
+            <DayRings
+              size={116}
+              stroke={13}
+              rings={[
+                { value: today ? 1 : 0, color: "var(--color-s-mind)", track: "color-mix(in srgb, var(--color-s-mind) 18%, transparent)" },
+                { value: focusToday / FOCUS_GOAL, color: "var(--color-s-sleep)", track: "color-mix(in srgb, var(--color-s-sleep) 18%, transparent)" },
+                { value: habitsTotal ? habitsDone / habitsTotal : 0, color: "var(--color-s-activity)", track: "color-mix(in srgb, var(--color-s-activity) 18%, transparent)" },
+              ]}
+            />
+          </div>
+          <dl className="min-w-0 flex-1 space-y-2">
+            <Fact label="Чек-ин" value={today ? "Готов" : "Нет"} dot="bg-s-mind" />
+            <Fact label="Фокус" value={`${focusToday}/${FOCUS_GOAL} мин`} dot="bg-s-sleep" />
             <Fact label="Привычки" value={habitsTotal ? `${habitsDone} из ${habitsTotal}` : "—"} dot="bg-s-activity" />
+            <div className="flex items-center justify-between gap-2 border-t border-line">
+              <dt className="text-[15px] whitespace-nowrap text-muted">Focus Score</dt>
+              <dd>
+                <Link
+                  href={score === null ? "/test/" : "/history/"}
+                  aria-label={score === null ? "Пройти тест" : `Focus Score ${score}, история`}
+                  className="inline-flex min-h-11 items-center text-[15px] font-semibold whitespace-nowrap text-link tabular-nums"
+                >
+                  {score === null ? "Пройти тест" : score}
+                </Link>
+              </dd>
+            </div>
           </dl>
         </div>
         <div className="mt-4 border-t border-line pt-3">
