@@ -42,6 +42,8 @@ export interface FocusSession {
   task?: string;
   /** Times the user left the app during the session (non-indexed). */
   away?: number;
+  /** Self-rating after the session: 1 трудно, 2 нормально, 3 отлично (non-indexed). */
+  feel?: 1 | 2 | 3;
   /** Synthetic demo row (see demo.ts). */
   demo?: true;
 }

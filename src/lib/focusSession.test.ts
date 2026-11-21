@@ -1,5 +1,5 @@
 import { FocusDB } from "./db";
-import { TASK_MAX, cancelSession, cleanTask, finishSession, getActiveSession, markAway, minutesByDay, minutesByTask, recentTasks, remainingMs, startSession } from "./focusSession";
+import { TASK_MAX, cancelSession, cleanTask, finishSession, getActiveSession, markAway, minutesByDay, minutesByTask, rateSession, recentTasks, remainingMs, startSession } from "./focusSession";
 
 const T0 = new Date(2026, 10, 21, 10, 0).getTime();
 
@@ -75,5 +75,17 @@ describe("task label and away count", () => {
       { task: "Английский", minutes: 25, count: 1 },
       { task: "Без названия", minutes: 15, count: 1 },
     ]);
+  });
+});
+
+describe("session rating", () => {
+  it("saves a 1–3 feel on a finished session", async () => {
+    const db = new FocusDB("session-test-5");
+    const id = await db.sessions.add({ date: "2026-11-21", startedAt: 1, minutes: 25 });
+    expect(await rateSession(id, 3, db)).toBe(true);
+    expect(await rateSession(id, 7, db)).toBe(false);
+    expect(await rateSession(999, 2, db)).toBe(false);
+    expect((await db.sessions.get(id))?.feel).toBe(3);
+    await db.delete();
   });
 });

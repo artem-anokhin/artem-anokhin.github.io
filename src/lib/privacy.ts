@@ -1,5 +1,5 @@
 import { SPHERE_KEYS, sanitizeCheckIn } from "./checkin";
-import { SESSION_LENGTHS, cleanTask, type SessionLength } from "./focusSession";
+import { SESSION_LENGTHS, cleanTask, isFeel, type SessionLength } from "./focusSession";
 import { HABIT_TITLE_MAX, MAX_HABITS } from "./habits";
 import { PROFILE_KEY, db as defaultDb, dayKey, type CheckIn, type FocusDB, type FocusSession, type Habit, type HabitLog, type FocusTestResult, type Setting } from "./db";
 import { getProfile, isExperiment, isWindow } from "./settings";
@@ -146,6 +146,7 @@ export async function importData(raw: unknown, database: FocusDB = defaultDb): P
         minutes: x.minutes,
         ...(task ? { task } : {}),
         ...(away !== undefined ? { away } : {}),
+        ...(isFeel(x.feel) ? { feel: x.feel } : {}),
         ...(x.demo === true ? { demo: true as const } : {}),
       });
     } else skipped++;

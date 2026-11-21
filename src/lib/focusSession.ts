@@ -114,6 +114,19 @@ export function minutesByDay(sessions: FocusSession[]): Map<string, number> {
   return m;
 }
 
+export const FEELS = [
+  { value: 1, label: "Трудно", emoji: "😣" },
+  { value: 2, label: "Нормально", emoji: "🙂" },
+  { value: 3, label: "Отлично", emoji: "🤩" },
+] as const;
+export const isFeel = (v: unknown): v is 1 | 2 | 3 => v === 1 || v === 2 || v === 3;
+
+/** Saves «Как прошла сессия?» on a finished session. False when not found or bad value. */
+export async function rateSession(id: number, feel: number, db: FocusDB = defaultDb): Promise<boolean> {
+  if (!isFeel(feel)) return false;
+  return (await db.sessions.update(id, { feel })) === 1;
+}
+
 /** Recent distinct task labels, newest first. */
 export function recentTasks(sessions: FocusSession[], limit = 4): string[] {
   const out: string[] = [];

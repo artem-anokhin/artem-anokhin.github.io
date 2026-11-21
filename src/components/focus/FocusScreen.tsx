@@ -10,8 +10,10 @@ import {
   cancelSession,
   finishSession,
   getActiveSession,
+  FEELS,
   markAway,
   minutesByDay,
+  rateSession,
   recentTasks,
   remainingMs,
   startSession,
@@ -32,7 +34,7 @@ type View =
   | { kind: "loading" }
   | { kind: "setup" }
   | { kind: "running"; active: ActiveSession }
-  | { kind: "done"; minutes: number; away: number; task?: string }
+  | { kind: "done"; id?: number; minutes: number; away: number; task?: string; feel?: 1 | 2 | 3 }
   | { kind: "break"; endsAt: number };
 
 const BREAK_MIN = 5;
@@ -180,7 +182,7 @@ export function FocusScreen() {
           tap("success");
           chime();
         }
-        setView(row ? { kind: "done", minutes, away: row.away ?? 0, task: row.task } : { kind: "setup" });
+        setView(row ? { kind: "done", id: row.id, minutes, away: row.away ?? 0, task: row.task } : { kind: "setup" });
       })
       .catch(() => {
         setError(true);
@@ -414,10 +416,10 @@ export function FocusScreen() {
         )}
 
         {view.kind === "done" && (
-          <div className="flex flex-1 flex-col items-center justify-center-safe gap-6 text-center" role="status">
+          <div className="flex flex-1 flex-col items-center justify-center-safe gap-4 text-center" role="status">
             <div className="animate-pop">
-              <ProgressRing night size={200} stroke={8} value={1} color="#83CF6E">
-                <GrowingSprout progress={1} className="w-[136px]" />
+              <ProgressRing night size={150} stroke={7} value={1} color="#83CF6E">
+                <GrowingSprout progress={1} className="w-[100px]" />
               </ProgressRing>
             </div>
             <p className="inline-flex animate-drop items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-[15px] font-semibold text-night-ink">
@@ -428,6 +430,37 @@ export function FocusScreen() {
             </h1>
             {view.task && <p className="-mt-4 text-[17px] text-night-ink/85">{view.task}</p>}
             {view.task && hasCrisisWording(view.task) && <CrisisCard />}
+            {view.id !== undefined && (
+              <fieldset className="w-full max-w-sm">
+                <legend className="mb-2 w-full text-center text-[15px] font-semibold text-night-ink">Как прошла сессия?</legend>
+                <div className="grid grid-cols-3 gap-2">
+                  {FEELS.map((f) => {
+                    const on = view.feel === f.value;
+                    return (
+                      <button
+                        key={f.value}
+                        type="button"
+                        aria-pressed={on}
+                        onClick={async () => {
+                          if (await rateSession(view.id!, f.value).catch(() => false)) {
+                            tap("light");
+                            setView({ ...view, feel: f.value });
+                          }
+                        }}
+                        className={`pressable flex min-h-16 flex-col items-center justify-center rounded-card text-[13px] ${
+                          on ? "bg-white text-accent" : "bg-white/10 text-night-ink/90"
+                        }`}
+                      >
+                        <span aria-hidden className="text-[22px] leading-none">
+                          {f.emoji}
+                        </span>
+                        <span className="mt-1 font-semibold">{f.label}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </fieldset>
+            )}
             <p className="text-[15px] text-night-muted">
               {view.away === 0 ? (
                 "Ни разу не выходили из приложения — чистый фокус."
@@ -443,7 +476,7 @@ export function FocusScreen() {
                 </>
               )}
             </p>
-            <p className="text-[17px] text-night-muted">
+            <p className="text-[15px] text-night-muted">
               Сделайте перерыв 5 минут: встаньте, разомнитесь. Короткие перерывы связаны с бодростью.{" "}
               <a href="https://pubmed.ncbi.nlm.nih.gov/36044424/" target="_blank" rel="noopener noreferrer" className="underline">
                 Мета-анализ микро-перерывов
