@@ -49,13 +49,13 @@ export function StartWeek({ info, day, checkin, test, focus }: { info: StartInfo
       <p className="flex items-start gap-2 border-t border-line px-4 py-3 text-[15px] text-ink">
         <Lightbulb aria-hidden size={16} className="mt-0.5 shrink-0 text-orange" />
         <span>
-          {day === START_DAYS ? (
+          {day >= START_DAYS - 1 ? (
             <>
-              Последний день старта. Загляните в{" "}
-              <Link href="/week/" className="text-link underline underline-offset-2">
-                итоги недели
-              </Link>
-              .
+              {day === START_DAYS ? "Последний день старта. " : ""}Пройдите{" "}
+              <Link href="/tests/stroop/" className="text-link underline underline-offset-2">
+                «Цвет и слово»
+              </Link>{" "}
+              и сравните с точкой старта{info.score !== null ? ` (${info.score})` : ""}.
             </>
           ) : (
             <>

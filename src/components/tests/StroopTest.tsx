@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import { Swords, X } from "lucide-react";
 import { challengeVerdict, parseChallenge, shareChallenge } from "@/lib/challenge";
 import { getProfile } from "@/lib/settings";
+import { getStart } from "@/lib/start";
 import { STROOP_COLORS, brainHistory, nowMs, saveBrainTest, scoreStroop, stroopTrials, type StroopAnswer, type StroopColor, type StroopSummary, type StroopTrial } from "@/lib/brainTests";
 import { cardHref } from "@/lib/libraryLinks";
 import { tap } from "@/lib/haptics";
@@ -23,6 +24,7 @@ export function StroopTest() {
   const shownAt = useRef(0);
   const [vs, setVs] = useState<number | null>(null);
   const [guest, setGuest] = useState(false);
+  const [startScore, setStartScore] = useState<number | null>(null);
   const [shareStatus, setShareStatus] = useState<"" | "copied" | "error">("");
 
   useEffect(() => {
@@ -33,6 +35,9 @@ export function StroopTest() {
     getProfile()
       .then((p) => read(!p))
       .catch(() => read(true));
+    getStart()
+      .then((st) => setStartScore(st?.score ?? null))
+      .catch(() => {});
   }, []);
 
   useEffect(() => {
@@ -157,6 +162,12 @@ export function StroopTest() {
             <p className="text-[15px] text-night-muted">Результат</p>
             <p className="stat text-[72px] text-night-ink">{s.score}</p>
             {vs !== null && <p className="-mt-2 text-[20px] font-semibold text-night-ink">{challengeVerdict(s.score, vs)}</p>}
+            {vs === null && startScore !== null && (
+              <p className="-mt-2 text-[15px] text-night-muted">
+                Точка старта: <b className="text-night-ink tabular-nums">{startScore}</b> → сейчас <b className="text-night-ink tabular-nums">{s.score}</b>
+                {s.score > startScore ? ` (+${s.score - startScore})` : ""}. Разминка была короче, сравнение примерное.
+              </p>
+            )}
             <dl className="grid w-full max-w-sm grid-cols-3 gap-2">
               {[
                 ["Точность", `${Math.round(s.accuracy * 100)}%`],
