@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { ChevronRight, Coffee, Volume2, VolumeX, Zap } from "lucide-react";
+import { ChevronRight, Coffee, Volume2, VolumeX, Wind, Zap } from "lucide-react";
 import { db, dayKey } from "@/lib/db";
 import {
   SESSION_LENGTHS,
@@ -330,6 +330,17 @@ export function FocusScreen() {
                 </dd>
               </div>
             </dl>
+
+            <Link href="/breathe/" className="pressable flex min-h-18 items-center gap-4 rounded-card bg-white/6 p-4">
+              <span className="grid size-11 shrink-0 place-items-center rounded-full bg-s-caffeine/30 text-night-ink">
+                <Wind aria-hidden size={22} />
+              </span>
+              <span className="min-w-0 flex-1">
+                <span className="block font-semibold text-night-ink">Дыхание перед сессией</span>
+                <span className="block text-[14px] text-night-muted">1 минута · вдох 4 с, выдох 6 с</span>
+              </span>
+              <ChevronRight aria-hidden size={20} className="text-night-muted" />
+            </Link>
 
             <Link href="/test/" className="pressable flex min-h-18 items-center gap-4 rounded-card bg-white/6 p-4">
               <span className="grid size-11 shrink-0 place-items-center rounded-full bg-glow/25 text-night-ink">

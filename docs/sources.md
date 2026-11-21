@@ -18,6 +18,8 @@ Use only these. Phrase findings carefully; no invented numbers.
 - Acute exercise meta-analysis (79 studies) — small but consistent cognitive benefit. https://pubmed.ncbi.nlm.nih.gov/22480735/
 - Acute stress meta-analysis — impairs working memory and cognitive flexibility. https://pubmed.ncbi.nlm.nih.gov/27371161/
 - Micro-breaks meta-analysis — breaks ≤10 min raise vigor and reduce fatigue. https://pubmed.ncbi.nlm.nih.gov/36044424/
+- Zaccaro et al., 2018 (systematic review, Front. Hum. Neurosci.) — slow breathing (~6 breaths/min) is linked to calmer state and less anxiety; studies are small. https://www.frontiersin.org/articles/10.3389/fnhum.2018.00353/full
+- Balban et al., 2023 (Cell Rep. Med., RCT, 5 min/day for a month) — breathing practice improved mood and lowered breathing rate at rest; exhale-focused «cyclic sighing» did best. https://pmc.ncbi.nlm.nih.gov/articles/PMC9873947/
 - Smartphone presence (UT Austin, 2017) — phone on the desk lowered task performance; replication only partial. https://news.utexas.edu/2017/06/26/the-mere-presence-of-your-smartphone-reduces-brain-power · https://www.bps.org.uk/research-digest/revisiting-brain-drain-effect
 
 ## Measuring focus and habits

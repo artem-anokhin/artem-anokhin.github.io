@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { BellRing, CalendarRange, ChartLine, Check, ChevronRight, ClipboardCheck, Lightbulb, Settings, Sprout, Timer, Zap } from "lucide-react";
+import { BellRing, CalendarRange, ChartLine, Check, ChevronRight, ClipboardCheck, Lightbulb, Settings, Sprout, Timer, Wind, Zap } from "lucide-react";
 import type { CheckInData } from "@/lib/checkin";
 import { db, dayKey, type CheckIn } from "@/lib/db";
 import { MIN_DAYS, pairDays, usableDays } from "@/lib/insights";
@@ -173,6 +173,7 @@ function Loaded({ data, onChange }: { data: Data; onChange: () => void }) {
           )}
           <Row href="/test/" icon={<Zap aria-hidden size={18} />} tint="bg-orange text-white" title="Тест реакции" sub={score === null ? "90 секунд · Focus Score" : `Сегодня ${score} из 100`} done={score !== null} />
           <Row href="/focus/" icon={<Timer aria-hidden size={18} />} tint="bg-s-sleep text-white" title="Фокус-сессия" sub={focusToday ? `Сегодня ${focusToday} мин` : "15, 25 или 50 минут"} />
+          <Row href="/breathe/" icon={<Wind aria-hidden size={18} />} tint="bg-s-caffeine text-white" title="Дыхание" sub="1 минута, чтобы успокоиться" />
         </nav>
       </section>
 
