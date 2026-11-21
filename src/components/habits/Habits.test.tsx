@@ -18,6 +18,7 @@ describe("habits UI", () => {
     const idea = HABIT_IDEAS[0]!;
     fireEvent.click(await screen.findByRole("button", { name: `Добавить: ${idea.title}` }));
     expect(await screen.findByRole("button", { name: `Уже добавлено: ${idea.title}` })).toBeDisabled();
+    fireEvent.click(screen.getByRole("button", { name: /Своя привычка/ }));
     fireEvent.change(screen.getByPlaceholderText(/20 минут чтения/), { target: { value: "Читать 20 минут" } });
     fireEvent.click(screen.getByRole("button", { name: "Добавить" }));
     expect(await screen.findByText("Мои привычки · 2 из 5")).toBeInTheDocument();

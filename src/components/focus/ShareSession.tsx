@@ -8,7 +8,7 @@ const appUrl = () => process.env.NEXT_PUBLIC_APP_URL || window.location.host;
 
 /** «Поделиться сессией»: night story image built on the device (minutes + optional task). */
 export function ShareSession({ minutes, todayMinutes, task }: { minutes: number; todayMinutes: number; task?: string }) {
-  const [withTask, setWithTask] = useState(true);
+  const [withTask, setWithTask] = useState(false); // task labels may be private: opt in
   const [status, setStatus] = useState<"idle" | "busy" | "downloaded" | "error">("idle");
 
   async function onShare() {

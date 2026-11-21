@@ -25,6 +25,7 @@ export function HabitsScreen() {
   const [sphere, setSphere] = useState<SphereKey>("work");
   const [msg, setMsg] = useState<string | null>(null);
   const [showAll, setShowAll] = useState(false);
+  const [ownOpen, setOwnOpen] = useState(false);
 
   const [rev, setRev] = useState(0);
   const load = () => setRev((n) => n + 1);
@@ -41,7 +42,10 @@ export function HabitsScreen() {
   async function add(t: string, s: SphereKey, ideaId?: string) {
     const r = await addHabit(t, s, ideaId);
     setMsg(r.ok ? `Добавлено: ${r.habit.title}` : REASON[r.reason]!);
-    if (r.ok) setTitle("");
+    if (r.ok && !ideaId) {
+      setTitle("");
+      setOwnOpen(false);
+    }
     load();
   }
 
@@ -139,6 +143,16 @@ export function HabitsScreen() {
         )}
       </section>
 
+      {!ownOpen ? (
+        <button
+          type="button"
+          onClick={() => setOwnOpen(true)}
+          disabled={full}
+          className="flex min-h-[56px] w-full items-center gap-3 rounded-card-lg bg-surface px-4 text-left text-[17px] text-link active:bg-pressed disabled:text-muted"
+        >
+          <Plus aria-hidden size={22} /> Своя привычка
+        </button>
+      ) : (
       <section aria-labelledby="own-h" className="rounded-card-lg bg-surface p-4">
         <h2 id="own-h" className="title text-[22px]">
           Своя привычка
@@ -184,6 +198,7 @@ export function HabitsScreen() {
           </button>
         </form>
       </section>
+      )}
 
       <p className="rounded-card-lg bg-surface p-4 text-[15px] text-ink">
         {HABIT_FORMATION.text}{" "}
