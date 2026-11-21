@@ -88,7 +88,7 @@ function Story({ data }: { data: Data }) {
             <span className="stat text-[72px] text-ink">{c.avgScore}</span>
             {scoreDelta !== null && scoreDelta !== 0 && (
               <span
-                className={`rounded-full px-3 py-1 text-[14px] font-semibold ${scoreDelta > 0 ? "bg-s-activity-tint text-s-activity-ink" : "bg-danger-tint text-danger"}`}
+                className={`rounded-full px-3 py-1 text-[14px] font-semibold ${scoreDelta > 0 ? "bg-s-activity-tint text-s-activity-ink" : "bg-fill text-ink"}`}
               >
                 {scoreDelta > 0 ? "+" : "−"}
                 {Math.abs(scoreDelta)} к прошлой неделе

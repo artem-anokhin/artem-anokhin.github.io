@@ -268,6 +268,11 @@ export function InsightsScreen() {
           {insights.map((i) => (
             <InsightCard key={i.metric.key} insight={i} split={splits[i.metric.key] ?? null} />
           ))}
+          {insights.some((i) => METRIC_CARD[i.metric.key]) && (
+            <a href={cardHref(METRIC_CARD[insights.find((i) => METRIC_CARD[i.metric.key])!.metric.key]!)} className="flex min-h-11 items-center px-4 text-[15px] text-link">
+              Что об этом говорят исследования
+            </a>
+          )}
         </section>
       )}
 
@@ -364,11 +369,6 @@ function InsightCard({ insight: i, split }: { insight: Insight; split: SplitMean
       <div className="mt-4">
         <StrengthChip strength={i.strength} days={i.days} />
       </div>
-      {METRIC_CARD[i.metric.key] && (
-        <a href={cardHref(METRIC_CARD[i.metric.key]!)} className="mt-1 flex min-h-11 items-center text-[15px] text-link">
-          Подробнее в библиотеке
-        </a>
-      )}
     </article>
   );
 }

@@ -126,7 +126,7 @@ export function LibraryScreen() {
           Такой карточки нет. Вот все материалы.
         </p>
       )}
-      <div role="group" aria-label="Темы" className="-mx-4 flex snap-x gap-2 overflow-x-auto px-4 pb-1 [scrollbar-width:none]">
+      <div role="group" aria-label="Темы" className="-mx-4 flex snap-x scroll-px-4 gap-2 overflow-x-auto px-4 pb-1 [scrollbar-width:none]">
         {[null, ...TOPICS].map((t) => {
           const on = topic === t;
           const st = t ? TOPIC_STYLE[t] : null;

@@ -182,12 +182,6 @@ export function SettingsScreen() {
         title="Перенос данных"
         footer="Экспорт — файл JSON со всеми отметками, заметками и настройками. Он не зашифрован — храните его осторожно. Импорт на другом телефоне перенесёт всё без аккаунта."
       >
-        <a href="/privacy/" className={row}>
-          <span className={icon("bg-leaf")}>
-            <ShieldCheck aria-hidden size={18} />
-          </span>
-          <span className="flex-1 text-ink">Политика конфиденциальности</span>
-        </a>
         <button type="button" onClick={onExport} className={row}>
           <span className={icon("bg-accent")}>
             <Download aria-hidden size={18} />
@@ -254,14 +248,22 @@ export function SettingsScreen() {
         )}
       </Group>
 
-      <Group id="s-about" title="Поддержка">
+      <Group id="s-about" title="Поддержка" footer="Или обратитесь к психологу вашего вуза.">
         {HELP_LINES.map((l) => (
           <a key={l.phone} href={`tel:${l.phone}`} className={row}>
             <span className="w-12 text-[22px] font-bold text-link tabular-nums">{l.phone}</span>
             <span className="flex-1 text-[15px] text-ink">{l.label}</span>
           </a>
         ))}
-        <p className="px-4 py-3 text-[15px] text-ink">или психолог вашего вуза</p>
+      </Group>
+
+      <Group id="s-privacy" title="Приватность" footer="Все данные хранятся только на этом устройстве. Мы их не видим и никуда не отправляем.">
+        <a href="/privacy/" className={row}>
+          <span className={icon("bg-leaf")}>
+            <ShieldCheck aria-hidden size={18} />
+          </span>
+          <span className="flex-1 text-ink">Политика конфиденциальности</span>
+        </a>
       </Group>
     </div>
   );

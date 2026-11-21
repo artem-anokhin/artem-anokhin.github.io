@@ -131,7 +131,7 @@ export function TreeScreen() {
         </section>
 
         <section aria-labelledby="week-title">
-          <h2 id="week-title" className="eyebrow mb-3">
+          <h2 id="week-title" className="px-4 pb-1.5 text-[13px] text-muted uppercase">
             Эта неделя
           </h2>
           <dl className="grid grid-cols-4 divide-x divide-line rounded-card-lg bg-surface py-4 text-center">
@@ -151,7 +151,7 @@ export function TreeScreen() {
         </section>
 
         <section aria-labelledby="how-title">
-          <h2 id="how-title" className="eyebrow mb-3">
+          <h2 id="how-title" className="px-4 pb-1.5 text-[13px] text-muted uppercase">
             Откуда капли
           </h2>
           <ul className="group-list">

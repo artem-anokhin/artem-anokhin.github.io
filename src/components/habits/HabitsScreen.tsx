@@ -1,8 +1,7 @@
 "use client";
 
-import Link from "next/link";
 import { useEffect, useState } from "react";
-import { ChevronLeft, Plus, Trash2 } from "lucide-react";
+import { Plus, Trash2 } from "lucide-react";
 import { SPHERES, type SphereKey } from "@/lib/checkin";
 import type { Habit } from "@/lib/db";
 import { HABIT_FORMATION, HABIT_IDEAS } from "@/lib/habitIdeas";
@@ -58,10 +57,6 @@ export function HabitsScreen() {
 
   return (
     <div className="stagger space-y-8">
-      <Link href="/" className="-mt-2 -ml-1.5 flex min-h-11 w-fit items-center gap-0.5 text-[17px] text-link">
-        <ChevronLeft aria-hidden size={20} /> Сегодня
-      </Link>
-
       <p role="status" className="min-h-0 text-[15px] font-medium text-link empty:hidden">
         {msg}
       </p>
