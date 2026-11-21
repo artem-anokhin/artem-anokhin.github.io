@@ -78,6 +78,9 @@ export interface Goal {
   /** Optional «зачем» line. */
   why?: string;
   due?: DayKey;
+  /** WOOP method: inner obstacle and the «Если…, то…» plan. */
+  obstacle?: string;
+  plan?: string;
   steps: { text: string; done: boolean }[];
   /** 0 = active, 1 = reached (number so Dexie can index it). */
   done: 0 | 1;

@@ -59,3 +59,19 @@ describe("brain test storage", () => {
     await db.delete();
   });
 });
+
+describe("brain tests privacy", () => {
+  it("are exported, re-imported and deleted with everything else", async () => {
+    const { exportData, importData, deleteAllData } = await import("./privacy");
+    const db = new FocusDB("brain-privacy");
+    await db.settings.put({ key: "profile", value: { mode: "study", consentAt: 1 } });
+    await saveBrainTest({ kind: "stroop", takenAt: new Date(2026, 10, 21, 9).getTime(), score: 70, accuracy: 0.9 }, db);
+    const file = JSON.parse(JSON.stringify(await exportData(db)));
+    await deleteAllData(db);
+    expect(await db.brainTests.count()).toBe(0);
+    await db.settings.put({ key: "profile", value: { mode: "study", consentAt: 1 } });
+    await importData(file, db);
+    expect((await db.brainTests.toArray())[0]).toMatchObject({ kind: "stroop", score: 70, accuracy: 0.9 });
+    await db.delete();
+  });
+});

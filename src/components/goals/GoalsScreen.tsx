@@ -10,6 +10,7 @@ import {
   MAX_GOALS,
   MAX_STEPS,
   STEP_MAX,
+  WOOP_MAX,
   addGoal,
   addStep,
   deleteGoal,
@@ -166,6 +167,22 @@ function GoalCard({ goal, onChange, onReach, onError }: { goal: Goal; onChange: 
           </h2>
           {goal.why && <p className="mt-1 text-[15px] text-muted">{goal.why}</p>}
           {goal.due && <p className="mt-1 text-[13px] font-semibold text-s-rest-ink">{dueText(goal.due)}</p>}
+          {(goal.obstacle || goal.plan) && (
+            <dl className="mt-2 space-y-1 rounded-[12px] bg-fill/60 p-3 text-[15px]">
+              {goal.obstacle && (
+                <div>
+                  <dt className="inline text-muted">Препятствие: </dt>
+                  <dd className="inline text-ink">{goal.obstacle}</dd>
+                </div>
+              )}
+              {goal.plan && (
+                <div>
+                  <dt className="inline text-muted">План: </dt>
+                  <dd className="inline font-semibold text-ink">{goal.plan}</dd>
+                </div>
+              )}
+            </dl>
+          )}
         </div>
         <button type="button" aria-label={`Удалить цель «${goal.title}»`} onClick={() => setConfirmDel(true)} className="-mt-2 -mr-2 grid size-11 place-items-center text-muted">
           <Trash2 aria-hidden size={18} />
@@ -253,7 +270,7 @@ function GoalCard({ goal, onChange, onReach, onError }: { goal: Goal; onChange: 
           )}
         </form>
       )}
-      {hasCrisisWording(`${goal.title} ${goal.why ?? ""} ${step}`) && (
+      {hasCrisisWording(`${goal.title} ${goal.why ?? ""} ${goal.obstacle ?? ""} ${goal.plan ?? ""} ${step}`) && (
         <div className="mt-3">
           <CrisisCard />
         </div>
@@ -271,6 +288,10 @@ function NewGoal({ onDone, onCancel }: { onDone: (ok: boolean, msg?: string) => 
   const [why, setWhy] = useState("");
   const [due, setDue] = useState("");
   const [steps, setSteps] = useState(["", "", ""]);
+  const [method, setMethod] = useState<"steps" | "woop">("steps");
+  const [obstacle, setObstacle] = useState("");
+  const [plan, setPlan] = useState("");
+  const woop = method === "woop";
 
   return (
     <form
@@ -278,7 +299,13 @@ function NewGoal({ onDone, onCancel }: { onDone: (ok: boolean, msg?: string) => 
       className="space-y-3 rounded-card-lg bg-surface p-4"
       onSubmit={async (e) => {
         e.preventDefault();
-        const r = await addGoal({ title, why, due: due || undefined, steps: steps.filter((s) => s.trim()) }).catch(() => null);
+        const r = await addGoal({
+          title,
+          why,
+          due: due || undefined,
+          steps: steps.filter((s) => s.trim()),
+          ...(woop ? { obstacle, plan: plan.trim() ? `Если ${obstacle.trim() || "…"}, то ${plan.trim()}` : "" } : {}),
+        }).catch(() => null);
         if (r?.ok) onDone(true);
         else
           onDone(
@@ -291,18 +318,61 @@ function NewGoal({ onDone, onCancel }: { onDone: (ok: boolean, msg?: string) => 
           );
       }}
     >
+      <fieldset>
+        <legend className="sr-only">Способ</legend>
+        <div className="grid grid-cols-2 gap-0.5 rounded-[9px] bg-seg p-0.5">
+          {(
+            [
+              ["steps", "Цель и шаги"],
+              ["woop", "Метод WOOP"],
+            ] as const
+          ).map(([k, l]) => (
+            <label
+              key={k}
+              className={`flex min-h-11 cursor-pointer items-center justify-center rounded-[8px] text-[15px] font-semibold has-[:focus-visible]:outline-3 has-[:focus-visible]:outline-accent ${method === k ? "bg-seg-on text-ink shadow-[0_3px_8px_rgba(0,0,0,.12)]" : "text-ink"}`}
+            >
+              <input type="radio" name="method" checked={method === k} onChange={() => setMethod(k)} className="sr-only" />
+              {l}
+            </label>
+          ))}
+        </div>
+        {woop && (
+          <p className="mt-2 text-[13px] text-muted">
+            Желание → лучший результат → главное препятствие внутри себя → план «Если…, то…».{" "}
+            <a href={cardHref("woop")} className="text-link underline">
+              Почему работает
+            </a>
+          </p>
+        )}
+      </fieldset>
       <div>
         <label htmlFor="g-title" className="block text-[15px] font-semibold text-ink">
-          Цель
+          {woop ? "Желание" : "Цель"}
         </label>
         <input id="g-title" required value={title} maxLength={GOAL_TITLE_MAX} onChange={(e) => setTitle(e.target.value)} placeholder="Например, сдать сессию без долгов" autoComplete="off" className={`${input} mt-1.5`} />
       </div>
       <div>
         <label htmlFor="g-why" className="block text-[15px] font-semibold text-ink">
-          Зачем мне это <span className="font-normal text-muted">· необязательно</span>
+          {woop ? "Лучший результат — представьте его" : "Зачем мне это"} <span className="font-normal text-muted">· необязательно</span>
         </label>
-        <input id="g-why" value={why} maxLength={GOAL_WHY_MAX} onChange={(e) => setWhy(e.target.value)} placeholder="Чтобы летом спокойно отдохнуть" autoComplete="off" className={`${input} mt-1.5`} />
+        <input id="g-why" value={why} maxLength={GOAL_WHY_MAX} onChange={(e) => setWhy(e.target.value)} placeholder={woop ? "Спокойное лето и гордость за себя" : "Чтобы летом спокойно отдохнуть"} autoComplete="off" className={`${input} mt-1.5`} />
       </div>
+      {woop && (
+        <>
+          <div>
+            <label htmlFor="g-obst" className="block text-[15px] font-semibold text-ink">
+              Главное препятствие во мне
+            </label>
+            <input id="g-obst" value={obstacle} maxLength={WOOP_MAX} onChange={(e) => setObstacle(e.target.value)} placeholder="Вечером залипаю в телефон" autoComplete="off" className={`${input} mt-1.5`} />
+          </div>
+          <div>
+            <label htmlFor="g-plan" className="block text-[15px] font-semibold text-ink">
+              План: если {obstacle.trim() ? `«${obstacle.trim()}»` : "это случится"}, то я…
+            </label>
+            <input id="g-plan" value={plan} maxLength={WOOP_MAX} onChange={(e) => setPlan(e.target.value)} placeholder="кладу телефон в другую комнату и ставлю таймер на 25 минут" autoComplete="off" className={`${input} mt-1.5`} />
+          </div>
+        </>
+      )}
       <div>
         <label htmlFor="g-due" className="block text-[15px] font-semibold text-ink">
           Срок <span className="font-normal text-muted">· необязательно</span>
@@ -326,7 +396,7 @@ function NewGoal({ onDone, onCancel }: { onDone: (ok: boolean, msg?: string) => 
           ))}
         </div>
       </fieldset>
-      {hasCrisisWording(`${title} ${why} ${steps.join(" ")}`) && <CrisisCard />}
+      {hasCrisisWording(`${title} ${why} ${obstacle} ${plan} ${steps.join(" ")}`) && <CrisisCard />}
       <div className="flex gap-2">
         <button type="submit" className={`${btnPrimary} flex-1`}>
           Сохранить

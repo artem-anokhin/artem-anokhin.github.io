@@ -6,6 +6,7 @@ import { getProfile, isExperiment, isWindow } from "./settings";
 import { EXAMS_KEY, sanitizeExams } from "./exams";
 import { MAX_GOALS, sanitizeGoal } from "./goals";
 import { MAX_NOTES, sanitizeNote } from "./notes";
+import { sanitizeBrainTest } from "./brainTests";
 import { GOAL_KEY, isGoal } from "./focusGoal";
 
 export const EXPORT_FORMAT = "focusai-export";
@@ -27,11 +28,13 @@ export interface ExportFile {
   /** Goals and notes (optional on import, added in v4). */
   goals?: unknown[];
   notes?: unknown[];
+  /** Mini-test results (v5). */
+  brainTests?: unknown[];
 }
 
 /** Snapshot of every table, read in one transaction so it is consistent. */
 export async function exportData(database: FocusDB = defaultDb, now = new Date()): Promise<ExportFile> {
-  return database.transaction("r", [database.checkins, database.focusTests, database.settings, database.sessions, database.habits, database.habitLogs, database.goals, database.notes], async () => ({
+  return database.transaction("r", [database.checkins, database.focusTests, database.settings, database.sessions, database.habits, database.habitLogs, database.goals, database.notes, database.brainTests], async () => ({
     format: EXPORT_FORMAT,
     version: EXPORT_VERSION,
     exportedAt: now.toISOString(),
@@ -43,6 +46,7 @@ export async function exportData(database: FocusDB = defaultDb, now = new Date()
     habitLogs: await database.habitLogs.toArray(),
     goals: await database.goals.toArray(),
     notes: await database.notes.toArray(),
+    brainTests: await database.brainTests.toArray(),
   }));
 }
 
@@ -66,12 +70,13 @@ export function downloadJson(data: unknown, fileName: string): void {
 
 /** Deletes all user data (check-ins, tests, sessions, profile, experiments) in one transaction. */
 export async function deleteAllData(database: FocusDB = defaultDb): Promise<void> {
-  await database.transaction("rw", [database.checkins, database.focusTests, database.settings, database.sessions, database.habits, database.habitLogs, database.goals, database.notes], async () => {
+  await database.transaction("rw", [database.checkins, database.focusTests, database.settings, database.sessions, database.habits, database.habitLogs, database.goals, database.notes, database.brainTests], async () => {
     await database.sessions.clear();
     await database.habits.clear();
     await database.habitLogs.clear();
     await database.goals.clear();
     await database.notes.clear();
+    await database.brainTests.clear();
     await database.checkins.clear();
     await database.focusTests.clear();
     await database.settings.clear();
@@ -193,6 +198,7 @@ export async function importData(raw: unknown, database: FocusDB = defaultDb): P
   const allGoals = arr(f.goals).map(sanitizeGoal).filter((g): g is NonNullable<typeof g> => g !== null);
   // Same limit as in the app: at most MAX_GOALS active, plus up to 100 reached.
   const goals = [...allGoals.filter((g) => g.done === 0).slice(0, MAX_GOALS), ...allGoals.filter((g) => g.done === 1).slice(0, 100)];
+  const brainTests = arr(f.brainTests).map(sanitizeBrainTest).filter((b): b is NonNullable<typeof b> => b !== null).slice(0, 5000);
   const notes = arr(f.notes).map(sanitizeNote).filter((n): n is NonNullable<typeof n> => n !== null).slice(0, MAX_NOTES);
   skipped += arr(f.goals).length - goals.length + arr(f.notes).length - Math.min(notes.length, arr(f.notes).length);
 
@@ -201,7 +207,7 @@ export async function importData(raw: unknown, database: FocusDB = defaultDb): P
   const experiment = settings.get("experiment");
   const history = arr(settings.get("experimentHistory")).filter(isWindow);
 
-  return database.transaction("rw", [database.checkins, database.focusTests, database.settings, database.sessions, database.habits, database.habitLogs, database.goals, database.notes], async () => {
+  return database.transaction("rw", [database.checkins, database.focusTests, database.settings, database.sessions, database.habits, database.habitLogs, database.goals, database.notes, database.brainTests], async () => {
     const profile = await getProfile(database);
     if (!profile) return null; // no consent → no storage
     await database.checkins.clear();
@@ -211,6 +217,7 @@ export async function importData(raw: unknown, database: FocusDB = defaultDb): P
     await database.habitLogs.clear();
     await database.goals.clear();
     await database.notes.clear();
+    await database.brainTests.clear();
     await database.settings.clear();
     await database.settings.put({
       key: PROFILE_KEY,
@@ -231,6 +238,7 @@ export async function importData(raw: unknown, database: FocusDB = defaultDb): P
     await database.habitLogs.bulkPut(habitLogs);
     await database.goals.bulkAdd(goals);
     await database.notes.bulkAdd(notes);
+    await database.brainTests.bulkAdd(brainTests);
     return { checkins: checkins.length, focusTests: tests.length, skipped };
   });
 }

@@ -8,6 +8,7 @@ export const MAX_STEPS = 8;
 export const GOAL_TITLE_MAX = 60;
 export const GOAL_WHY_MAX = 140;
 export const STEP_MAX = 60;
+export const WOOP_MAX = 140;
 
 const clip = (v: unknown, max: number): string | undefined => {
   if (typeof v !== "string") return undefined;
@@ -29,6 +30,8 @@ export function sanitizeGoal(v: unknown): Omit<Goal, "id"> | null {
   const title = clip(g.title, GOAL_TITLE_MAX);
   if (!title) return null;
   const why = clip(g.why, GOAL_WHY_MAX);
+  const obstacle = clip(g.obstacle, WOOP_MAX);
+  const plan = clip(g.plan, WOOP_MAX);
   const steps = (Array.isArray(g.steps) ? g.steps : [])
     .map((s) => {
       const text = clip((s as { text?: unknown })?.text, STEP_MAX);
@@ -41,6 +44,8 @@ export function sanitizeGoal(v: unknown): Omit<Goal, "id"> | null {
   return {
     title,
     ...(why ? { why } : {}),
+    ...(obstacle ? { obstacle } : {}),
+    ...(plan ? { plan } : {}),
     ...(isDay(g.due) ? { due: g.due } : {}),
     steps,
     done,
@@ -61,7 +66,7 @@ export async function countGoalsDone(db: FocusDB = defaultDb): Promise<number> {
 
 export type AddGoalResult = { ok: true; goal: Goal } | { ok: false; reason: "consent" | "invalid" | "full" };
 
-export async function addGoal(input: { title: string; why?: string; due?: string; steps?: string[] }, db: FocusDB = defaultDb, now = Date.now()): Promise<AddGoalResult> {
+export async function addGoal(input: { title: string; why?: string; due?: string; steps?: string[]; obstacle?: string; plan?: string }, db: FocusDB = defaultDb, now = Date.now()): Promise<AddGoalResult> {
   const clean = sanitizeGoal({ ...input, steps: (input.steps ?? []).map((text) => ({ text, done: false })), done: 0, createdAt: now });
   if (!clean || (clean.due && clean.due < dayKey(new Date(now)))) return { ok: false, reason: "invalid" };
   return db.transaction("rw", db.goals, db.settings, async () => {
