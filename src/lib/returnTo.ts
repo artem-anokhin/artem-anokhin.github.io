@@ -4,7 +4,7 @@
  * Only same-site focus invite paths are accepted (no open redirect). Tab-scoped.
  */
 const KEY = "focusai-return";
-const ALLOWED = /^\/focus\/\?together=\d{1,16}&m=\d{1,3}$/;
+const ALLOWED = /^\/focus\/\?together=\d{1,16}&m=(15|25|50)$/;
 
 export function rememberReturn(pathWithSearch: string): void {
   try {

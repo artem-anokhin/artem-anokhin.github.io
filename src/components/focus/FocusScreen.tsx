@@ -97,7 +97,7 @@ export function FocusScreen() {
   const [noise, setNoise] = useState<NoiseId>("off");
   const [muted, setMuted] = useState(false);
   const [invite, setInvite] = useState<Together | null>(null);
-  const [inviteStatus, setInviteStatus] = useState<"" | "copied" | "error">("");
+  const [inviteStatus, setInviteStatus] = useState<"" | "copied" | "error" | "busy">("");
   const [now, setNow] = useState(() => Date.now());
   const [confirmStop, setConfirmStop] = useState(false);
   const [error, setError] = useState(false);
@@ -218,6 +218,8 @@ export function FocusScreen() {
     unlockAudio();
     const active = await startSession(invite.minutes, undefined, invite.startedAt, task).catch(() => null);
     if (!active) return setError(true);
+    // A session already running (e.g. in another tab) keeps its own timer.
+    if (active.startedAt !== invite.startedAt) setInviteStatus("busy");
     window.history.replaceState(null, "", "/focus/");
     setInvite(null);
     setNow(Date.now());
@@ -464,7 +466,13 @@ export function FocusScreen() {
               <Users aria-hidden size={18} /> Позвать друга
             </button>
             <p role="status" className="-mt-4 text-[13px] text-night-muted empty:hidden">
-              {inviteStatus === "copied" ? "Ссылка скопирована — отправьте её другу." : inviteStatus === "error" ? "Не получилось поделиться ссылкой." : ""}
+              {inviteStatus === "copied"
+                ? "Ссылка скопирована — отправьте её другу."
+                : inviteStatus === "error"
+                  ? "Не получилось поделиться ссылкой."
+                  : inviteStatus === "busy"
+                    ? "У вас уже шла своя сессия — продолжаем её."
+                    : ""}
             </p>
             {!confirmStop ? (
               <button type="button" onClick={() => setConfirmStop(true)} className={btnNightGhost}>

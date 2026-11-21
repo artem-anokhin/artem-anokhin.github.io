@@ -1,5 +1,5 @@
 import { FocusDB } from "./db";
-import { TASK_MAX, cancelSession, cleanTask, finishSession, getActiveSession, markAway, minutesByDay, minutesByTask, feelByLength, parseTogether, rateSession, togetherLink, recentTasks, remainingMs, startSession } from "./focusSession";
+import { JOIN_LATE_MS, TASK_MAX, cancelSession, cleanTask, finishSession, getActiveSession, markAway, minutesByDay, minutesByTask, feelByLength, parseTogether, rateSession, togetherLink, recentTasks, remainingMs, startSession } from "./focusSession";
 
 const T0 = new Date(2026, 10, 21, 10, 0).getTime();
 
@@ -115,5 +115,8 @@ describe("study together link", () => {
     expect(parseTogether(`?together=${now}&m=33`, now)).toBeNull();
     expect(parseTogether(`?together=abc&m=25`, now)).toBeNull();
     expect(parseTogether("", now)).toBeNull();
+    expect(parseTogether(`?together=${now - JOIN_LATE_MS}&m=50`, now)).toMatchObject({ ok: true });
+    expect(parseTogether(`?together=${now + 60_000}&m=15`, now)).toEqual({ ok: true, startedAt: now, minutes: 15 });
+    expect(parseTogether(`?together=${now + 60_001}&m=15`, now)).toEqual({ ok: false, reason: "future" });
   });
 });
