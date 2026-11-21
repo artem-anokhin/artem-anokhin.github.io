@@ -56,6 +56,44 @@ ${dots}
 </svg>`;
 }
 
+export interface SessionCardInput {
+  /** Serialized sprout <svg> (outerHTML) from the done screen. */
+  sproutSvg: string;
+  minutes: number;
+  /** Today's total focus minutes (≥ minutes). */
+  todayMinutes: number;
+  /** Optional task label the user typed; shown only if they keep it on. */
+  task?: string;
+  url: string;
+}
+
+/**
+ * «Карточка сессии»: night-style story image after a finished focus session.
+ * Shows only focus minutes and (optionally) the task label — no health data.
+ */
+export function sessionCardSvg({ sproutSvg, minutes, todayMinutes, task, url }: SessionCardInput): string {
+  const font = "-apple-system, 'SF Pro Display', 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif";
+  const inner = sproutSvg
+    .replace(/<title[^>]*>[\s\S]*?<\/title>/, "")
+    .replace(/^<svg[^>]*>/, "")
+    .replace(/<\/svg>\s*$/, "");
+  const m = Math.max(0, Math.round(minutes));
+  const t = Math.max(m, Math.round(todayMinutes));
+  const hours = t >= 60 ? `${Math.floor(t / 60)} ч ${t % 60 ? `${t % 60} мин` : ""}`.trim() : `${t} мин`;
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${CARD_W}" height="${CARD_H}" viewBox="0 0 ${CARD_W} ${CARD_H}">
+<rect width="100%" height="100%" fill="#000000"/>
+<text x="96" y="210" font-family="${font}" font-weight="600" font-size="40" fill="#98989F">FOCUSAI · ФОКУС</text>
+<circle cx="540" cy="760" r="330" fill="none" stroke="#83CF6E" stroke-width="22"/>
+<svg x="300" y="480" width="480" height="520" viewBox="0 0 120 130">${inner}</svg>
+<text x="540" y="1300" text-anchor="middle" font-family="${font}" font-weight="700" font-size="140" letter-spacing="-4" fill="#FFFFFF">${m} ${plural(m, ["минута", "минуты", "минут"])}</text>
+<text x="540" y="1390" text-anchor="middle" font-family="${font}" font-weight="600" font-size="56" fill="#FFFFFF">в фокус-сессии</text>
+${task ? `<text x="540" y="1490" text-anchor="middle" font-family="${font}" font-weight="500" font-size="52" fill="#9BDB7E">${esc(task)}</text>` : ""}
+<text x="540" y="1610" text-anchor="middle" font-family="${font}" font-weight="500" font-size="44" fill="#98989F">Сегодня всего: ${hours}</text>
+<text x="540" y="1790" text-anchor="middle" font-family="${font}" font-weight="600" font-size="40" fill="#7EA2FF">FocusAI — фокус растёт, как сад</text>
+<text x="540" y="1846" text-anchor="middle" font-family="${font}" font-weight="500" font-size="32" fill="#98989F">${esc(url)}</text>
+</svg>`;
+}
+
 /** Renders the card SVG to a PNG blob via canvas. */
 export async function renderPng(svg: string): Promise<Blob> {
   const img = new Image();
@@ -71,10 +109,10 @@ export async function renderPng(svg: string): Promise<Blob> {
 }
 
 /** Opens the system share sheet when files can be shared; otherwise downloads the PNG. */
-export async function shareOrDownload(blob: Blob, fileName = "focusai-week.png"): Promise<"shared" | "downloaded"> {
+export async function shareOrDownload(blob: Blob, fileName = "focusai-week.png", title = "Моя неделя фокуса"): Promise<"shared" | "downloaded"> {
   const file = new File([blob], fileName, { type: "image/png" });
   if (typeof navigator.canShare === "function" && navigator.canShare({ files: [file] })) {
-    await navigator.share({ files: [file], title: "Моя неделя фокуса" });
+    await navigator.share({ files: [file], title });
     return "shared";
   }
   const url = URL.createObjectURL(blob);

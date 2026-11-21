@@ -27,6 +27,7 @@ import { NOISES, chime, isNoiseId, playNoise, stopNoise, unlockAudio, type Noise
 import { CrisisCard } from "@/components/CrisisCard";
 import { loadTree } from "@/lib/garden";
 import { GrowingSprout, sproutPhase } from "./GrowingSprout";
+import { ShareSession } from "./ShareSession";
 import { btnNight, btnNightGhost } from "@/components/ui/controls";
 import { DropIcon, ProgressRing, TreeScene } from "@/components/ui/visuals";
 
@@ -416,7 +417,7 @@ export function FocusScreen() {
         )}
 
         {view.kind === "done" && (
-          <div className="flex flex-1 flex-col items-center justify-center-safe gap-4 text-center" role="status">
+          <div id="session-done" className="flex flex-1 flex-col items-center justify-center-safe gap-4 text-center" role="status">
             <div className="animate-pop">
               <ProgressRing night size={150} stroke={7} value={1} color="#83CF6E">
                 <GrowingSprout progress={1} className="w-[100px]" />
@@ -492,6 +493,7 @@ export function FocusScreen() {
               <button type="button" onClick={() => setView({ kind: "setup" })} className={`${btnNightGhost} w-full`}>
                 Готово
               </button>
+              <ShareSession minutes={view.minutes} todayMinutes={stats.today} task={view.task} />
               <Link href="/tree/" className="pressable min-h-11 py-2 text-[15px] text-night-muted underline">
                 Посмотреть дерево
               </Link>
