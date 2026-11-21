@@ -4,12 +4,14 @@ import { useEffect, useState } from "react";
 import { Check, Flower2, Leaf, Lock, Moon, Sprout, Target, Timer, Zap, type LucideIcon } from "lucide-react";
 import { db } from "@/lib/db";
 import { awards, type Award, type AwardIcon } from "@/lib/awards";
+import { plural } from "@/lib/plural";
 
 const ICON: Record<AwardIcon, LucideIcon> = { check: Check, timer: Timer, zap: Zap, sprout: Sprout, leaf: Leaf, moon: Moon, flower: Flower2, target: Target };
 
 /** «Награды»: a grid of total-based milestones (no streaks, never lost). */
 export function Awards({ stage }: { stage: number }) {
   const [list, setList] = useState<Award[] | null>(null);
+  const [all, setAll] = useState(false);
 
   useEffect(() => {
     let alive = true;
@@ -23,6 +25,11 @@ export function Awards({ stage }: { stage: number }) {
 
   if (!list) return null;
   const got = list.filter((a) => a.done).length;
+  // Earned first, then the closest locked ones; the rest behind «Ещё».
+  const locked = list.filter((a) => !a.done).sort((a, b) => b.have / b.need - a.have / a.need);
+  const ordered = [...list.filter((a) => a.done), ...locked];
+  const shown = all ? ordered : ordered.slice(0, got + 2);
+  const hidden = ordered.length - shown.length;
 
   return (
     <section aria-labelledby="awards-title">
@@ -30,7 +37,7 @@ export function Awards({ stage }: { stage: number }) {
         Награды · {got} из {list.length}
       </h2>
       <ul className="grid grid-cols-2 gap-3">
-        {list.map((a) => {
+        {shown.map((a) => {
           const Icon = a.done ? ICON[a.icon] : Lock;
           return (
             <li key={a.id} className="flex flex-col rounded-card-lg bg-surface p-4">
@@ -61,6 +68,11 @@ export function Awards({ stage }: { stage: number }) {
           );
         })}
       </ul>
+      {hidden > 0 && (
+        <button type="button" onClick={() => setAll(true)} className="mt-1 flex min-h-11 items-center px-4 text-[15px] text-link">
+          Ещё {hidden} {plural(hidden, ["награда", "награды", "наград"])}
+        </button>
+      )}
     </section>
   );
 }

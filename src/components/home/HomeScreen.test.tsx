@@ -26,7 +26,8 @@ describe("HomeScreen", () => {
     render(<HomeScreen />);
     expect(await screen.findByRole("link", { name: /Отметить день/ })).toHaveAttribute("href", expect.stringMatching(/^\/checkin\/?$/));
     expect(screen.getByRole("link", { name: /Фокус-сессия/ })).toHaveAttribute("href", expect.stringMatching(/^\/focus\/?$/));
-    expect(screen.getByRole("link", { name: "Пройти тест" })).toHaveAttribute("href", expect.stringMatching(/^\/test\/?$/));
+    expect(screen.getByRole("link", { name: /Тест реакции/ })).toHaveAttribute("href", expect.stringMatching(/^\/test\/?$/));
+    expect(screen.queryByRole("link", { name: /Пройти тест/ })).not.toBeInTheDocument();
     expect(screen.getByRole("img", { name: /Кольца дня: чек-ин не сделан, фокус 0 из 25 минут/ })).toBeInTheDocument();
     expect(screen.getByText("До инсайтов 7 дней")).toBeInTheDocument();
     expect(screen.getByText("Нет")).toBeInTheDocument();

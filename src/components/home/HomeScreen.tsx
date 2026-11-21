@@ -173,13 +173,19 @@ function Loaded({ data, onChange }: { data: Data; onChange: () => void }) {
             <div className="flex items-center justify-between gap-2 border-t border-line">
               <dt className="text-[15px] whitespace-nowrap text-muted">Focus Score</dt>
               <dd>
-                <Link
-                  href={score === null ? "/test/" : "/history/"}
-                  aria-label={score === null ? "Пройти тест" : `Focus Score ${score}, история`}
-                  className="inline-flex min-h-11 items-center text-[15px] font-semibold whitespace-nowrap text-link tabular-nums"
-                >
-                  {score === null ? "Пройти" : score}
-                </Link>
+                {score === null ? (
+                  <span className="inline-flex min-h-11 items-center text-[15px] font-semibold text-chevron" aria-label="нет теста сегодня">
+                    —
+                  </span>
+                ) : (
+                  <Link
+                    href="/history/"
+                    aria-label={`Focus Score ${score}, история`}
+                    className="inline-flex min-h-11 items-center text-[15px] font-semibold whitespace-nowrap text-link tabular-nums"
+                  >
+                    {score}
+                  </Link>
+                )}
               </dd>
             </div>
           </dl>
@@ -189,10 +195,17 @@ function Loaded({ data, onChange }: { data: Data; onChange: () => void }) {
         </div>
       </section>
 
-      {!today && (
+      {/* One contextual primary action: check-in first, then the test. */}
+      {!today ? (
         <Link href="/checkin/" className={`${btnPrimary} w-full`}>
           Отметить день
         </Link>
+      ) : (
+        score === null && (
+          <Link href="/test/" className={`${btnPrimary} w-full`}>
+            Пройти тест · 90 секунд
+          </Link>
+        )
       )}
 
       <section aria-labelledby="actions-h">
