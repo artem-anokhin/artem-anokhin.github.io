@@ -5,6 +5,8 @@ import { useEffect, useState } from "react";
 import { X } from "lucide-react";
 import { SPHERES } from "@/lib/checkin";
 import { db, dayKey } from "@/lib/db";
+import { minutesByTask } from "@/lib/focusSession";
+import { daysUntil, upcomingExams } from "@/lib/exams";
 import { MIN_DAYS, computeInsights, pairDays, usableDays, type Insight } from "@/lib/insights";
 import { plural } from "@/lib/plural";
 import { loadTree } from "@/lib/garden";
@@ -14,7 +16,16 @@ import type { TreeState } from "@/lib/tree";
 import { weeklyReview, type WeeklyReview } from "@/lib/weekly";
 import { btnPrimary } from "@/components/ui/controls";
 
-type Data = { review: WeeklyReview; scores: (number | null)[]; tree: TreeState; top: Insight | null; usable: number };
+type Data = {
+  review: WeeklyReview;
+  scores: (number | null)[];
+  tree: TreeState;
+  top: Insight | null;
+  usable: number;
+  /** Task with the most focus minutes this week (labelled sessions only). */
+  topTask: { task: string; minutes: number } | null;
+  nextExam: { title: string; days: number } | null;
+};
 
 const WD = ["вс", "пн", "вт", "ср", "чт", "пт", "сб"];
 const weekday = (key: string) => {
@@ -41,6 +52,10 @@ export function WeekScreen() {
       const pairs = pairDays(checkins, tests);
       const usable = usableDays(pairs);
       const tree = await loadTree();
+      const from = review.days[0]!.date;
+      const labelled = sessions.filter((s) => s.date >= from && s.date <= key && s.task);
+      const topTask = labelled.length ? minutesByTask(labelled)[0]! : null;
+      const exam = (await upcomingExams())[0];
       if (alive)
         setData({
           review,
@@ -48,6 +63,8 @@ export function WeekScreen() {
           tree,
           top: usable >= MIN_DAYS ? (computeInsights(pairs)[0] ?? null) : null,
           usable,
+          topTask,
+          nextExam: exam ? { title: exam.title, days: daysUntil(exam.date, key) } : null,
         });
     })().catch(() => {});
     return () => {
@@ -71,7 +88,7 @@ export function WeekScreen() {
 }
 
 function Story({ data }: { data: Data }) {
-  const { review, scores, top, usable } = data;
+  const { review, scores, top, usable, topTask, nextExam } = data;
   const { current: c, scoreDelta } = review;
   const max = Math.max(...scores.map((s) => s ?? 0), 1);
   const bestDate = c.best?.date;
@@ -138,6 +155,25 @@ function Story({ data }: { data: Data }) {
           </div>
         ))}
       </section>
+
+      {(topTask || nextExam) && (
+        <section aria-label="Учёба" className="group-list">
+          {topTask && (
+            <p className="flex min-h-[52px] items-center gap-3 px-4 py-2 text-[15px] text-ink">
+              <span className="flex-1">Больше всего фокуса — «{topTask.task}»</span>
+              <span className="font-semibold tabular-nums">{topTask.minutes} мин</span>
+            </p>
+          )}
+          {nextExam && (
+            <p className="flex min-h-[52px] items-center gap-3 px-4 py-2 text-[15px] text-ink">
+              <span className="flex-1">Ближайшее — «{nextExam.title}»</span>
+              <span className="font-semibold">
+                {nextExam.days === 0 ? "сегодня" : `через ${nextExam.days} ${plural(nextExam.days, ["день", "дня", "дней"])}`}
+              </span>
+            </p>
+          )}
+        </section>
+      )}
 
       {/* 4. Strongest link */}
       {top ? (
