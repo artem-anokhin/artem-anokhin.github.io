@@ -27,7 +27,8 @@ import { ProgressRing } from "@/components/ui/visuals";
 import { latestTestByDay } from "@/lib/today";
 import { SPHERE_STYLE } from "@/lib/spheres";
 import { SPHERES } from "@/lib/checkin";
-import { ArrowRight, FlaskConical } from "lucide-react";
+import { ArrowRight, Clock, FlaskConical } from "lucide-react";
+import { MIN_GAP, timeOfDay, type TimeOfDay } from "@/lib/timeOfDay";
 
 const LIMITS_URL = "https://www.frontiersin.org/journals/digital-health/articles/10.3389/fdgth.2020.00003/full";
 
@@ -42,6 +43,7 @@ type Ready = {
   splits: Record<string, SplitMeans | null>;
   /** Focus Score for each of the last 7 days (oldest → today), null = no test. */
   week: (number | null)[];
+  tod: TimeOfDay | null;
 };
 type State = { kind: "loading" } | { kind: "error" } | Ready;
 
@@ -179,6 +181,7 @@ export function InsightsScreen() {
           kind: "ready",
           days,
           week,
+          tod: timeOfDay(tests),
           splits: Object.fromEntries(top.map((i) => [i.metric.key, splitMeans(pairs, i.metric)])),
           insights: top,
           candidate: pickExperiment(all),
@@ -223,7 +226,7 @@ export function InsightsScreen() {
     );
   }
 
-  const { days, insights, candidate, experiment, splits, week } = state;
+  const { days, insights, candidate, experiment, splits, week, tod } = state;
   const locked = days < MIN_DAYS;
 
   return (
@@ -275,6 +278,8 @@ export function InsightsScreen() {
           )}
         </section>
       )}
+
+      {tod && <TimeOfDayCard tod={tod} />}
 
       {(experiment || candidate) && (
         <ExperimentCard
@@ -389,6 +394,45 @@ function PreviewInsight() {
         <div className="h-2.5 w-[58%] rounded-full bg-fill-strong" />
       </div>
       <p className="mt-3 text-[13px] text-muted">Здесь появятся ваши настоящие связи — посчитанные только на этом устройстве.</p>
+    </section>
+  );
+}
+
+/** «Когда фокус выше»: average Focus Score by morning / day / evening (all tests). */
+function TimeOfDayCard({ tod }: { tod: TimeOfDay }) {
+  const shown = tod.parts.filter((p) => p.avg !== null);
+  if (shown.length < 2) return null;
+  const tests = tod.parts.reduce((a, p) => a + p.tests, 0);
+  return (
+    <section aria-labelledby="tod-h" className="rounded-card-lg bg-surface p-4">
+      <p className="flex items-center gap-1.5 text-[15px] font-semibold text-link">
+        <Clock aria-hidden size={18} /> Время дня
+      </p>
+      <h2 id="tod-h" className="mt-1 text-[20px] font-bold text-ink">
+        {tod.best ? `В ваших данных Focus Score в среднем выше ${tod.best.gen}` : "Заметной разницы по времени дня пока нет"}
+      </h2>
+      <p className="mt-1 text-[13px] text-muted">
+        По {tod.days} {plural(tod.days, DAYS_GEN)} · {tests} {plural(tests, ["тест", "теста", "тестов"])}
+      </p>
+      <ul className="mt-3 space-y-2.5">
+        {tod.parts.map((p) => (
+          <li key={p.key}>
+            <div className="flex justify-between text-[15px]">
+              <span className="text-ink">{p.label}</span>
+              <span className="font-semibold text-ink tabular-nums">{p.avg ?? <span className="font-normal text-muted">мало тестов</span>}</span>
+            </div>
+            <div className="mt-1 h-2 rounded-full bg-fill" aria-hidden>
+              {p.avg !== null && (
+                <div className={`h-full rounded-full ${tod.best?.key === p.key ? "bg-accent" : "bg-accent/40"}`} style={{ width: `${p.avg}%` }} />
+              )}
+            </div>
+          </li>
+        ))}
+      </ul>
+      <p className="mt-3 text-[13px] text-muted">
+        Средний Focus Score по всем тестам; разницу меньше {MIN_GAP} баллов не считаем.
+        {tod.best && " Можно попробовать ставить сложные задачи на это время и посмотреть, что изменится."}
+      </p>
     </section>
   );
 }
