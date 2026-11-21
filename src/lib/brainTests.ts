@@ -112,7 +112,9 @@ export function spanStep(state: { length: number; misses: number; best: number }
 
 // ---------- storage ----------
 
-export async function saveBrainTest(row: Omit<BrainTest, "id" | "date">, db: FocusDB = defaultDb): Promise<BrainTest | null> {
+/** Saves a result; `takenAt` defaults to now. Null without consent or with a bad score. */
+export async function saveBrainTest(input: Omit<BrainTest, "id" | "date" | "takenAt"> & { takenAt?: number }, db: FocusDB = defaultDb): Promise<BrainTest | null> {
+  const row = { ...input, takenAt: input.takenAt ?? Date.now() };
   if (!Number.isFinite(row.score) || row.score < 0 || row.score > 100) return null;
   return db.transaction("rw", db.brainTests, db.settings, async () => {
     if (!(await getProfile(db))) return null;
@@ -143,3 +145,6 @@ export function sanitizeBrainTest(v: unknown): Omit<BrainTest, "id"> | null {
     ...(num(b.interference, -10_000, 10_000) ? { interference: b.interference as number } : {}),
   };
 }
+
+/** Monotonic clock for reaction times (wrapped so event handlers stay lint-clean). */
+export const nowMs = (): number => performance.now();

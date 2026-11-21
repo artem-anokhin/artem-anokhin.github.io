@@ -428,13 +428,13 @@ export function FocusScreen() {
               <ChevronRight aria-hidden size={20} className="text-night-muted" />
             </Link>
 
-            <Link href="/test/" className="pressable flex min-h-18 items-center gap-4 rounded-card bg-white/6 p-4">
+            <Link href="/tests/" className="pressable flex min-h-18 items-center gap-4 rounded-card bg-white/6 p-4">
               <span className="grid size-11 shrink-0 place-items-center rounded-full bg-glow/25 text-night-ink">
                 <Zap aria-hidden size={22} />
               </span>
               <span className="min-w-0 flex-1">
-                <span className="block font-semibold text-night-ink">Тест реакции</span>
-                <span className="block text-[14px] text-night-muted">90 секунд · ваш Focus Score на сегодня</span>
+                <span className="block font-semibold text-night-ink">Тесты внимания и памяти</span>
+                <span className="block text-[14px] text-night-muted">Реакция, «Цвет и слово», «Запомни порядок»</span>
               </span>
               <ChevronRight aria-hidden size={20} className="text-night-muted" />
             </Link>
