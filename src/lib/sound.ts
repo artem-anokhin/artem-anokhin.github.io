@@ -28,6 +28,11 @@ function audio(): Ctx | null {
   return ctx;
 }
 
+/** Creates/resumes the audio context; call inside a tap so later sounds may play. */
+export function unlockAudio(): void {
+  audio();
+}
+
 /** Fills a looping buffer with brown noise (integrated white noise). */
 function brownBuffer(c: Ctx, seconds = 4): AudioBuffer {
   const len = c.sampleRate * seconds;

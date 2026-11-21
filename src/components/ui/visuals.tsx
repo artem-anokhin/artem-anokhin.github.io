@@ -57,7 +57,6 @@ export function ProgressRing({
 
 const WD = ["Вс", "Пн", "Вт", "Ср", "Чт", "Пт", "Сб"];
 
-/** 7-day strip: done days are leaf circles with a check, today has a navy ring. */
 /** Apple Fitness–style concentric day rings (outer first). Values are 0–1; above 1 stays full. */
 export function DayRings({ rings, size = 120, stroke = 12, gap = 3 }: { rings: { value: number; color: string; track: string }[]; size?: number; stroke?: number; gap?: number }) {
   return (
@@ -90,6 +89,7 @@ export function DayRings({ rings, size = 120, stroke = 12, gap = 3 }: { rings: {
   );
 }
 
+/** 7-day strip: done days are leaf circles with a check, today has a navy ring. */
 export function WeekStrip({ days }: { days: { date: string; done: boolean; today: boolean }[] }) {
   return (
     <ol className="grid grid-cols-7 gap-1" aria-label="Последние 7 дней">

@@ -75,7 +75,7 @@ export function BreatheScreen() {
               <div>
                 <h1 className="title text-[32px] text-night-ink">Дыхание</h1>
                 <p className="mt-2 text-[17px] text-night-muted">
-                  Вдох 4 секунды, долгий выдох 6 секунд. Хорошо перед учёбой, тестом или сном.
+                  Вдох 4 секунды, долгий выдох 6 секунд. Можно попробовать перед учёбой или тестом.
                 </p>
               </div>
               <fieldset className="w-full max-w-sm">
@@ -111,7 +111,7 @@ export function BreatheScreen() {
                 Начать
               </button>
               <p className="text-center text-[13px] text-night-muted">
-                Медленное дыхание связано с более спокойным состоянием.{" "}
+                Медленное дыхание (около 6 вдохов в минуту) связано с более спокойным состоянием; исследования небольшие.{" "}
                 <a href="https://www.frontiersin.org/articles/10.3389/fnhum.2018.00353/full" target="_blank" rel="noopener noreferrer" className="underline">
                   Обзор исследований
                   <span className="sr-only"> (откроется в новой вкладке)</span>
@@ -125,7 +125,7 @@ export function BreatheScreen() {
         {view.kind === "run" && (
           <div className="flex flex-1 flex-col items-center justify-center-safe gap-10 text-center">
             <Orb inhale={phase.inhale} animate />
-            <p className="title text-[32px] text-night-ink" aria-live="polite">
+            <p className="title text-[32px] text-night-ink" aria-live="off">
               {phase.inhale ? "Вдох" : "Выдох"}
             </p>
             <p className="text-[15px] text-night-muted tabular-nums">
@@ -143,7 +143,7 @@ export function BreatheScreen() {
             <h1 className="title text-[30px] text-night-ink">
               {view.minutes} {plural(view.minutes, ["минута", "минуты", "минут"])} спокойного дыхания
             </h1>
-            <p className="text-[17px] text-night-muted">Заметьте, как вы себя чувствуете. Теперь можно браться за дело.</p>
+            <p className="text-[17px] text-night-muted">Заметьте, как вы себя чувствуете. Если захочется, можно приступать к делу.</p>
             <div className="grid w-full max-w-sm gap-2">
               <Link href="/focus/" className={`${btnNight} w-full`}>
                 К фокус-сессии
@@ -164,14 +164,14 @@ function Orb({ inhale, animate = false }: { inhale: boolean; animate?: boolean }
   return (
     <span aria-hidden className="relative grid size-64 place-items-center">
       <span
-        className="absolute inset-0 rounded-full bg-accent/20"
+        className="absolute inset-0 rounded-full bg-accent/20 motion-reduce:transition-none!"
         style={{
           transform: `scale(${inhale ? 1 : 0.62})`,
           transition: animate ? `transform ${inhale ? INHALE_MS : EXHALE_MS}ms cubic-bezier(0.45, 0, 0.55, 1)` : undefined,
         }}
       />
       <span
-        className="absolute inset-10 rounded-full bg-accent/45"
+        className="absolute inset-10 rounded-full bg-accent/45 motion-reduce:transition-none!"
         style={{
           transform: `scale(${inhale ? 1 : 0.7})`,
           transition: animate ? `transform ${inhale ? INHALE_MS : EXHALE_MS}ms cubic-bezier(0.45, 0, 0.55, 1)` : undefined,

@@ -62,8 +62,11 @@ export function buildDemo(today: Date = new Date(), days = DEMO_DAYS, seed = 7) 
       sessions.push({ date, startedAt: t - 3 * 3_600_000, minutes, task: DEMO_TASKS[i % DEMO_TASKS.length], away: i % 3, demo: true });
     }
     if (r() > 0.12) {
-      const score = Math.round(Math.min(95, Math.max(30, 40 + (sleepH - 5.5) * 12 + (r() - 0.5) * 16)));
-      tests.push({ date, takenAt: t + 60_000, score, medianRt: Math.round(420 - score * 1.6), lapses: Math.floor(r() * 3), falseStarts: Math.floor(r() * 2), trials: 30, demo: true });
+      // Test hour rotates morning/day/evening by day index; mornings run a little higher (demo only).
+      const hour = [9, 14, 20][i % 3]!;
+      const base = 40 + (sleepH - 5.5) * 12 + (r() - 0.5) * 16 + (hour === 9 ? 7 : 0);
+      const score = Math.round(Math.min(95, Math.max(30, base)));
+      tests.push({ date, takenAt: new Date(d.getFullYear(), d.getMonth(), d.getDate(), hour, 5).getTime(), score, medianRt: Math.round(420 - score * 1.6), lapses: Math.floor(r() * 3), falseStarts: Math.floor(r() * 2), trials: 30, demo: true });
     }
   }
   return { checkins, tests, sessions };

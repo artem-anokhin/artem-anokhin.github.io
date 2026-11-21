@@ -20,7 +20,7 @@ import {
 import { plural } from "@/lib/plural";
 import { tap } from "@/lib/haptics";
 import { hasCrisisWording } from "@/lib/crisis";
-import { NOISES, chime, isNoiseId, playNoise, stopNoise, type NoiseId } from "@/lib/sound";
+import { NOISES, chime, isNoiseId, playNoise, stopNoise, unlockAudio, type NoiseId } from "@/lib/sound";
 import { CrisisCard } from "@/components/CrisisCard";
 import { loadTree } from "@/lib/garden";
 import { GrowingSprout, sproutPhase } from "./GrowingSprout";
@@ -59,15 +59,21 @@ function useWakeLock(on: boolean) {
     if (!on || !("wakeLock" in navigator)) return;
     let lock: { release: () => Promise<void> } | null = null;
     let gone = false;
-    (navigator as Navigator & { wakeLock: { request: (t: "screen") => Promise<{ release: () => Promise<void> }> } }).wakeLock
-      .request("screen")
-      .then((l) => {
-        if (gone) void l.release().catch(() => {});
-        else lock = l;
-      })
-      .catch(() => {});
+    const request = () =>
+      (navigator as Navigator & { wakeLock: { request: (t: "screen") => Promise<{ release: () => Promise<void> }> } }).wakeLock
+        .request("screen")
+        .then((l) => {
+          if (gone) void l.release().catch(() => {});
+          else lock = l;
+        })
+        .catch(() => {});
+    void request();
+    // The browser drops the lock when the tab hides; take it again on return.
+    const onVis = () => document.visibilityState === "visible" && !gone && void request();
+    document.addEventListener("visibilitychange", onVis);
     return () => {
       gone = true;
+      document.removeEventListener("visibilitychange", onVis);
       void lock?.release().catch(() => {});
     };
   }, [on]);
@@ -162,7 +168,7 @@ export function FocusScreen() {
     const minutes = view.active.minutes;
     finishSession()
       .then(async (row) => {
-        await loadStats();
+        await loadStats().catch(() => {}); // stats are cosmetic; the session is already saved
         if (row) {
           tap("success");
           chime();
@@ -189,7 +195,7 @@ export function FocusScreen() {
   async function onStart() {
     setError(false);
     finishing.current = false;
-    if (noise !== "off") playNoise(noise); // unlock audio inside the tap
+    unlockAudio(); // inside the tap, so noise and the end chime may play
     const active = await startSession(length, undefined, Date.now(), task).catch(() => null);
     if (!active) return setError(true);
     setNow(Date.now());
@@ -197,7 +203,11 @@ export function FocusScreen() {
   }
 
   async function onStop() {
-    await cancelSession();
+    try {
+      await cancelSession();
+    } catch {
+      setError(true);
+    }
     setConfirmStop(false);
     setView({ kind: "setup" });
   }
@@ -208,7 +218,7 @@ export function FocusScreen() {
   }
 
   function startBreak() {
-    chime(); // unlock audio inside the tap so the end chime can play
+    unlockAudio(); // inside the tap so the end chime can play
     setNow(Date.now());
     setView({ kind: "break", endsAt: Date.now() + BREAK_MIN * 60_000 });
   }
@@ -407,10 +417,21 @@ export function FocusScreen() {
               {view.minutes} {plural(view.minutes, ["минута", "минуты", "минут"])} фокуса
             </h1>
             {view.task && <p className="-mt-4 text-[17px] text-night-ink/85">{view.task}</p>}
+            {view.task && hasCrisisWording(view.task) && <CrisisCard />}
             <p className="text-[15px] text-night-muted">
-              {view.away === 0
-                ? "Ни разу не выходили из приложения — чистый фокус."
-                : `Выходили из приложения ${view.away} ${plural(view.away, ["раз", "раза", "раз"])}. Телефон рядом отвлекает — попробуйте убрать его подальше.`}
+              {view.away === 0 ? (
+                "Ни разу не выходили из приложения — чистый фокус."
+              ) : (
+                <>
+                  Выходили из приложения {view.away} {plural(view.away, ["раз", "раза", "раз"])}. Если телефон рядом отвлекает, попробуйте убрать его
+                  подальше.{" "}
+                  <a href="https://news.utexas.edu/2017/06/26/the-mere-presence-of-your-smartphone-reduces-brain-power" target="_blank" rel="noopener noreferrer" className="underline">
+                    Исследование
+                    <span className="sr-only"> (откроется в новой вкладке)</span>
+                  </a>{" "}
+                  (подтверждено частично)
+                </>
+              )}
             </p>
             <p className="text-[17px] text-night-muted">
               Сделайте перерыв 5 минут: встаньте, разомнитесь. Короткие перерывы связаны с бодростью.{" "}

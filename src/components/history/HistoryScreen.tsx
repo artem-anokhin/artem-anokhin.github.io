@@ -169,17 +169,19 @@ function MoodPixels({ days, moods }: { days: HistoryDay[]; moods: Map<string, nu
           const m = moods.get(d.date);
           const label = `${longFmt.format(parseDay(d.date))}: ${m ? `настроение ${MOOD_WORDS[m]}` : "нет отметки"}`;
           return (
-            <li
-              key={d.date}
-              title={label}
-              aria-label={label}
-              className="aspect-square rounded-[6px]"
-              style={{
+            <li key={d.date} className="aspect-square">
+              <span
+                role="img"
+                title={label}
+                aria-label={label}
+                className="block size-full rounded-[6px]"
+                style={{
                 background: m ? `color-mix(in srgb, var(--color-s-mind) ${MOOD_MIX[m]}%, var(--color-surface))` : "var(--color-fill)",
                 outline: m ? undefined : "1px dashed var(--color-line)",
-                outlineOffset: -1,
-              }}
-            />
+                  outlineOffset: -1,
+                }}
+              />
+            </li>
           );
         })}
       </ul>

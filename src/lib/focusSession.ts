@@ -26,7 +26,7 @@ export const TASK_MAX = 40;
 /** Trims, collapses spaces and caps a task label; empty → undefined. */
 export function cleanTask(v: unknown): string | undefined {
   if (typeof v !== "string") return undefined;
-  const t = v.replace(/\s+/g, " ").trim().slice(0, TASK_MAX);
+  const t = Array.from(v.replace(/\s+/g, " ").trim()).slice(0, TASK_MAX).join("").trim();
   return t || undefined;
 }
 

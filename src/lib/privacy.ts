@@ -134,7 +134,7 @@ export async function importData(raw: unknown, database: FocusDB = defaultDb): P
   const sessions: FocusSession[] = [];
   for (const r of arr(f.sessions)) {
     const x = r as FocusSession;
-    const sameDay = x && isNum(x.startedAt) && dayKey(new Date(x.startedAt)) === x.date;
+    const sameDay = x && isNum(x.startedAt) && x.startedAt > 0 && x.startedAt < 8.64e15 && dayKey(new Date(x.startedAt)) === x.date;
     if (x && isDay(x.date) && sameDay && SESSION_LENGTHS.includes(x.minutes as SessionLength)) {
       const task = cleanTask(x.task);
       const away = isNum(x.away) && x.away >= 0 && x.away < 1000 ? Math.round(x.away) : undefined;
