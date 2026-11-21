@@ -27,6 +27,12 @@ Use only these. Phrase findings carefully; no invented numbers.
 - Lally, 2010 — habits form in a median of 66 days (18–254); one miss does not break it. https://core.ac.uk/download/70653523.pdf
 - Implementation intentions meta-analysis (94 studies, d = 0.65) — "if–then" plans help reach goals. https://kops.uni-konstanz.de/server/api/core/bitstreams/eb48c8cf-7855-478e-90ec-1ea6d44f8252/content
 - Limits of personal correlations — they are hypotheses, factors are confounded. https://www.frontiersin.org/journals/digital-health/articles/10.3389/fdgth.2020.00003/full
+- Stroop, 1935 — original study of color-word interference. https://psychclassics.yorku.ca/Stroop/
+- Scarpina & Tagini, 2017 — review of the Stroop Color and Word Test; it measures selective attention and inhibition. https://www.frontiersin.org/articles/10.3389/fpsyg.2017.00557/full
+- Cowan, 2001 — short-term memory holds about 4 chunks. https://pubmed.ncbi.nlm.nih.gov/11515286/
+- Brouillette et al., 2013 / iVitality smartphone tests (JMIR mHealth, 2017) — smartphone Stroop correlates moderately with the lab test; scores improve with repetition (learning effect). https://mhealth.jmir.org/2017/5/e68/
+- Wang, Wang & Gai, 2021 meta-analysis — mental contrasting with implementation intentions (MCII/WOOP) helps goal attainment; few studies. https://pmc.ncbi.nlm.nih.gov/articles/PMC8149892/
+- Cross & Sheffield, 2019 meta-analysis — mental contrasting has a small-to-moderate effect on health behaviour (g = 0.28). https://pubmed.ncbi.nlm.nih.gov/30879403/
 
 ## Help lines (Kazakhstan) — re-check before release
 - 111 — contact center, 24/7, anonymous. 150 — child and youth line. https://tengrinews.kz/kazakhstan_news/zvonit-kazahstantsam-nujna-psihologicheskaya-pomosch-525732/

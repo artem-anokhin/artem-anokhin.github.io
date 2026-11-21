@@ -93,6 +93,20 @@ export interface Note {
   updatedAt: number;
 }
 
+/** Extra mini-tests: «Цвет и слово» (Stroop) and «Запомни порядок» (memory span). */
+export interface BrainTest {
+  id?: number;
+  kind: "stroop" | "span";
+  date: DayKey;
+  takenAt: number;
+  /** stroop: 0–100 (our own scale); span: longest sequence repeated (2–9). */
+  score: number;
+  /** stroop only: share correct 0–1, median RT ms, interference ms (incongruent − congruent). */
+  accuracy?: number;
+  medianRt?: number;
+  interference?: number;
+}
+
 export interface Setting {
   key: string;
   value: unknown;
@@ -107,6 +121,7 @@ export class FocusDB extends Dexie {
   habitLogs!: Dexie.Table<HabitLog, [number, string]>;
   goals!: EntityTable<Goal, "id">;
   notes!: EntityTable<Note, "id">;
+  brainTests!: EntityTable<BrainTest, "id">;
 
   constructor(name = "focusai") {
     super(name);
@@ -121,6 +136,8 @@ export class FocusDB extends Dexie {
     this.version(3).stores({ habits: "++id, archived", habitLogs: "&[habitId+date], date, habitId" });
     // v4: goals and notes.
     this.version(4).stores({ goals: "++id, done", notes: "++id, updatedAt" });
+    // v5: extra mini-tests.
+    this.version(5).stores({ brainTests: "++id, kind, date" });
   }
 }
 

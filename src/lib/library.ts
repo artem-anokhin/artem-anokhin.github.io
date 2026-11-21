@@ -19,7 +19,10 @@ export type CardId =
   | "focus-score" // how our 0–100 Focus Score is built (own scaling, see src/lib/focusTest.ts)
   | "habits" // Lally 2010: median 66 days, one miss does not break it
   | "if-then" // implementation intentions meta-analysis
-  | "correlations"; // limits of personal correlations
+  | "correlations" // limits of personal correlations
+  | "stroop" // Stroop 1935 + Scarpina 2017 + smartphone Stroop: interference, practice effect
+  | "memory-span" // Cowan 2001: ~4 chunks, practice effect
+  | "woop"; // MCII/WOOP meta-analyses: small-to-moderate effect, few studies
 
 export type Topic = "Сон" | "Кофеин" | "Питание и вода" | "Движение и стресс" | "Перерывы и телефон" | "Как работает FocusAI";
 
@@ -297,6 +300,57 @@ export const CARDS: KnowledgeCard[] = [
     evidence: "Ограничение метода, а не результат эксперимента",
     sources: [
       { name: "Limits of personal correlations (Frontiers in Digital Health)", url: "https://www.frontiersin.org/journals/digital-health/articles/10.3389/fdgth.2020.00003/full" },
+    ],
+  },
+  {
+    id: "stroop",
+    topic: "Как работает FocusAI",
+    title: "Что измеряет «Цвет и слово»",
+    summary: "Тест основан на эффекте Струпа: он показывает, как вы удерживаете внимание и сдерживаете автоматическую реакцию.",
+    body: [
+      "Ещё в 1935 году Струп показал: называть цвет чернил трудно, когда само слово обозначает другой цвет. Читать мы привыкли быстрее.",
+      "Обзор 2017 года описывает такой тест как меру избирательного внимания и торможения. Версия на смартфоне умеренно совпадает с лабораторной.",
+      "Результаты растут с повторами: это эффект практики. Это не диагноз. Сравнивайте себя только с собой.",
+    ],
+    tryThis: "Если вы хотите видеть честную динамику, то проходите тест в похожих условиях и не сравнивайте себя с другими.",
+    evidence: "Классический тест, смартфонная версия совпадает с лабораторной умеренно",
+    sources: [
+      { name: "Stroop, 1935", url: "https://psychclassics.yorku.ca/Stroop/" },
+      { name: "Scarpina & Tagini, 2017", url: "https://www.frontiersin.org/articles/10.3389/fpsyg.2017.00557/full" },
+      { name: "Brouillette et al. / iVitality (JMIR mHealth, 2017)", url: "https://mhealth.jmir.org/2017/5/e68/" },
+    ],
+  },
+  {
+    id: "memory-span",
+    topic: "Как работает FocusAI",
+    title: "Что измеряет «Запомни порядок»",
+    summary: "Тест показывает, сколько элементов вы удерживаете в кратковременной памяти. У людей это обычно около 4 блоков.",
+    body: [
+      "По обзору Коуэна (2001), кратковременная память удерживает около 4 блоков информации.",
+      "Блок может быть и одним элементом, и несколькими, объединёнными в одно целое. Поэтому результат зависит от приёма запоминания.",
+      "С практикой результат обычно улучшается. Сравнивайте себя только с собой.",
+    ],
+    tryThis: "Если вы запоминаете ряд, то попробуйте объединить элементы в группы.",
+    evidence: "Теоретический обзор, оценка приблизительная",
+    sources: [
+      { name: "Cowan, 2001", url: "https://pubmed.ncbi.nlm.nih.gov/11515286/" },
+    ],
+  },
+  {
+    id: "woop",
+    topic: "Как работает FocusAI",
+    title: "WOOP: желание, препятствие, план",
+    summary: "Метод из четырёх шагов связан с лучшим достижением целей. Эффект небольшой или умеренный, исследований немного.",
+    body: [
+      "Шаги такие: Желание, Лучший результат, Препятствие, План «Если…, то…». Сначала мечтаем, потом честно смотрим на помеху.",
+      "Мета-анализ 2021 года связал такой подход с лучшим достижением целей, но исследований было немного. Для поведения, связанного со здоровьем, эффект небольшой или умеренный (g = 0,28).",
+      "Это не гарантия, а способ попробовать.",
+    ],
+    tryThis: "Если вы назвали главное препятствие, то запишите план: «Если случится это, то я сделаю то».",
+    evidence: "Мета-анализы, эффект небольшой или умеренный, исследований мало",
+    sources: [
+      { name: "Wang, Wang & Gai, 2021", url: "https://pmc.ncbi.nlm.nih.gov/articles/PMC8149892/" },
+      { name: "Cross & Sheffield, 2019", url: "https://pubmed.ncbi.nlm.nih.gov/30879403/" },
     ],
   },
 ];
