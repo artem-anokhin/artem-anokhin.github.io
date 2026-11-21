@@ -12,6 +12,7 @@ export type CardId =
   | "water" // dehydration meta-analysis (~2% body-mass loss)
   | "exercise" // acute exercise meta-analysis (79 studies)
   | "stress" // acute stress meta-analysis
+  | "breathing" // Zaccaro 2018 review + Balban 2023 RCT: slow breathing, small studies
   | "micro-breaks" // micro-breaks meta-analysis (≤10 min)
   | "phone" // smartphone presence, partial replication
   | "focus-test" // PVT-B: what the test measures, lapses 355 ms, short version less precise
@@ -167,6 +168,23 @@ export const CARDS: KnowledgeCard[] = [
     evidence: "Мета-анализ",
     sources: [
       { name: "Acute stress meta-analysis", url: "https://pubmed.ncbi.nlm.nih.gov/27371161/" },
+    ],
+  },
+  {
+    id: "breathing",
+    topic: "Движение и стресс",
+    title: "Медленное дыхание и настроение",
+    summary: "Медленное дыхание связано со спокойным состоянием и меньшей тревогой. Исследования небольшие.",
+    body: [
+      "Обзор исследований: медленное дыхание, около 6 вдохов в минуту, связано с более спокойным состоянием и меньшей тревогой. Исследования небольшие.",
+      "В испытании с рандомизацией дыхательная практика по 5 минут в день в течение месяца была связана с лучшим настроением и более редким дыханием в покое.",
+      "Лучше всех показал себя «циклический вздох» с упором на выдох.",
+    ],
+    tryThis: "Если вы напряжены, то откройте в приложении экран «Дыхание» и побудьте с ним пару минут.",
+    evidence: "Небольшие исследования, доказательства предварительные",
+    sources: [
+      { name: "Zaccaro et al., 2018", url: "https://www.frontiersin.org/articles/10.3389/fnhum.2018.00353/full" },
+      { name: "Balban et al., 2023", url: "https://pmc.ncbi.nlm.nih.gov/articles/PMC9873947/" },
     ],
   },
   {

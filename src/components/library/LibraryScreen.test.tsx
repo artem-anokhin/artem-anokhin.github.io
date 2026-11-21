@@ -10,7 +10,7 @@ afterEach(() => {
 describe("LibraryScreen", () => {
   it("lists all cards and filters by topic", () => {
     const { container } = render(<LibraryScreen />);
-    expect(container.querySelectorAll("details")).toHaveLength(15);
+    expect(container.querySelectorAll("details")).toHaveLength(16);
     fireEvent.click(screen.getByRole("button", { name: "Сон" }));
     expect(screen.getByRole("button", { name: "Сон" })).toHaveAttribute("aria-pressed", "true");
     expect(container.querySelectorAll("details").length).toBe(CARDS.filter((c) => c.topic === "Сон").length);

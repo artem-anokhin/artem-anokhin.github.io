@@ -13,7 +13,7 @@ export const TIP_CARD: Record<TipKey, CardId> = {
   default: "phone",
 };
 
-/** Insight metric key → card. Metrics without a sourced card (mood, work) have none. */
+/** Insight metric key → card. Metrics without a sourced card (work) have none; mood links to the breathing card. */
 export const METRIC_CARD: Partial<Record<string, CardId>> = {
   sleepHours: "sleep-hours",
   sleepQuality: "sleep-debt",
@@ -24,6 +24,7 @@ export const METRIC_CARD: Partial<Record<string, CardId>> = {
   stress: "stress",
   activity: "exercise",
   rest: "micro-breaks",
+  mood: "breathing",
 };
 
 export const cardHref = (id: CardId) => `/library/#${id}`;

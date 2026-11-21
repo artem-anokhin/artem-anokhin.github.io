@@ -8,9 +8,9 @@ import { TIPS } from "./tips";
 const sources = readFileSync("docs/sources.md", "utf8");
 
 describe("library cards", () => {
-  it("has 15 unique cards", () => {
-    expect(CARDS).toHaveLength(15);
-    expect(new Set(CARDS.map((c) => c.id)).size).toBe(15);
+  it("has 16 unique cards", () => {
+    expect(CARDS).toHaveLength(16);
+    expect(new Set(CARDS.map((c) => c.id)).size).toBe(16);
   });
 
   it("cites only URLs from docs/sources.md and never says «вызывает»", () => {
