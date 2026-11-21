@@ -67,7 +67,7 @@ export function Awards({ stage }: { stage: number }) {
               <span className="min-w-0 flex-1">
                 <span className={`flex flex-wrap items-center gap-x-2 text-[17px] ${a.done ? "text-ink" : "text-muted"}`}>
                   {masked ? "Секретная награда" : a.title}
-                  {isNew && <span className="rounded-full bg-leaf px-2 py-0.5 text-[11px] font-semibold text-white">Новая</span>}
+                  {isNew && <span className="rounded-full bg-s-activity-ink px-2 py-0.5 text-[11px] font-semibold text-white">Новая</span>}
                   <span className="sr-only">{a.done ? ". Получена." : masked ? ". Пока скрыта." : `. Пока ${a.have} из ${a.need}.`}</span>
                 </span>
                 <span className="block text-[13px] text-muted">{masked ? "Откроется сама. Попробуйте разное время и длину сессий" : a.hint}</span>
