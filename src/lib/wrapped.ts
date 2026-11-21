@@ -19,7 +19,7 @@ export function weekPersona(sessions: Pick<FocusSession, "minutes" | "startedAt"
   const long = sessions.filter((s) => s.minutes >= 50).length;
   const top = TAG_SPHERES.flatMap((s) => tagCounts(checkins, s).map((t) => ({ ...t, sphere: s }))).sort((a, b) => b.count - a.count)[0];
 
-  if (n >= 3 && night / n >= 0.5) return { emoji: "🦉", title: "Ночная сова", why: "больше половины сессий — после полуночи" };
+  if (n >= 3 && night / n >= 0.5) return { emoji: "🦉", title: "Ночная сова", why: "больше половины сессий — с полуночи до 4 утра" };
   if (n >= 3 && early / n >= 0.5) return { emoji: "🐦", title: "Ранняя пташка", why: "больше половины сессий — до 9 утра" };
   if (long >= 3) return { emoji: "🏃", title: "Марафонец", why: `${long} ${plural(long, ["сессия", "сессии", "сессий"])} по 50 минут` };
   if (top && top.count >= 3) {

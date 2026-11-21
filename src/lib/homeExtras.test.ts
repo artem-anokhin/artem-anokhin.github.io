@@ -43,3 +43,12 @@ describe("weekEcho", () => {
     expect(weekEcho(ci("2026-11-22"), rows)).toBeNull();
   });
 });
+
+describe("weekEcho window", () => {
+  it("a tag 7 days ago does not count", async () => {
+    const { weekEcho } = await import("./homeExtras");
+    const swim = (date: string) => ci(date, { activity: { level: "medium", note: "", kinds: ["swim"] } });
+    const rows = [swim("2026-11-15"), swim("2026-11-20"), swim("2026-11-22")];
+    expect(weekEcho(rows[2]!, rows)).toBeNull();
+  });
+});
