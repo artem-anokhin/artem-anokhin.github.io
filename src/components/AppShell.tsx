@@ -39,6 +39,18 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     };
   }, [onWelcome, router]);
 
+  // Re-check the demo flag on client navigation (e.g. after «убрать» on another screen).
+  useEffect(() => {
+    if (onWelcome || !ready) return;
+    let alive = true;
+    isDemo()
+      .then((d) => alive && setDemo(d))
+      .catch(() => {});
+    return () => {
+      alive = false;
+    };
+  }, [pathname, onWelcome, ready]);
+
   // Onboarding and the privacy page are full-screen, without navigation.
   if (onWelcome) return <main>{children}</main>;
 
