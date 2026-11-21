@@ -22,6 +22,8 @@ import { GoalPeek } from "./GoalPeek";
 import { getFocusGoal } from "@/lib/focusGoal";
 import { daysUntil, upcomingExams } from "@/lib/exams";
 import { DayRings, ProgressRing, WeekStrip } from "@/components/ui/visuals";
+import { getStart, startDay, type StartInfo } from "@/lib/start";
+import { StartWeek } from "./StartWeek";
 
 type Data = {
   today: CheckIn | null;
@@ -35,6 +37,9 @@ type Data = {
   goal: number;
   /** Nearest exam within a week, for the line under the greeting. */
   exam: { title: string; days: number } | null;
+  /** First 7 days after consent: the personal start plan. */
+  start: { info: StartInfo; day: number } | null;
+  brainToday: boolean;
 };
 
 const dateFmt = new Intl.DateTimeFormat("ru-RU", { weekday: "short", day: "numeric", month: "long" });
@@ -67,7 +72,8 @@ export function HomeScreen() {
   useEffect(() => {
     let alive = true;
     (async () => {
-      if (!(await getProfile())) return; // AppShell redirects to onboarding
+      const profile = await getProfile();
+      if (!profile) return; // AppShell redirects to onboarding
       const key = dayKey();
       const [checkins, tests, sessions, tree, habitLogs, habits] = await Promise.all([
         db.checkins.toArray(),
@@ -78,6 +84,9 @@ export function HomeScreen() {
         activeHabits(),
       ]);
       const goal = await getFocusGoal();
+      const info = await getStart().catch(() => null);
+      const day = startDay(profile.consentAt, key);
+      const brainToday = (await db.brainTests.where("date").equals(key).count().catch(() => 0)) > 0;
       const next = (await upcomingExams())[0];
       const examDays = next ? daysUntil(next.date, key) : Infinity;
       if (!alive) return;
@@ -91,6 +100,8 @@ export function HomeScreen() {
         habitsTotal: habits.length,
         goal,
         exam: next && examDays <= 7 ? { title: next.title, days: examDays } : null,
+        start: info && day ? { info, day } : null,
+        brainToday,
         habitsDone: habits.filter((h) => habitLogs.some((l) => l.habitId === h.id && l.date === key)).length,
       });
     })().catch(() => alive && setFailed(true));
@@ -208,6 +219,8 @@ function Loaded({ data, onChange }: { data: Data; onChange: () => void }) {
           </Link>
         )
       )}
+
+      {data.start && <StartWeek {...data.start} checkin={!!today} test={score !== null || data.brainToday} focus={focusToday} />}
 
       <section aria-labelledby="actions-h">
         <h2 id="actions-h" className="px-4 pb-1.5 text-[13px] text-muted uppercase">

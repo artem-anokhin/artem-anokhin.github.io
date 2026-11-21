@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { STAGES, treeMessages, type TreeState } from "@/lib/tree";
 import { loadTree } from "@/lib/garden";
+import { getStart } from "@/lib/start";
 import { Bean, Flower2, Leaf, Sprout, TreeDeciduous, type LucideIcon } from "lucide-react";
 
 const STAGE_ICONS: LucideIcon[] = [Bean, Sprout, Leaf, TreeDeciduous, Flower2];
@@ -13,7 +14,7 @@ import { plural } from "@/lib/plural";
 import { ShareWeek } from "./ShareWeek";
 import { Awards } from "./Awards";
 
-type State = { kind: "loading" } | { kind: "error" } | { kind: "ready"; tree: TreeState };
+type State = { kind: "loading" } | { kind: "error" } | { kind: "ready"; tree: TreeState; name?: string };
 
 export function TreeScreen() {
   const [state, setState] = useState<State>({ kind: "loading" });
@@ -21,9 +22,9 @@ export function TreeScreen() {
 
   useEffect(() => {
     let alive = true;
-    loadTree()
-      .then((tree) => {
-        if (alive) setState({ kind: "ready", tree });
+    Promise.all([loadTree(), getStart().catch(() => null)])
+      .then(([tree, start]) => {
+        if (alive) setState({ kind: "ready", tree, name: start?.treeName });
       })
       .catch(() => alive && setState({ kind: "error" }));
     return () => {
@@ -50,16 +51,18 @@ export function TreeScreen() {
     );
   }
 
-  const { tree } = state;
+  const { tree, name } = state;
   // Week facts are already shown as numbers below; keep only the other messages.
   const messages = treeMessages(tree).filter((m) => !/^(За 7 дней|Лучший Focus Score недели)/.test(m.text));
   const next = tree.nextAt === null ? null : STAGES[tree.stage + 1];
-  const title = `Дерево: ${tree.stageName}${tree.wilting ? ", отдыхает" : ""}`;
+  const title = `Дерево${name ? ` «${name}»` : ""}: ${tree.stageName}${tree.wilting ? ", отдыхает" : ""}`;
 
   return (
     <div className="space-y-6">
       <header className="pt-2">
-        <p className="text-[15px] font-medium text-muted first-letter:uppercase">Стадия {tree.stage + 1} из {STAGES.length}</p>
+        <p className="text-[15px] font-medium text-muted first-letter:uppercase">
+          {name ? `«${name}» · ` : ""}Стадия {tree.stage + 1} из {STAGES.length}
+        </p>
         <h1 id="stage-title" className="title text-[34px] first-letter:uppercase">
           {tree.stageName}
         </h1>

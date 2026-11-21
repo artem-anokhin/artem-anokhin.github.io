@@ -61,6 +61,22 @@ describe("HomeScreen", () => {
   });
 });
 
+describe("StartWeek on home", () => {
+  it("shows day 1 of 7 with tasks tuned to the answers, and hides after the week", async () => {
+    await db.settings.put({ key: "profile", value: { mode: "study", consentAt: Date.now() } });
+    await db.settings.put({ key: "start", value: { goal: "exams", blocker: "start", score: 70 } });
+    const { unmount } = render(<HomeScreen />);
+    expect(await screen.findByText("Неделя старта")).toBeInTheDocument();
+    expect(screen.getByText(/День 1 из 7/)).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /Фокус 15 минут/ })).toHaveAttribute("href", expect.stringMatching(/^\/focus\/?$/));
+    unmount();
+    await db.settings.put({ key: "profile", value: { mode: "study", consentAt: Date.now() - 9 * 86_400_000 } });
+    render(<HomeScreen />);
+    await screen.findByText("Действия");
+    expect(screen.queryByText("Неделя старта")).not.toBeInTheDocument();
+  });
+});
+
 describe("HistoryScreen", () => {
   it("shows the empty state, 7 day rows and all 30 on demand", async () => {
     render(<HistoryScreen />);

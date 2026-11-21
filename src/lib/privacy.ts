@@ -8,6 +8,7 @@ import { MAX_GOALS, sanitizeGoal } from "./goals";
 import { MAX_NOTES, sanitizeNote } from "./notes";
 import { sanitizeBrainTest } from "./brainTests";
 import { GOAL_KEY, isGoal } from "./focusGoal";
+import { START_KEY, sanitizeStart } from "./start";
 
 export const EXPORT_FORMAT = "focusai-export";
 export const EXPORT_VERSION = 1;
@@ -229,6 +230,8 @@ export async function importData(raw: unknown, database: FocusDB = defaultDb): P
     if (isGoal(goal)) await database.settings.put({ key: GOAL_KEY, value: goal });
     const exams = sanitizeExams(settings.get(EXAMS_KEY));
     if (exams.length) await database.settings.put({ key: EXAMS_KEY, value: exams });
+    const start = sanitizeStart(settings.get(START_KEY));
+    if (start) await database.settings.put({ key: START_KEY, value: start });
     // Demo label only if the file really holds demo-tagged rows.
     if ([...checkins, ...tests, ...sessions, ...habits].some((r) => r.demo === true)) await database.settings.put({ key: "demo", value: true });
     await database.checkins.bulkPut(checkins);

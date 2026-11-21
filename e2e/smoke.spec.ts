@@ -17,9 +17,11 @@ test("onboarding → demo → every screen fits 375px → check-in → focus →
   await page.goto("/");
   await expect(page).toHaveURL(/\/welcome\/$/);
   await fitsWidth(page);
+  await page.getByRole("button", { name: "Поехали" }).click();
+  await page.getByRole("button", { name: "Пропустить" }).click();
+  await page.getByRole("button", { name: /Сессия и экзамены/ }).click();
+  await page.getByRole("button", { name: /Телефон/ }).click();
   await page.getByRole("button", { name: "Далее" }).click();
-  await page.getByRole("button", { name: "Далее" }).click();
-  await page.getByRole("button", { name: "Понятно" }).click();
   await page.getByRole("checkbox").check();
   await page.getByRole("button", { name: "Начать" }).click();
   await expect(page.getByRole("link", { name: /Отметить день/ })).toBeVisible();

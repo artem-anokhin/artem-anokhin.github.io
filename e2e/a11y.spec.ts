@@ -4,9 +4,11 @@ import { expect, test, type Page } from "@playwright/test";
 /** Onboard and load demo data so every screen has content. */
 async function setup(page: Page) {
   await page.goto("/welcome/");
+  await page.getByRole("button", { name: "Поехали" }).click();
+  await page.getByRole("button", { name: "Пропустить" }).click();
+  await page.getByRole("button", { name: /Сессия и экзамены/ }).click();
+  await page.getByRole("button", { name: /Телефон/ }).click();
   await page.getByRole("button", { name: "Далее" }).click();
-  await page.getByRole("button", { name: "Далее" }).click();
-  await page.getByRole("button", { name: "Понятно" }).click();
   await page.getByRole("checkbox").check();
   await page.getByRole("button", { name: "Начать" }).click();
   await page.getByRole("link", { name: /Отметить день/ }).waitFor();

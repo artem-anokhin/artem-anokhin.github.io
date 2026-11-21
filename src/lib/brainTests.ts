@@ -70,9 +70,9 @@ export interface StroopSummary {
 }
 
 /** Score 0–100 = accuracy × speed (1 at ≤600 ms, 0 at ≥1600 ms, floor 0.5). Our own scale. */
-export function scoreStroop(answers: StroopAnswer[]): StroopSummary | null {
+export function scoreStroop(answers: StroopAnswer[], minValid = STROOP_TRIALS / 2): StroopSummary | null {
   const valid = answers.filter((a) => a.rt >= 150 && a.rt <= 5000);
-  if (valid.length < STROOP_TRIALS / 2) return null;
+  if (valid.length < minValid) return null;
   const correct = valid.filter((a) => a.answer === a.trial.ink);
   const accuracy = correct.length / valid.length;
   const rts = correct.map((a) => a.rt);
