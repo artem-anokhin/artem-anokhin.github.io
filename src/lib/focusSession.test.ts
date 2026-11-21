@@ -1,5 +1,5 @@
 import { FocusDB } from "./db";
-import { cancelSession, finishSession, getActiveSession, minutesByDay, remainingMs, startSession } from "./focusSession";
+import { TASK_MAX, cancelSession, cleanTask, finishSession, getActiveSession, markAway, minutesByDay, minutesByTask, recentTasks, remainingMs, startSession } from "./focusSession";
 
 const T0 = new Date(2026, 10, 21, 10, 0).getTime();
 
@@ -9,7 +9,7 @@ describe("focus session", () => {
     expect(await startSession(25, db, T0)).toBeNull();
     await db.settings.put({ key: "profile", value: { mode: "study", consentAt: 1 } });
     const a = await startSession(25, db, T0);
-    expect(a).toEqual({ startedAt: T0, minutes: 25 });
+    expect(a).toEqual({ startedAt: T0, minutes: 25, away: 0 });
     expect(await getActiveSession(db)).toEqual(a);
     expect(remainingMs(a!, T0 + 60_000)).toBe(24 * 60_000);
     expect(await finishSession(db, T0 + 10 * 60_000)).toBeNull();
@@ -37,11 +37,43 @@ describe("focus session edge cases", () => {
     await db.settings.put({ key: "profile", value: { mode: "study", consentAt: 1 } });
     const late = new Date(2026, 10, 21, 23, 50).getTime();
     await startSession(25, db, late);
-    expect(await startSession(50, db, late + 1000)).toEqual({ startedAt: late, minutes: 25 });
+    expect(await startSession(50, db, late + 1000)).toEqual({ startedAt: late, minutes: 25, away: 0 });
     const row = await finishSession(db, late + 30 * 60_000);
     expect(row?.date).toBe("2026-11-21");
     expect(await finishSession(db, late + 31 * 60_000)).toBeNull();
     expect(await db.sessions.count()).toBe(1);
     await db.delete();
+  });
+});
+
+describe("task label and away count", () => {
+  it("stores a cleaned task and counts leaving the app", async () => {
+    const db = new FocusDB("session-test-4");
+    await db.settings.put({ key: "profile", value: { mode: "study", consentAt: 1 } });
+    const t = new Date(2026, 10, 21, 10, 0).getTime();
+    await startSession(15, db, t, "  Курсовая   глава 2 ");
+    await markAway(db, t + 60_000);
+    await markAway(db, t + 120_000);
+    await markAway(db, t + 16 * 60_000); // after time is up: not counted
+    const row = await finishSession(db, t + 16 * 60_000);
+    expect(row).toMatchObject({ task: "Курсовая глава 2", away: 2, minutes: 15 });
+    await db.delete();
+  });
+
+  it("cleans, dedupes and groups tasks", () => {
+    expect(cleanTask("   ")).toBeUndefined();
+    expect(cleanTask("x".repeat(80))?.length).toBe(TASK_MAX);
+    const s = [
+      { date: "d", startedAt: 1, minutes: 25, task: "Матан" },
+      { date: "d", startedAt: 2, minutes: 50, task: "матан" },
+      { date: "d", startedAt: 3, minutes: 15 },
+      { date: "d", startedAt: 4, minutes: 25, task: "Английский" },
+    ];
+    expect(recentTasks(s)).toEqual(["Английский", "матан"]);
+    expect(minutesByTask(s)).toEqual([
+      { task: "Матан", minutes: 75, count: 2 },
+      { task: "Английский", minutes: 25, count: 1 },
+      { task: "Без названия", minutes: 15, count: 1 },
+    ]);
   });
 });

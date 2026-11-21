@@ -2,13 +2,16 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { ChevronRight, Zap } from "lucide-react";
+import { ChevronRight, Coffee, Volume2, VolumeX, Zap } from "lucide-react";
 import { db, dayKey } from "@/lib/db";
 import {
   SESSION_LENGTHS,
+  TASK_MAX,
   cancelSession,
   finishSession,
   getActiveSession,
+  markAway,
+  recentTasks,
   remainingMs,
   startSession,
   type ActiveSession,
@@ -16,6 +19,9 @@ import {
 } from "@/lib/focusSession";
 import { plural } from "@/lib/plural";
 import { tap } from "@/lib/haptics";
+import { hasCrisisWording } from "@/lib/crisis";
+import { NOISES, chime, isNoiseId, playNoise, stopNoise, type NoiseId } from "@/lib/sound";
+import { CrisisCard } from "@/components/CrisisCard";
 import { loadTree } from "@/lib/garden";
 import { GrowingSprout, sproutPhase } from "./GrowingSprout";
 import { btnNight, btnNightGhost } from "@/components/ui/controls";
@@ -25,7 +31,11 @@ type View =
   | { kind: "loading" }
   | { kind: "setup" }
   | { kind: "running"; active: ActiveSession }
-  | { kind: "done"; minutes: number };
+  | { kind: "done"; minutes: number; away: number; task?: string }
+  | { kind: "break"; endsAt: number };
+
+const BREAK_MIN = 5;
+const NOISE_KEY = "focusNoise";
 
 const fmt = (ms: number) => {
   const s = Math.ceil(ms / 1000);
@@ -68,6 +78,10 @@ export function FocusScreen() {
   const [view, setView] = useState<View>({ kind: "loading" });
   const [length, setLength] = useState<SessionLength>(25);
   const [stats, setStats] = useState({ today: 0, week: 0, stage: 0 });
+  const [task, setTask] = useState("");
+  const [recent, setRecent] = useState<string[]>([]);
+  const [noise, setNoise] = useState<NoiseId>("off");
+  const [muted, setMuted] = useState(false);
   const [now, setNow] = useState(() => Date.now());
   const [confirmStop, setConfirmStop] = useState(false);
   const [error, setError] = useState(false);
@@ -83,6 +97,7 @@ export function FocusScreen() {
       week: sessions.filter((s) => s.date >= weekAgo && s.date <= key).reduce((a, s) => a + s.minutes, 0),
       stage: tree.stage,
     });
+    setRecent(recentTasks(sessions));
   }, []);
 
   useEffect(() => {
@@ -90,7 +105,9 @@ export function FocusScreen() {
     (async () => {
       const active = await getActiveSession();
       await loadStats();
+      const saved = (await db.settings.get(NOISE_KEY))?.value;
       if (!alive) return;
+      if (isNoiseId(saved)) setNoise(saved);
       setView(active ? { kind: "running", active } : { kind: "setup" });
     })().catch(() => alive && setView({ kind: "setup" }));
     return () => {
@@ -103,11 +120,41 @@ export function FocusScreen() {
   useWakeLock(running);
 
   // Tick once a second; finish when time is up.
+  const ticking = running || view.kind === "break";
   useEffect(() => {
-    if (!running) return;
+    if (!ticking) return;
     const id = setInterval(() => setNow(Date.now()), 1000);
     return () => clearInterval(id);
+  }, [ticking]);
+
+  // Leaving the app during a session is counted (gently shown at the end), like Forest.
+  useEffect(() => {
+    if (!running) return;
+    const onVis = () => {
+      if (document.visibilityState === "hidden") void markAway().catch(() => {});
+      else setNow(Date.now());
+    };
+    document.addEventListener("visibilitychange", onVis);
+    return () => document.removeEventListener("visibilitychange", onVis);
   }, [running]);
+
+  // Noise plays only while a session runs.
+  useEffect(() => {
+    if (!running || muted) return;
+    playNoise(noise);
+    return () => stopNoise();
+  }, [running, muted, noise]);
+
+  // Break over → chime and back to setup.
+  useEffect(() => {
+    if (view.kind !== "break") return;
+    const id = setTimeout(() => {
+      chime();
+      tap("success");
+      setView({ kind: "setup" });
+    }, Math.max(0, view.endsAt - Date.now()));
+    return () => clearTimeout(id);
+  }, [view]);
 
   useEffect(() => {
     if (view.kind !== "running" || remainingMs(view.active, now) > 0 || finishing.current) return;
@@ -116,8 +163,11 @@ export function FocusScreen() {
     finishSession()
       .then(async (row) => {
         await loadStats();
-        if (row) tap("success");
-        setView(row ? { kind: "done", minutes } : { kind: "setup" });
+        if (row) {
+          tap("success");
+          chime();
+        }
+        setView(row ? { kind: "done", minutes, away: row.away ?? 0, task: row.task } : { kind: "setup" });
       })
       .catch(() => {
         setError(true);
@@ -139,7 +189,8 @@ export function FocusScreen() {
   async function onStart() {
     setError(false);
     finishing.current = false;
-    const active = await startSession(length).catch(() => null);
+    if (noise !== "off") playNoise(noise); // unlock audio inside the tap
+    const active = await startSession(length, undefined, Date.now(), task).catch(() => null);
     if (!active) return setError(true);
     setNow(Date.now());
     setView({ kind: "running", active });
@@ -149,6 +200,17 @@ export function FocusScreen() {
     await cancelSession();
     setConfirmStop(false);
     setView({ kind: "setup" });
+  }
+
+  function pickNoise(id: NoiseId) {
+    setNoise(id);
+    void db.settings.put({ key: NOISE_KEY, value: id }).catch(() => {});
+  }
+
+  function startBreak() {
+    chime(); // unlock audio inside the tap so the end chime can play
+    setNow(Date.now());
+    setView({ kind: "break", endsAt: Date.now() + BREAK_MIN * 60_000 });
   }
 
   const stage = stats.stage;
@@ -185,6 +247,62 @@ export function FocusScreen() {
                   );
                 })}
               </div>
+            </fieldset>
+
+            <div>
+              <label htmlFor="task" className="mb-3 block text-[17px] font-semibold text-night-ink">
+                Над чем работаете? <span className="font-normal text-night-muted">· необязательно</span>
+              </label>
+              <input
+                id="task"
+                value={task}
+                maxLength={TASK_MAX}
+                onChange={(e) => setTask(e.target.value)}
+                placeholder="Например, курсовая"
+                autoComplete="off"
+                className="min-h-12 w-full rounded-card bg-night-2 px-4 text-[17px] text-night-ink placeholder:text-night-muted focus-visible:outline-3 focus-visible:outline-glow"
+              />
+              {recent.length > 0 && (
+                <div className="mt-2 flex flex-wrap gap-2" aria-label="Недавние задачи">
+                  {recent.map((r) => (
+                    <button
+                      key={r}
+                      type="button"
+                      onClick={() => setTask(r)}
+                      aria-pressed={task === r}
+                      className={`pressable min-h-11 rounded-full px-4 text-[15px] ${task === r ? "bg-white text-accent" : "bg-white/8 text-night-ink/85"}`}
+                    >
+                      {r}
+                    </button>
+                  ))}
+                </div>
+              )}
+              {hasCrisisWording(task) && (
+                <div className="mt-3">
+                  <CrisisCard />
+                </div>
+              )}
+            </div>
+
+            <fieldset>
+              <legend className="mb-3 text-[17px] font-semibold text-night-ink">Звук</legend>
+              <div className="grid grid-cols-3 gap-1 rounded-full bg-night-2 p-1">
+                {NOISES.map((n) => {
+                  const on = n.id === noise;
+                  return (
+                    <label
+                      key={n.id}
+                      className={`pressable flex min-h-12 cursor-pointer items-center justify-center rounded-full text-[15px] font-semibold transition-colors has-[:focus-visible]:outline-3 has-[:focus-visible]:outline-glow ${
+                        on ? "bg-white text-accent" : "text-night-ink/85"
+                      }`}
+                    >
+                      <input type="radio" name="noise" value={n.id} checked={on} onChange={() => pickNoise(n.id)} className="sr-only" />
+                      {n.label}
+                    </label>
+                  );
+                })}
+              </div>
+              <p className="mt-2 text-[13px] text-night-muted">Звук создаётся на устройстве и играет только во время сессии.</p>
             </fieldset>
 
             <button type="button" onClick={onStart} className={`${btnNight} w-full`}>
@@ -227,10 +345,23 @@ export function FocusScreen() {
         )}
 
         {view.kind === "running" && (
-          <div className="flex flex-1 flex-col items-center justify-center gap-6 text-center">
-            <p className="eyebrow text-night-muted">Фокус · {view.active.minutes} минут</p>
+          <div className="flex flex-1 flex-col items-center justify-center-safe gap-6 text-center">
+            <p className="eyebrow text-night-muted">
+              {view.active.task ? view.active.task : "Фокус"} · {view.active.minutes} минут
+            </p>
             <RunningSprout active={view.active} now={now} />
             <p className="max-w-xs text-[15px] text-night-muted">Телефон отложен — росток растёт. Можно закрыть вкладку: таймер продолжится.</p>
+            {noise !== "off" && (
+              <button
+                type="button"
+                onClick={() => setMuted((m) => !m)}
+                aria-pressed={muted}
+                className="pressable inline-flex min-h-11 items-center gap-2 rounded-full bg-white/8 px-4 text-[15px] text-night-ink/85"
+              >
+                {muted ? <VolumeX aria-hidden size={18} /> : <Volume2 aria-hidden size={18} />}
+                {muted ? "Звук выключен" : NOISES.find((n) => n.id === noise)?.label}
+              </button>
+            )}
             {!confirmStop ? (
               <button type="button" onClick={() => setConfirmStop(true)} className={btnNightGhost}>
                 Завершить раньше
@@ -252,7 +383,7 @@ export function FocusScreen() {
         )}
 
         {view.kind === "done" && (
-          <div className="flex flex-1 flex-col items-center justify-center gap-6 text-center" role="status">
+          <div className="flex flex-1 flex-col items-center justify-center-safe gap-6 text-center" role="status">
             <div className="animate-pop">
               <ProgressRing night size={200} stroke={8} value={1} color="#83CF6E">
                 <GrowingSprout progress={1} className="w-[136px]" />
@@ -264,23 +395,35 @@ export function FocusScreen() {
             <h1 className="title text-[30px] text-night-ink">
               {view.minutes} {plural(view.minutes, ["минута", "минуты", "минут"])} фокуса
             </h1>
+            {view.task && <p className="-mt-4 text-[17px] text-night-ink/85">{view.task}</p>}
+            <p className="text-[15px] text-night-muted">
+              {view.away === 0
+                ? "Ни разу не выходили из приложения — чистый фокус."
+                : `Выходили из приложения ${view.away} ${plural(view.away, ["раз", "раза", "раз"])}. Телефон рядом отвлекает — попробуйте убрать его подальше.`}
+            </p>
             <p className="text-[17px] text-night-muted">
-              Отличная работа. Сделайте перерыв 5 минут: встаньте, разомнитесь. Короткие перерывы связаны с бодростью.{" "}
+              Сделайте перерыв 5 минут: встаньте, разомнитесь. Короткие перерывы связаны с бодростью.{" "}
               <a href="https://pubmed.ncbi.nlm.nih.gov/36044424/" target="_blank" rel="noopener noreferrer" className="underline">
                 Мета-анализ микро-перерывов
                 <span className="sr-only"> (откроется в новой вкладке)</span>
               </a>
             </p>
             <div className="grid w-full max-w-sm gap-2">
-              <button type="button" onClick={() => setView({ kind: "setup" })} className={`${btnNight} w-full`}>
+              <button type="button" onClick={startBreak} className={`${btnNight} w-full`}>
+                <Coffee aria-hidden size={20} className="mr-2 inline" />
+                Перерыв {BREAK_MIN} минут
+              </button>
+              <button type="button" onClick={() => setView({ kind: "setup" })} className={`${btnNightGhost} w-full`}>
                 Готово
               </button>
-              <Link href="/tree/" className={`${btnNightGhost} w-full`}>
+              <Link href="/tree/" className="pressable min-h-11 py-2 text-[15px] text-night-muted underline">
                 Посмотреть дерево
               </Link>
             </div>
           </div>
         )}
+
+        {view.kind === "break" && <BreakView endsAt={view.endsAt} now={now} onEnd={() => setView({ kind: "setup" })} />}
       </div>
     </div>
   );
@@ -293,7 +436,7 @@ function RunningSprout({ active, now }: { active: ActiveSession; now: number }) 
   const milestone = Math.floor(Math.max(0, Math.min(1, p)) * 5);
   return (
     <>
-      <ProgressRing night size={280} stroke={10} value={p} label={`Осталось ${fmt(left)}`}>
+      <ProgressRing night size={256} stroke={10} value={p} label={`Осталось ${fmt(left)}`}>
         <span className="relative block">
           <GrowingSprout progress={p} className="w-[210px]" />
           {milestone > 0 && (
@@ -312,5 +455,41 @@ function RunningSprout({ active, now }: { active: ActiveSession; now: number }) 
         </p>
       </div>
     </>
+  );
+}
+
+const BREAK_IDEAS = ["Встаньте и пройдитесь", "Выпейте воды", "Посмотрите в окно, вдаль", "Потянитесь, расправьте плечи"];
+
+/** Short break timer after a session (micro-breaks meta-analysis, docs/sources.md). */
+function BreakView({ endsAt, now, onEnd }: { endsAt: number; now: number; onEnd: () => void }) {
+  const left = Math.max(0, endsAt - now);
+  const p = 1 - left / (BREAK_MIN * 60_000);
+  return (
+    <div className="flex flex-1 flex-col items-center justify-center-safe gap-6 text-center">
+      <p className="eyebrow text-night-muted">Перерыв</p>
+      <ProgressRing night size={220} stroke={8} value={p} color="#83CF6E" label={`Перерыв, осталось ${fmt(left)}`}>
+        <Coffee aria-hidden size={56} className="text-night-ink/85" />
+      </ProgressRing>
+      <p className="stat text-[48px] text-night-ink" aria-live="off">
+        {fmt(left)}
+      </p>
+      <ul className="w-full max-w-sm divide-y divide-white/10 rounded-card bg-white/6 text-left">
+        {BREAK_IDEAS.map((i) => (
+          <li key={i} className="px-4 py-3 text-[17px] text-night-ink/85">
+            {i}
+          </li>
+        ))}
+      </ul>
+      <p className="max-w-sm text-[13px] text-night-muted">
+        Перерывы до 10 минут связаны с бодростью и меньшей усталостью.{" "}
+        <a href="https://pubmed.ncbi.nlm.nih.gov/36044424/" target="_blank" rel="noopener noreferrer" className="underline">
+          Источник
+          <span className="sr-only"> (откроется в новой вкладке)</span>
+        </a>
+      </p>
+      <button type="button" onClick={onEnd} className={`${btnNightGhost} w-full max-w-sm`}>
+        Закончить перерыв
+      </button>
+    </div>
   );
 }

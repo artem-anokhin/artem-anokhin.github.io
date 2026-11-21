@@ -4,11 +4,16 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Check } from "lucide-react";
 import { CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
-import { db } from "@/lib/db";
+import { db, type CheckIn, type FocusSession } from "@/lib/db";
+import { minutesByTask } from "@/lib/focusSession";
+import { plural } from "@/lib/plural";
 import { historyDays, type HistoryDay } from "@/lib/today";
 import { btnPrimary } from "@/components/ui/controls";
 
-type State = { kind: "loading" } | { kind: "error" } | { kind: "ready"; days: HistoryDay[] };
+type State =
+  | { kind: "loading" }
+  | { kind: "error" }
+  | { kind: "ready"; days: HistoryDay[]; moods: Map<string, number>; sessions: FocusSession[] };
 
 const shortFmt = new Intl.DateTimeFormat("ru-RU", { day: "numeric", month: "short" });
 const longFmt = new Intl.DateTimeFormat("ru-RU", { day: "numeric", month: "long", weekday: "short" });
@@ -32,8 +37,18 @@ export function HistoryScreen() {
 
   useEffect(() => {
     let alive = true;
-    Promise.all([db.checkins.toArray(), db.focusTests.toArray()])
-      .then(([checkins, tests]) => alive && setState({ kind: "ready", days: historyDays(checkins, tests) }))
+    Promise.all([db.checkins.toArray(), db.focusTests.toArray(), db.sessions.toArray()])
+      .then(([checkins, tests, sessions]) => {
+        if (!alive) return;
+        const days = historyDays(checkins, tests);
+        const from = days[0]!.date;
+        setState({
+          kind: "ready",
+          days,
+          moods: moodByDay(checkins),
+          sessions: sessions.filter((s) => s.date >= from),
+        });
+      })
       .catch(() => alive && setState({ kind: "error" }));
     return () => {
       alive = false;
@@ -45,7 +60,7 @@ export function HistoryScreen() {
     return <p className="card p-5 text-ink">Не удалось загрузить данные. Обновите страницу.</p>;
   }
 
-  const { days } = state;
+  const { days, moods, sessions } = state;
   const scores = days.flatMap((d) => (d.score === null ? [] : [d.score]));
   const chartData = days.map((d) => ({ label: shortFmt.format(parseDay(d.date)), score: d.score }));
   const chartLabel =
@@ -82,6 +97,10 @@ export function HistoryScreen() {
         </section>
       )}
 
+      <MoodPixels days={days} moods={moods} />
+
+      <TaskTotals sessions={sessions} />
+
       <section aria-labelledby="days-title">
         <h2 id="days-title" className="px-4 pb-1.5 text-[13px] text-muted uppercase">
           Дни
@@ -110,5 +129,101 @@ export function HistoryScreen() {
         </ul>
       </section>
     </div>
+  );
+}
+
+function moodByDay(checkins: CheckIn[]): Map<string, number> {
+  const m = new Map<string, number>();
+  for (const c of checkins) if (typeof c.mind?.mood === "number") m.set(c.date, c.mind.mood);
+  return m;
+}
+
+const MOOD_WORDS = ["", "очень плохое", "плохое", "среднее", "хорошее", "отличное"];
+/** Mood 1–5 → share of the mind-sphere color. */
+const MOOD_MIX = [0, 22, 40, 60, 80, 100];
+
+/** «Год в пикселях»-style grid: one square per day, colored by mood (Daylio-like). */
+function MoodPixels({ days, moods }: { days: HistoryDay[]; moods: Map<string, number> }) {
+  const known = days.filter((d) => moods.has(d.date));
+  if (known.length < 3) return null;
+  const lead = (parseDay(days[0]!.date).getDay() + 6) % 7; // Monday-first offset
+  const avg = known.reduce((a, d) => a + moods.get(d.date)!, 0) / known.length;
+  return (
+    <section className="rounded-card-lg bg-surface p-4" aria-labelledby="mood-title">
+      <h2 id="mood-title" className="text-[17px] font-semibold text-ink">
+        Настроение за 30 дней
+      </h2>
+      <p className="mb-3 text-[13px] text-muted">
+        {known.length} {plural(known.length, ["день", "дня", "дней"])} с отметкой · в среднем {MOOD_WORDS[Math.round(avg)]}
+      </p>
+      <div className="grid grid-cols-7 gap-1.5 text-center text-[11px] text-muted" aria-hidden>
+        {["пн", "вт", "ср", "чт", "пт", "сб", "вс"].map((w) => (
+          <span key={w}>{w}</span>
+        ))}
+      </div>
+      <ul className="mt-1 grid grid-cols-7 gap-1.5" aria-label="Настроение по дням">
+        {Array.from({ length: lead }, (_, i) => (
+          <li key={`pad${i}`} aria-hidden />
+        ))}
+        {days.map((d) => {
+          const m = moods.get(d.date);
+          const label = `${longFmt.format(parseDay(d.date))}: ${m ? `настроение ${MOOD_WORDS[m]}` : "нет отметки"}`;
+          return (
+            <li
+              key={d.date}
+              title={label}
+              aria-label={label}
+              className="aspect-square rounded-[6px]"
+              style={{
+                background: m ? `color-mix(in srgb, var(--color-s-mind) ${MOOD_MIX[m]}%, var(--color-surface))` : "var(--color-fill)",
+                outline: m ? undefined : "1px dashed var(--color-line)",
+                outlineOffset: -1,
+              }}
+            />
+          );
+        })}
+      </ul>
+      <div className="mt-3 flex items-center justify-end gap-1.5 text-[12px] text-muted" aria-hidden>
+        хуже
+        {[1, 2, 3, 4, 5].map((m) => (
+          <span
+            key={m}
+            className="size-3.5 rounded-[4px]"
+            style={{ background: `color-mix(in srgb, var(--color-s-mind) ${MOOD_MIX[m]}%, var(--color-surface))` }}
+          />
+        ))}
+        лучше
+      </div>
+    </section>
+  );
+}
+
+/** Focus-session minutes per task label over the last 30 days. */
+function TaskTotals({ sessions }: { sessions: FocusSession[] }) {
+  if (sessions.length === 0) return null;
+  const rows = minutesByTask(sessions).slice(0, 6);
+  const max = rows[0]!.minutes;
+  const total = sessions.reduce((a, s) => a + s.minutes, 0);
+  return (
+    <section aria-labelledby="tasks-title">
+      <h2 id="tasks-title" className="px-4 pb-1.5 text-[13px] text-muted uppercase">
+        Фокус по задачам · {Math.round((total / 60) * 10) / 10} ч
+      </h2>
+      <ul className="group-list">
+        {rows.map((r) => (
+          <li key={r.task} className="px-4 py-2.5">
+            <div className="flex items-baseline gap-3">
+              <span className="min-w-0 flex-1 truncate text-[17px] text-ink">{r.task}</span>
+              <span className="text-[15px] text-muted tabular-nums">
+                {r.minutes} мин · {r.count} {plural(r.count, ["сессия", "сессии", "сессий"])}
+              </span>
+            </div>
+            <div className="mt-1.5 h-1.5 rounded-full bg-fill" aria-hidden>
+              <div className="h-full rounded-full bg-s-work" style={{ width: `${Math.max(4, (r.minutes / max) * 100)}%` }} />
+            </div>
+          </li>
+        ))}
+      </ul>
+    </section>
   );
 }

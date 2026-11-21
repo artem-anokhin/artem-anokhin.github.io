@@ -1,5 +1,5 @@
 import { SPHERE_KEYS, sanitizeCheckIn } from "./checkin";
-import { SESSION_LENGTHS, type SessionLength } from "./focusSession";
+import { SESSION_LENGTHS, cleanTask, type SessionLength } from "./focusSession";
 import { HABIT_TITLE_MAX, MAX_HABITS } from "./habits";
 import { db as defaultDb, dayKey, type CheckIn, type FocusDB, type FocusSession, type Habit, type HabitLog, type FocusTestResult, type Setting } from "./db";
 import { getProfile, isExperiment, isWindow } from "./settings";
@@ -136,7 +136,16 @@ export async function importData(raw: unknown, database: FocusDB = defaultDb): P
     const x = r as FocusSession;
     const sameDay = x && isNum(x.startedAt) && dayKey(new Date(x.startedAt)) === x.date;
     if (x && isDay(x.date) && sameDay && SESSION_LENGTHS.includes(x.minutes as SessionLength)) {
-      sessions.push({ date: x.date, startedAt: x.startedAt, minutes: x.minutes, ...(x.demo === true ? { demo: true as const } : {}) });
+      const task = cleanTask(x.task);
+      const away = isNum(x.away) && x.away >= 0 && x.away < 1000 ? Math.round(x.away) : undefined;
+      sessions.push({
+        date: x.date,
+        startedAt: x.startedAt,
+        minutes: x.minutes,
+        ...(task ? { task } : {}),
+        ...(away !== undefined ? { away } : {}),
+        ...(x.demo === true ? { demo: true as const } : {}),
+      });
     } else skipped++;
   }
 

@@ -38,6 +38,10 @@ export interface FocusSession {
   date: DayKey;
   startedAt: number;
   minutes: number;
+  /** Optional «Над чем работаете?» label (non-indexed). */
+  task?: string;
+  /** Times the user left the app during the session (non-indexed). */
+  away?: number;
   /** Synthetic demo row (see demo.ts). */
   demo?: true;
 }

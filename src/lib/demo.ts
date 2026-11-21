@@ -29,6 +29,8 @@ const hhmm = (min: number) => {
   return `${String(Math.floor(m / 60)).padStart(2, "0")}:${String(m % 60).padStart(2, "0")}`;
 };
 
+const DEMO_TASKS = ["Матанализ", "Курсовая", "Английский", "Подготовка к экзамену"];
+
 /** Builds `days` synthetic days ending yesterday (today stays free for a live check-in). */
 export function buildDemo(today: Date = new Date(), days = DEMO_DAYS, seed = 7) {
   const r = rng(seed);
@@ -54,7 +56,11 @@ export function buildDemo(today: Date = new Date(), days = DEMO_DAYS, seed = 7) 
     };
     const t = d.getTime();
     checkins.push({ ...data, date, createdAt: t, updatedAt: t, demo: true });
-    if (r() > 0.45) sessions.push({ date, startedAt: t - 3 * 3_600_000, minutes: r() > 0.5 ? 50 : 25, demo: true });
+    if (r() > 0.45) {
+      // Task and away come from the day index, not rng, so the rest of the demo stays the same.
+      const minutes = r() > 0.5 ? 50 : 25;
+      sessions.push({ date, startedAt: t - 3 * 3_600_000, minutes, task: DEMO_TASKS[i % DEMO_TASKS.length], away: i % 3, demo: true });
+    }
     if (r() > 0.12) {
       const score = Math.round(Math.min(95, Math.max(30, 40 + (sleepH - 5.5) * 12 + (r() - 0.5) * 16)));
       tests.push({ date, takenAt: t + 60_000, score, medianRt: Math.round(420 - score * 1.6), lapses: Math.floor(r() * 3), falseStarts: Math.floor(r() * 2), trials: 30, demo: true });
