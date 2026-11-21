@@ -19,6 +19,7 @@ import { weeklyReview, type WeeklyReview } from "@/lib/weekly";
 import { btnPrimary } from "@/components/ui/controls";
 import { ExamsCard } from "./ExamsCard";
 import { getFocusGoal } from "@/lib/focusGoal";
+import { daysUntil, upcomingExams } from "@/lib/exams";
 import { DayRings, ProgressRing, WeekStrip } from "@/components/ui/visuals";
 
 type Data = {
@@ -31,6 +32,8 @@ type Data = {
   habitsDone: number;
   habitsTotal: number;
   goal: number;
+  /** Nearest exam within a week, for the line under the greeting. */
+  exam: { title: string; days: number } | null;
 };
 
 const dateFmt = new Intl.DateTimeFormat("ru-RU", { weekday: "short", day: "numeric", month: "long" });
@@ -40,6 +43,18 @@ function greeting(h: number): string {
   if (h >= 12 && h < 18) return "Добрый день";
   if (h >= 18 && h < 23) return "Добрый вечер";
   return "Доброй ночи";
+}
+
+/** One calm line under the greeting: a close exam, or the focus goal reached. */
+function subline(d: Data): string | null {
+  if (d.exam) {
+    const { title, days } = d.exam;
+    if (days === 0) return `Сегодня «${title}». Удачи!`;
+    if (days === 1) return `Завтра «${title}»`;
+    return `До «${title}» ${days} ${plural(days, ["день", "дня", "дней"])}`;
+  }
+  if (d.focusToday >= d.goal) return "Цель фокуса на сегодня выполнена";
+  return null;
 }
 
 /** «Сегодня»: one hero scene, two big actions, then calm rows (docs/DESIGN.md §4). */
@@ -62,6 +77,8 @@ export function HomeScreen() {
         activeHabits(),
       ]);
       const goal = await getFocusGoal();
+      const next = (await upcomingExams())[0];
+      const examDays = next ? daysUntil(next.date, key) : Infinity;
       if (!alive) return;
       setData({
         today: checkins.find((c) => c.date === key) ?? null,
@@ -72,6 +89,7 @@ export function HomeScreen() {
         focusToday: sessions.filter((s) => s.date === key).reduce((a, s) => a + s.minutes, 0),
         habitsTotal: habits.length,
         goal,
+        exam: next && examDays <= 7 ? { title: next.title, days: examDays } : null,
         habitsDone: habits.filter((h) => habitLogs.some((l) => l.habitId === h.id && l.date === key)).length,
       });
     })().catch(() => alive && setFailed(true));
@@ -101,6 +119,7 @@ export function HomeScreen() {
         <div>
           <p className="text-[15px] font-medium text-muted first-letter:uppercase">{dateFmt.format(now)}</p>
           <h1 className="title text-[34px]">{greeting(now.getHours())}</h1>
+          {data && subline(data) && <p className="mt-1 text-[15px] text-muted">{subline(data)}</p>}
         </div>
         <Link href="/settings/" aria-label="Настройки" className="pressable grid size-11 shrink-0 place-items-center text-link md:hidden">
           <Settings aria-hidden size={24} />
@@ -192,7 +211,7 @@ function Loaded({ data, onChange }: { data: Data; onChange: () => void }) {
 
       <HabitsToday onChange={onChange} />
 
-      <ExamsCard />
+      <ExamsCard onChange={onChange} />
 
       {usable < MIN_DAYS && <Countdown days={usable} />}
       {today && <Tip data={today} />}

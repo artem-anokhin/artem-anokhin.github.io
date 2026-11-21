@@ -18,7 +18,7 @@ function when(days: number): string {
 }
 
 /** «Экзамены и дедлайны» on Today: countdown to a few dates the student cares about. */
-export function ExamsCard() {
+export function ExamsCard({ onChange }: { onChange?: () => void } = {}) {
   const [exams, setExams] = useState<Exam[] | null>(null);
   const [adding, setAdding] = useState(false);
   const [title, setTitle] = useState("");
@@ -46,11 +46,13 @@ export function ExamsCard() {
     setError(false);
     setAdding(false);
     setRev((n) => n + 1);
+    onChange?.();
   }
 
   async function onRemove(id: string) {
     await removeExam(id).catch(() => {});
     setRev((n) => n + 1);
+    onChange?.();
   }
 
   if (exams === null) return null;
