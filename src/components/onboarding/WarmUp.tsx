@@ -26,7 +26,8 @@ export function WarmUp({ onDone, onSkip }: { onDone: (s: StroopSummary | null) =
   }, [running, i]);
 
   function answer(c: StroopColor) {
-    if (busy.current) return;
+    // One answer per trial: a fast double tap before re-render must not answer twice.
+    if (busy.current || answers.current.length !== i) return;
     const trial = trials[i]!;
     answers.current.push({ trial, answer: c, rt: nowMs() - shownAt.current });
     setFlash(c === trial.ink ? "ok" : "bad");

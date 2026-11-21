@@ -24,6 +24,8 @@ import { daysUntil, upcomingExams } from "@/lib/exams";
 import { DayRings, ProgressRing, WeekStrip } from "@/components/ui/visuals";
 import { getStart, startDay, type StartInfo } from "@/lib/start";
 import { StartWeek } from "./StartWeek";
+import { Memory, WeekTop } from "./HomeExtras";
+import { awayDays, memory, weekTags } from "@/lib/homeExtras";
 
 type Data = {
   today: CheckIn | null;
@@ -40,6 +42,10 @@ type Data = {
   /** First 7 days after consent: the personal start plan. */
   start: { info: StartInfo; day: number } | null;
   brainToday: boolean;
+  /** Days away (≥3) before today, for a guilt-free welcome back. */
+  away: number | null;
+  weekTop: ReturnType<typeof weekTags>;
+  memory: ReturnType<typeof memory>;
 };
 
 const dateFmt = new Intl.DateTimeFormat("ru-RU", { weekday: "short", day: "numeric", month: "long" });
@@ -52,7 +58,8 @@ function greeting(h: number): string {
 }
 
 /** One calm line under the greeting: a close exam, or the focus goal reached. */
-export function subline(d: Pick<Data, "exam" | "focusToday" | "goal">): string | null {
+export function subline(d: Pick<Data, "exam" | "focusToday" | "goal"> & { away?: number | null }): string | null {
+  if (d.away) return "С возвращением! Начните с малого — хватит 15 минут.";
   if (d.exam) {
     const { title, days } = d.exam;
     if (days === 0) return `Сегодня «${title}». Удачи!`;
@@ -86,6 +93,8 @@ export function HomeScreen() {
       const goal = await getFocusGoal();
       const info = await getStart().catch(() => null);
       const day = startDay(profile.consentAt, key);
+      const notes = await db.notes.toArray().catch(() => []);
+      const activity = [...checkins, ...tests, ...sessions].map((r) => r.date);
       const brainToday = (await db.brainTests.where("date").equals(key).count().catch(() => 0)) > 0;
       const next = (await upcomingExams())[0];
       const examDays = next ? daysUntil(next.date, key) : Infinity;
@@ -102,6 +111,9 @@ export function HomeScreen() {
         exam: next && examDays <= 7 ? { title: next.title, days: examDays } : null,
         start: info && day ? { info, day } : null,
         brainToday,
+        away: awayDays(activity, key),
+        weekTop: weekTags(checkins, key),
+        memory: memory(notes, checkins, key, (t) => dayKey(new Date(t))),
         habitsDone: habits.filter((h) => habitLogs.some((l) => l.habitId === h.id && l.date === key)).length,
       });
     })().catch(() => alive && setFailed(true));
@@ -241,6 +253,9 @@ function Loaded({ data, onChange }: { data: Data; onChange: () => void }) {
       <GoalPeek />
 
       <ExamsCard onChange={onChange} />
+
+      {data.weekTop.length > 0 && <WeekTop tags={data.weekTop} />}
+      {data.memory && <Memory {...data.memory} />}
 
       {usable < MIN_DAYS && <Countdown days={usable} />}
       {today && <Tip data={today} />}

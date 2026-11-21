@@ -107,11 +107,14 @@ export interface ImportSummary {
  * consent stays (the file can't grant consent); only the mode is taken from it.
  * Returns null when the file is not a FocusAI export or there is no consent.
  */
+export const IMPORT_MAX_ROWS = 10_000;
+
 export async function importData(raw: unknown, database: FocusDB = defaultDb): Promise<ImportSummary | null> {
   if (!raw || typeof raw !== "object") return null;
   const f = raw as Record<string, unknown>;
   if (f.format !== EXPORT_FORMAT || f.version !== EXPORT_VERSION) return null;
-  const arr = (x: unknown) => (Array.isArray(x) ? x : []);
+  // Bounded: a hostile file must not fill the device (≈27 years of daily rows).
+  const arr = (x: unknown) => (Array.isArray(x) ? x.slice(0, IMPORT_MAX_ROWS) : []);
   let skipped = 0;
 
   const checkins: CheckIn[] = [];
@@ -206,7 +209,7 @@ export async function importData(raw: unknown, database: FocusDB = defaultDb): P
   const settings = new Map(arr(f.settings).map((s) => [(s as Setting)?.key, (s as Setting)?.value]));
   const mode = (settings.get(PROFILE_KEY) as { mode?: unknown } | undefined)?.mode;
   const experiment = settings.get("experiment");
-  const history = arr(settings.get("experimentHistory")).filter(isWindow);
+  const history = arr(settings.get("experimentHistory")).filter(isWindow).slice(-100);
 
   return database.transaction("rw", [database.checkins, database.focusTests, database.settings, database.sessions, database.habits, database.habitLogs, database.goals, database.notes, database.brainTests], async () => {
     const profile = await getProfile(database);

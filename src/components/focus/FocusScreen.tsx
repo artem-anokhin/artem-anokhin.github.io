@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { ChevronRight, Coffee, Users, Volume2, VolumeX, Wind, Zap } from "lucide-react";
+import { ChevronRight, Coffee, Flag, Users, Volume2, VolumeX, Wind, Zap } from "lucide-react";
 import { db, dayKey } from "@/lib/db";
 import {
   SESSION_LENGTHS,
@@ -32,6 +32,7 @@ import { CrisisCard } from "@/components/CrisisCard";
 import { loadTree } from "@/lib/garden";
 import { GrowingSprout, sproutPhase } from "./GrowingSprout";
 import { ShareSession } from "./ShareSession";
+import { listGoals, openSteps, toggleStep, type GoalStep } from "@/lib/goals";
 import { NewAwardChip } from "@/components/tree/NewAwardChip";
 import { btnNight, btnNightGhost } from "@/components/ui/controls";
 import { DropIcon, ProgressRing, TreeScene } from "@/components/ui/visuals";
@@ -95,6 +96,8 @@ export function FocusScreen() {
   const [stats, setStats] = useState({ today: 0, week: 0, stage: 0, days: [] as { label: string; min: number }[] });
   const [task, setTask] = useState("");
   const [recent, setRecent] = useState<string[]>([]);
+  const [steps, setSteps] = useState<GoalStep[]>([]);
+  const [stepDone, setStepDone] = useState<"" | "done" | "error">("");
   const [noise, setNoise] = useState<NoiseId>("off");
   const [muted, setMuted] = useState(false);
   const [invite, setInvite] = useState<Together | null>(null);
@@ -121,6 +124,7 @@ export function FocusScreen() {
       stage: tree.stage,
     });
     setRecent(recentTasks(sessions));
+    setSteps(openSteps(await listGoals().catch(() => [])));
   }, []);
 
   useEffect(() => {
@@ -193,6 +197,7 @@ export function FocusScreen() {
           tap("success");
           chime();
         }
+        setStepDone("");
         setView(row ? { kind: "done", id: row.id, minutes, away: row.away ?? 0, task: row.task } : { kind: "setup" });
       })
       .catch(() => {
@@ -345,9 +350,26 @@ export function FocusScreen() {
                 autoComplete="off"
                 className="min-h-12 w-full rounded-card bg-night-2 px-4 text-[17px] text-night-ink placeholder:text-night-muted focus-visible:outline-3 focus-visible:outline-glow"
               />
-              {recent.length > 0 && (
+              {steps.length > 0 && (
+                <div className="mt-2 flex flex-wrap gap-2" role="group" aria-label="Шаги ваших целей">
+                  {steps.map((st) => (
+                    <button
+                      key={`${st.goalId}-${st.index}`}
+                      type="button"
+                      onClick={() => setTask(st.text)}
+                      aria-pressed={task === st.text}
+                      aria-label={`Шаг цели «${st.goal}»: ${st.text}`}
+                      className={`pressable inline-flex min-h-11 items-center gap-1.5 rounded-full px-4 text-[15px] ${task === st.text ? "bg-white text-accent" : "bg-white/12 text-night-ink/90"}`}
+                    >
+                      <Flag aria-hidden size={14} />
+                      {st.text}
+                    </button>
+                  ))}
+                </div>
+              )}
+              {recent.filter((r) => !steps.some((st) => st.text === r)).length > 0 && (
                 <div className="mt-2 flex flex-wrap gap-2" aria-label="Недавние задачи">
-                  {recent.map((r) => (
+                  {recent.filter((r) => !steps.some((st) => st.text === r)).map((r) => (
                     <button
                       key={r}
                       type="button"
@@ -511,6 +533,28 @@ export function FocusScreen() {
             {view.task && <p className="-mt-4 text-[17px] text-night-ink/85">{view.task}</p>}
             <NewAwardChip night />
             {view.task && hasCrisisWording(view.task) && <CrisisCard />}
+            {(() => {
+              const st = steps.find((x) => x.text === view.task);
+              if (!st && stepDone !== "done") return null;
+              return stepDone === "done" ? (
+                <p className="inline-flex items-center gap-2 text-[15px] font-semibold text-night-ink" role="status">
+                  <Flag aria-hidden size={16} /> Шаг цели отмечен
+                </p>
+              ) : (
+                <button
+                  type="button"
+                  onClick={async () => {
+                    const ok = await toggleStep(st!.goalId, st!.index).catch(() => null);
+                    setStepDone(ok ? "done" : "error");
+                    if (ok) setSteps(openSteps(await listGoals().catch(() => [])));
+                  }}
+                  className={`${btnNightGhost} w-full max-w-sm gap-2`}
+                >
+                  <Flag aria-hidden size={18} /> Шаг «{st!.text}» сделан
+                </button>
+              );
+            })()}
+            {stepDone === "error" && <p role="alert" className="text-[15px] text-night-ink">Не получилось отметить шаг.</p>}
             {view.id !== undefined && (
               <fieldset className="w-full max-w-sm">
                 <legend className="mb-2 w-full text-center text-[15px] font-semibold text-night-ink">Как прошла сессия?</legend>

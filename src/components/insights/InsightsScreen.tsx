@@ -449,7 +449,7 @@ function TimeOfDayCard({ tod }: { tod: TimeOfDay }) {
   );
 }
 
-/** «Длина сессии»: how the user rated 15/25/50-minute sessions (needs ≥2 lengths with ≥3 ratings). */
+/** «Ваши занятия и фокус»: check-in tags with the biggest Focus Score difference (≥7 days). */
 function TagEffectsCard({ fx, days }: { fx: TagEffect[]; days: number }) {
   return (
     <section aria-labelledby="tagfx-h" className="rounded-card-lg bg-surface p-4">
@@ -471,7 +471,7 @@ function TagEffectsCard({ fx, days }: { fx: TagEffect[]; days: number }) {
             <span className="min-w-0 flex-1">
               <span className="block text-[15px] font-semibold text-ink">{t.label}</span>
               <span className="block text-[13px] text-muted">
-                {t.withDays} {plural(t.withDays, ["день", "дня", "дней"])} с этим · {t.withoutDays} без{t.withDays < 5 ? " · пока предварительно" : ""}
+                {t.withDays} {plural(t.withDays, ["день", "дня", "дней"])} с этим · {t.withoutDays} без этого{t.withDays < 5 ? " · пока предварительно" : ""}
               </span>
             </span>
             <span className={`text-[17px] font-semibold tabular-nums ${t.diff > 0 ? "text-s-activity-ink" : "text-ink"}`} aria-label={`в среднем на ${Math.abs(t.diff)} ${t.diff > 0 ? "выше" : "ниже"}`}>
@@ -482,12 +482,13 @@ function TagEffectsCard({ fx, days }: { fx: TagEffect[]; days: number }) {
         ))}
       </ul>
       <p className="mt-3 text-[13px] text-muted">
-        Разница среднего Focus Score в дни с занятием и без. Это связь, а не причина: такие дни отличаются и другим — сном, нагрузкой, настроением.
+        Разница среднего Focus Score в дни с этой отметкой и без неё. Это только связь, а не причина: такие дни отличаются и другим — сном, нагрузкой, настроением.
       </p>
     </section>
   );
 }
 
+/** «Длина сессии»: how the user rated 15/25/50-minute sessions (needs ≥2 lengths with ≥3 ratings). */
 function SessionFitCard({ fit, days }: { fit: ReturnType<typeof feelByLength>; days: number }) {
   const shown = fit.filter((f) => f.avg !== null).sort((a, b) => b.avg! - a.avg!);
   if (shown.length < 2) return null;

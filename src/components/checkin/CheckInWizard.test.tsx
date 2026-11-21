@@ -61,6 +61,19 @@ describe("CheckInWizard", () => {
     expect(saved.rest).toMatchObject({ type: "hobby", kinds: ["manga"], custom: ["Фанфики", "Квиз с друзьями"] });
   });
 
+  it("rest type follows chips over a carried-over type; at most 12 tags", () => {
+    const initial = { ...emptyCheckIn(), rest: { type: "physical" as const }, answered: [] };
+    render(<CheckInWizard initial={initial} mode="study" onSave={vi.fn()} />);
+    for (let i = 0; i < 6; i++) next();
+    fireEvent.click(screen.getByRole("button", { name: /Книга/ }));
+    expect(screen.getByRole("radio", { name: "Хобби" })).toBeChecked();
+    fireEvent.click(screen.getByRole("button", { name: /^Ещё/ }));
+    const chips = screen.getAllByRole("button").filter((b) => b.getAttribute("aria-pressed") === "false");
+    chips.slice(0, 14).forEach((b) => fireEvent.click(b));
+    expect(screen.getAllByRole("button").filter((b) => b.getAttribute("aria-pressed") === "true")).toHaveLength(12);
+    expect(screen.getByText(/Не больше 12 отметок/)).toBeInTheDocument();
+  });
+
   it("marks only touched spheres as answered when values were carried over", async () => {
     const onSave = vi.fn<(d: CheckInData) => Promise<void>>().mockResolvedValue();
     render(<CheckInWizard initial={{ ...emptyCheckIn(), answered: [] }} mode="study" onSave={onSave} />);

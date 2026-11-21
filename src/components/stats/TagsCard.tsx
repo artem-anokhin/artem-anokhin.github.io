@@ -63,7 +63,7 @@ export function TagsCard({ rows }: { rows: CheckIn[] }) {
           <ul className="mt-4 space-y-2.5">
             {counts.map((c) => (
               <li
-                key={c.label}
+                key={`${c.emoji}${c.label}`}
                 className="grid grid-cols-[1fr_auto] items-center gap-x-3 gap-y-1"
               >
                 <span className="truncate text-[15px] text-ink">

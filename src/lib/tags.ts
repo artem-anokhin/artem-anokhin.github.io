@@ -44,6 +44,7 @@ export const TAGS: Record<TagSphere, readonly Tag[]> = {
     { id: "dance", label: "Танцы", emoji: "💃" },
     { id: "fight", label: "Единоборства", emoji: "🥋" },
     { id: "winter", label: "Лыжи, коньки", emoji: "⛸️" },
+    { id: "petwalk", label: "Прогулка с питомцем", emoji: "🐕" },
     { id: "home", label: "Домашние дела", emoji: "🧹" },
     { id: "pe", label: "Физра", emoji: "🤸" },
   ],
@@ -58,6 +59,8 @@ export const TAGS: Record<TagSphere, readonly Tag[]> = {
     { id: "practice", label: "Практика", emoji: "🩺", mode: "study" },
     { id: "course", label: "Онлайн-курс", emoji: "💻" },
     { id: "language", label: "Иностранный язык", emoji: "🌍" },
+    { id: "volunteer", label: "Волонтёрство", emoji: "🤝" },
+    { id: "club", label: "Кружок, клуб", emoji: "🎤" },
     { id: "job", label: "Подработка", emoji: "💼", mode: "study" },
     { id: "deep", label: "Глубокая работа", emoji: "🎯", mode: "work" },
     { id: "meetings", label: "Встречи", emoji: "👥", mode: "work" },
@@ -74,7 +77,7 @@ export const TAGS: Record<TagSphere, readonly Tag[]> = {
     { id: "youtube", label: "YouTube", emoji: "▶️", rest: "hobby" },
     { id: "social", label: "Соцсети", emoji: "📱", rest: "hobby" },
     { id: "music", label: "Музыка", emoji: "🎧", rest: "nervous" },
-    { id: "instrument", label: "Играл(а) на инструменте", emoji: "🎸", rest: "hobby" },
+    { id: "instrument", label: "Игра на инструменте", emoji: "🎸", rest: "hobby" },
     { id: "drawing", label: "Рисование", emoji: "🎨", rest: "hobby" },
     { id: "craft", label: "Рукоделие", emoji: "🧶", rest: "hobby" },
     { id: "cooking", label: "Готовка", emoji: "🍳", rest: "hobby" },
@@ -86,7 +89,9 @@ export const TAGS: Record<TagSphere, readonly Tag[]> = {
     { id: "nap", label: "Дневной сон", emoji: "😴", rest: "nervous" },
     { id: "meditation", label: "Медитация, дыхание", emoji: "🪷", rest: "nervous" },
     { id: "bath", label: "Ванна, баня", emoji: "🛁", rest: "nervous" },
-    { id: "nothing", label: "Ничего не делал(а)", emoji: "☁️", rest: "nervous" },
+    { id: "prayer", label: "Молитва, намаз", emoji: "🤲", rest: "nervous" },
+    { id: "celebration", label: "Той, праздник", emoji: "🎉", rest: "nervous" },
+    { id: "nothing", label: "Ничегонеделание", emoji: "☁️", rest: "nervous" },
   ],
 };
 
@@ -110,7 +115,7 @@ export function tagsFor(sphere: TagSphere, mode: "study" | "work"): readonly Tag
 /** One custom tag: no control/invisible chars, trimmed, ≤24 code points, first letter upper-cased. */
 export function cleanCustom(v: unknown): string | null {
   if (typeof v !== "string") return null;
-  const t = Array.from(v.replace(/[\p{Cc}\p{Cf}]/gu, "").replace(/\s+/g, " ").trim()).slice(0, CUSTOM_MAX).join("").trim();
+  const t = Array.from(v.slice(0, CUSTOM_MAX * 4).replace(/[\p{Cc}\p{Cf}]/gu, "").replace(/\s+/g, " ").trim()).slice(0, CUSTOM_MAX).join("").trim();
   if (!t) return null;
   return t[0]!.toLocaleUpperCase("ru-RU") + t.slice(1);
 }

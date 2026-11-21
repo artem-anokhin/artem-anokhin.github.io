@@ -67,3 +67,16 @@ describe("woop plan", () => {
     expect(sanitizeGoal({ title: "Цель", plan })?.plan).toBe(plan);
   });
 });
+
+describe("openSteps", () => {
+  it("offers the next undone step of each active goal", async () => {
+    const { openSteps } = await import("./goals");
+    const g = (id: number, done: 0 | 1, steps: [string, boolean][]) => ({ id, title: `G${id}`, done, createdAt: 1, steps: steps.map(([text, d]) => ({ text, done: d })) });
+    expect(
+      openSteps([g(1, 0, [["a", true], ["b", false]]), g(2, 1, [["c", false]]), g(3, 0, [["d", true]]), g(4, 0, [["e", false]])]),
+    ).toEqual([
+      { goalId: 1, index: 1, text: "b", goal: "G1" },
+      { goalId: 4, index: 0, text: "e", goal: "G4" },
+    ]);
+  });
+});

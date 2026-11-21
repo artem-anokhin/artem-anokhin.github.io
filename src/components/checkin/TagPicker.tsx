@@ -3,7 +3,7 @@
 import { useId, useState } from "react";
 import { Plus, X } from "lucide-react";
 import { tap } from "@/lib/haptics";
-import { CUSTOM_MAX, MAX_CUSTOM, cleanCustom, type Tag } from "@/lib/tags";
+import { CUSTOM_MAX, MAX_CUSTOM, MAX_TAGS, cleanCustom, type Tag } from "@/lib/tags";
 
 /**
  * Multi-select chips «что было сегодня» + own tags. Chips are toggle buttons (aria-pressed).
@@ -40,7 +40,11 @@ export function TagPicker({
   const hidden = tags.length - shown.length;
   const customChips = [...custom, ...recent.filter((r) => !custom.some((c) => c.toLowerCase() === r.toLowerCase()))];
 
+  const [full, setFull] = useState(false);
   const toggle = (id: string) => {
+    const on = kinds.includes(id);
+    if (!on && kinds.length >= MAX_TAGS) return setFull(true);
+    setFull(false);
     tap();
     onChange({ kinds: kinds.includes(id) ? kinds.filter((k) => k !== id) : [...kinds, id], custom });
   };
@@ -104,6 +108,11 @@ export function TagPicker({
           </button>
         )}
       </div>
+      {full && (
+        <p role="status" className="mt-2 text-[13px] text-muted">
+          Не больше {MAX_TAGS} отметок — снимите одну, чтобы выбрать другую.
+        </p>
+      )}
       {adding && (
         <div className="mt-3 flex items-center gap-2">
           <label htmlFor={inputId} className="sr-only">

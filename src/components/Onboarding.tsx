@@ -1,7 +1,7 @@
 "use client";
 
 import { BookOpen, ChevronLeft, ChevronRight, ShieldCheck, Sprout } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { StroopSummary } from "@/lib/brainTests";
 import { HELP_LINES } from "@/lib/crisis";
 import { cardHref } from "@/lib/libraryLinks";
@@ -32,13 +32,19 @@ export function Onboarding({ onDone }: { onDone: () => void }) {
   const [saving, setSaving] = useState(false);
 
   const idx = ORDER.indexOf(step);
+  const pickTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const finishing = useRef(false);
+  useEffect(() => () => clearTimeout(pickTimer.current ?? undefined), []);
   const go = (s: Step) => {
+    if (pickTimer.current) clearTimeout(pickTimer.current);
+    pickTimer.current = null;
     setStep(s);
     window.scrollTo?.(0, 0);
   };
 
   async function finish() {
-    if (!consent || !goal || !blocker) return;
+    if (!consent || !goal || !blocker || finishing.current) return;
+    finishing.current = true;
     setSaving(true);
     setError(false);
     try {
@@ -48,6 +54,7 @@ export function Onboarding({ onDone }: { onDone: () => void }) {
     } catch {
       setError(true);
       setSaving(false);
+      finishing.current = false;
     }
   }
 
@@ -66,7 +73,8 @@ export function Onboarding({ onDone }: { onDone: () => void }) {
   const pick = <T,>(set: (v: T) => void, v: T, next: Step) => {
     set(v);
     tap("light");
-    setTimeout(() => go(next), 180);
+    if (pickTimer.current) clearTimeout(pickTimer.current);
+    pickTimer.current = setTimeout(() => go(next), 180);
   };
 
   return (

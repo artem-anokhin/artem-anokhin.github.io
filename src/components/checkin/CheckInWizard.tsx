@@ -63,12 +63,14 @@ export function CheckInWizard({
     setTouched((prev) => (prev === null || prev.has(key) ? prev : new Set(prev).add(key)));
   };
 
+  // The rest type follows chosen chips until the user picks it by hand (carried-over values don't count).
+  const restManual = useRef(Array.isArray(initial.answered) ? initial.answered.includes("rest") : false);
   const picker = (sphere: TagSphere, legend: string, extra?: { fold?: number; placeholder?: string }) => {
     const { kinds, custom } = sphereTags(d, sphere);
     return (
       <TagPicker
         legend={legend}
-        tags={sphere === "work" ? tagsFor("work", mode) : TAGS[sphere]}
+        tags={sphere === "work" ? [...tagsFor("work", mode), ...TAGS.work.filter((t) => t.mode && t.mode !== mode && kinds.includes(t.id))] : TAGS[sphere]}
         kinds={kinds}
         custom={custom}
         recent={recent[sphere]}
@@ -79,7 +81,8 @@ export function CheckInWizard({
           if (sphere === "rest") {
             // A chosen rest activity implies the rest type when it is still «Не было».
             const first = next.kinds.map((id) => tagById("rest", id)?.rest).find(Boolean);
-            patch("rest", { ...v, ...(d.rest.type === "none" && (first || next.custom.length) ? { type: first ?? "hobby" } : {}) });
+            const auto = !restManual.current || d.rest.type === "none";
+            patch("rest", { ...v, ...(auto && (first || next.custom.length) ? { type: first ?? "hobby" } : {}) });
           } else patch(sphere, v);
         }}
       />
@@ -203,8 +206,11 @@ export function CheckInWizard({
 
           {step === 6 && (
             <>
-              {picker("rest", "Чем отдыхали?", { fold: 12, placeholder: "Своё: например, читал(а) фанфики" })}
-              <ChoiceField legend="Какой это был отдых?" name="rest" columns={2} value={d.rest.type} options={REST_OPTIONS} onChange={(v) => patch("rest", { type: v })} theme={theme} />
+              {picker("rest", "Чем отдыхали?", { fold: 12, placeholder: "Своё: например, фанфики" })}
+              <ChoiceField legend="Какой это был отдых?" name="rest" columns={2} value={d.rest.type} options={REST_OPTIONS} onChange={(v) => {
+                  restManual.current = true;
+                  patch("rest", { type: v });
+                }} theme={theme} />
             </>
           )}
 
@@ -226,6 +232,8 @@ export function CheckInWizard({
               {hasCrisisWording(`${d.note} ${d.activity.note} ${customText(d)}`) && <CrisisCard />}
             </>
           )}
+
+          {!isNote && hasCrisisWording(customText(d)) && <CrisisCard />}
 
           {error && (
             <p role="alert" className="font-medium text-ink">

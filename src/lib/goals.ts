@@ -122,3 +122,22 @@ export function goalProgress(g: Pick<Goal, "steps" | "done">): number {
   if (g.steps.length === 0) return 0;
   return g.steps.filter((s) => s.done).length / g.steps.length;
 }
+
+/** The next undone step of each active goal, offered as a focus-session task. */
+export interface GoalStep {
+  goalId: number;
+  index: number;
+  text: string;
+  goal: string;
+}
+
+export function openSteps(goals: Goal[], max = 4): GoalStep[] {
+  const out: GoalStep[] = [];
+  for (const g of goals) {
+    if (g.done || g.id === undefined) continue;
+    const index = g.steps.findIndex((s) => !s.done);
+    if (index >= 0) out.push({ goalId: g.id, index, text: g.steps[index]!.text, goal: g.title });
+    if (out.length >= max) break;
+  }
+  return out;
+}
