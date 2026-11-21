@@ -34,12 +34,16 @@ export function StroopTest() {
 
   function start() {
     setTrials(stroopTrials());
+    busy.current = false;
     answers.current = [];
     setI(0);
     setView({ kind: "run" });
   }
 
+  const busy = useRef(false);
+
   async function answer(c: StroopColor) {
+    if (busy.current) return; // a fast second tap must not answer twice or save twice
     const trial = trials[i]!;
     answers.current.push({ trial, answer: c, rt: nowMs() - shownAt.current });
     const ok = c === trial.ink;
@@ -47,6 +51,7 @@ export function StroopTest() {
     tap("light");
     setTimeout(() => setFlash(null), 150);
     if (i + 1 < trials.length) return setI(i + 1);
+    busy.current = true;
     const s = scoreStroop(answers.current);
     const prev = (await brainHistory("stroop").catch(() => [])).map((r) => r.score);
     if (s) await saveBrainTest({ kind: "stroop", score: s.score, accuracy: s.accuracy, medianRt: s.medianRt, ...(s.interference !== null ? { interference: s.interference } : {}) }).catch(() => null);

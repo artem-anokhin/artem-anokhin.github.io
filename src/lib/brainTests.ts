@@ -43,10 +43,14 @@ export function stroopTrials(rand: () => number = Math.random, n = STROOP_TRIALS
     } while (out.length && out.at(-1)!.word === t.word && out.at(-1)!.ink === t.ink);
     out.push(t);
   }
-  // Fisher–Yates shuffle keeps the 50/50 balance.
-  for (let i = out.length - 1; i > 0; i--) {
-    const j = Math.floor(rand() * (i + 1));
-    [out[i], out[j]] = [out[j]!, out[i]!];
+  // Fisher–Yates shuffle keeps the 50/50 balance; reshuffle until no trial repeats its neighbour.
+  const same = (a: StroopTrial, b: StroopTrial) => a.word === b.word && a.ink === b.ink;
+  for (let attempt = 0; attempt < 500; attempt++) {
+    for (let i = out.length - 1; i > 0; i--) {
+      const j = Math.floor(rand() * (i + 1));
+      [out[i], out[j]] = [out[j]!, out[i]!];
+    }
+    if (!out.some((t, i) => i > 0 && same(t, out[i - 1]!))) break;
   }
   return out;
 }

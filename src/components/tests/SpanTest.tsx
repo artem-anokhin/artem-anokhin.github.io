@@ -51,6 +51,7 @@ export function SpanTest() {
   }
 
   function start() {
+    ending.current = false;
     const st = { length: SPAN_START, misses: 0, best: 0, done: false };
     setLevel(st);
     play(st.length);
@@ -63,13 +64,16 @@ export function SpanTest() {
     setPrev(best > 0 ? [...history, best] : history);
   }
 
+  const ending = useRef(false);
+
   function press(tile: number) {
-    if (phase !== "input") return;
+    if (phase !== "input" || ending.current) return;
     if (tile !== seq[pos]) {
       setWrong(tile);
       tap("success");
       const next = spanStep(level, false);
       setLevel(next);
+      if (next.done) ending.current = true;
       timers.current.push(setTimeout(() => (next.done ? finish(next.best) : play(next.length)), 700));
       setPhase("show");
       return;
@@ -78,7 +82,10 @@ export function SpanTest() {
     if (pos + 1 < seq.length) return setPos(pos + 1);
     const next = spanStep(level, true);
     setLevel(next);
-    if (next.done) return void finish(next.best);
+    if (next.done) {
+      ending.current = true;
+      return void finish(next.best);
+    }
     setPhase("show");
     timers.current.push(setTimeout(() => play(next.length), 500));
   }

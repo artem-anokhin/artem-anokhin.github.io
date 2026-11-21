@@ -75,3 +75,14 @@ describe("brain tests privacy", () => {
     await db.delete();
   });
 });
+
+describe("stroop order", () => {
+  it("never shows the same trial twice in a row (many seeds)", () => {
+    let seed = 1;
+    const rand = () => ((seed = (seed * 16807) % 2147483647) - 1) / 2147483646;
+    for (let k = 0; k < 500; k++) {
+      const t = stroopTrials(rand);
+      expect(t.some((x, i) => i > 0 && x.word === t[i - 1]!.word && x.ink === t[i - 1]!.ink)).toBe(false);
+    }
+  });
+});

@@ -60,3 +60,10 @@ describe("notes + privacy", () => {
     await db.delete();
   });
 });
+
+describe("woop plan", () => {
+  it("keeps a long «Если…, то…» plan whole", () => {
+    const plan = `Если ${"а".repeat(130)}, то ${"б".repeat(130)}`;
+    expect(sanitizeGoal({ title: "Цель", plan })?.plan).toBe(plan);
+  });
+});

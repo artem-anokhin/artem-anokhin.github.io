@@ -9,6 +9,8 @@ export const GOAL_TITLE_MAX = 60;
 export const GOAL_WHY_MAX = 140;
 export const STEP_MAX = 60;
 export const WOOP_MAX = 140;
+/** The stored plan is «Если <obstacle>, то <plan>» — room for both parts. */
+export const PLAN_MAX = 300;
 
 const clip = (v: unknown, max: number): string | undefined => {
   if (typeof v !== "string") return undefined;
@@ -31,7 +33,7 @@ export function sanitizeGoal(v: unknown): Omit<Goal, "id"> | null {
   if (!title) return null;
   const why = clip(g.why, GOAL_WHY_MAX);
   const obstacle = clip(g.obstacle, WOOP_MAX);
-  const plan = clip(g.plan, WOOP_MAX);
+  const plan = clip(g.plan, PLAN_MAX);
   const steps = (Array.isArray(g.steps) ? g.steps : [])
     .map((s) => {
       const text = clip((s as { text?: unknown })?.text, STEP_MAX);

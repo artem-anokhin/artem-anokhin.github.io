@@ -52,6 +52,7 @@ function Card({ id, title, sub, children }: { id: string; title: string; sub?: s
 /** «Статистика»: focus calendar, weekly minutes, score trend, study hours, sleep vs score. */
 export function StatsScreen() {
   const [data, setData] = useState<Data | null>(null);
+  const [failed, setFailed] = useState(false);
 
   useEffect(() => {
     let alive = true;
@@ -70,12 +71,13 @@ export function StatsScreen() {
           sleep: sleepVsScore(checkins, tests),
         });
       })
-      .catch(() => alive && setData(null));
+      .catch(() => alive && setFailed(true));
     return () => {
       alive = false;
     };
   }, []);
 
+  if (failed) return <p role="alert" className="rounded-card-lg bg-surface p-4 text-ink">Не удалось загрузить данные. Обновите страницу.</p>;
   if (!data) return <div aria-busy="true" className="h-96 animate-pulse rounded-card-lg bg-surface" />;
   const { totalMin, sessions, tests, checkins, weeks, cal, trend, hours, sleep } = data;
   const hoursTotal = Math.round((totalMin / 60) * 10) / 10;

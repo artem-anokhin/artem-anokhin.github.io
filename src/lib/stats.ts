@@ -16,7 +16,8 @@ export function weeklyMinutes(sessions: Pick<FocusSession, "date" | "minutes">[]
   const first = addDays(monday(today), -7 * (weeks - 1));
   const out = Array.from({ length: weeks }, (_, i) => ({ start: dayKey(addDays(first, 7 * i)), minutes: 0 }));
   for (const s of sessions) {
-    const idx = Math.floor((parse(s.date).getTime() - first.getTime()) / (7 * 86_400_000) + 1e-9);
+    // Whole days first (rounding absorbs DST hour shifts), then weeks.
+    const idx = Math.floor(Math.round((parse(s.date).getTime() - first.getTime()) / 86_400_000) / 7);
     if (idx >= 0 && idx < weeks) out[idx]!.minutes += s.minutes;
   }
   return out;
