@@ -40,3 +40,11 @@ export function memory(notes: Pick<Note, "text" | "createdAt">[], checkins: Pick
   }
   return null;
 }
+
+/** After a check-in: a tag from today that repeats this week, e.g. «🏊 Плавание — 3-й раз за неделю». */
+export function weekEcho(today: CheckIn, checkins: CheckIn[]): string | null {
+  const best = weekTags(checkins, today.date, 50)
+    .filter((t) => t.count >= 3)
+    .find((t) => TAG_SPHERES.some((s) => tagCounts([today], s).some((x) => x.label === t.label && x.emoji === t.emoji)));
+  return best ? `${best.emoji} ${best.label} — ${best.count}-й раз за неделю` : null;
+}

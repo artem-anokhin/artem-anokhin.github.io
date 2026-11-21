@@ -13,14 +13,15 @@ import { MIN_DAYS, pairDays, usableDays } from "@/lib/insights";
 import { plural } from "@/lib/plural";
 import { loadTree } from "@/lib/garden";
 import { CheckInWizard } from "./CheckInWizard";
-import { recentCustom, withoutTags, type TagSphere } from "@/lib/tags";
+import { TAG_SPHERES, recentCustom, tagLabels, withoutTags, type TagSphere } from "@/lib/tags";
+import { weekEcho } from "@/lib/homeExtras";
 import { NewAwardChip } from "@/components/tree/NewAwardChip";
 
 type State =
   | { kind: "loading" }
   | { kind: "error" }
   | { kind: "wizard"; profile: Profile; prefill: CheckInData; isEdit: boolean; recent: Record<TagSphere, string[]> }
-  | { kind: "done"; isEdit: boolean; stage: number; next: string[] };
+  | { kind: "done"; isEdit: boolean; stage: number; next: string[]; tags: string[]; echo: string | null; stageUp: boolean };
 
 /** Strip storage fields so a row can seed the wizard. */
 function toData(row: CheckIn): CheckInData {
@@ -62,7 +63,7 @@ export function CheckInFlow() {
       </div>
     );
   }
-  if (state.kind === "done") return <Done isEdit={state.isEdit} stage={state.stage} next={state.next} />;
+  if (state.kind === "done") return <Done isEdit={state.isEdit} stage={state.stage} next={state.next} tags={state.tags} echo={state.echo} stageUp={state.stageUp} />;
 
   return (
     <CheckInWizard
@@ -70,6 +71,7 @@ export function CheckInFlow() {
       mode={state.profile.mode}
       recent={state.recent}
       onSave={async (data) => {
+        const before = await loadTree().catch(() => null);
         const row = await saveCheckIn(data);
         if (!row) {
           // Consent is gone (e.g. data deleted in another tab): back to onboarding.
@@ -79,7 +81,16 @@ export function CheckInFlow() {
         }
         const tree = await loadTree().catch(() => null);
         const next = await whatsNext(tree?.stage ?? 0, tree?.drops ?? 0).catch(() => []);
-        setState({ kind: "done", isEdit: state.isEdit, stage: tree?.stage ?? 0, next });
+        const all = await db.checkins.toArray().catch(() => []);
+        setState({
+          kind: "done",
+          isEdit: state.isEdit,
+          stage: tree?.stage ?? 0,
+          next,
+          tags: TAG_SPHERES.flatMap((s) => tagLabels(row, s)),
+          stageUp: !!before && !!tree && tree.stage > before.stage,
+          echo: weekEcho(row, all),
+        });
       }}
     />
   );
@@ -107,7 +118,7 @@ async function whatsNext(stage: number, drops: number): Promise<string[]> {
   return out;
 }
 
-function Done({ isEdit, stage, next }: { isEdit: boolean; stage: number; next: string[] }) {
+function Done({ isEdit, stage, next, tags, echo, stageUp }: { isEdit: boolean; stage: number; next: string[]; tags: string[]; echo: string | null; stageUp: boolean }) {
   return (
     <div className="flex min-h-dvh flex-col bg-bg px-4 pt-16 pb-[calc(16px+env(safe-area-inset-bottom))] text-center">
       <div className="mx-auto w-full max-w-md flex-1">
@@ -120,11 +131,23 @@ function Done({ isEdit, stage, next }: { isEdit: boolean; stage: number; next: s
           <TreeSvg stage={stage} wilting={false} title={`Дерево: ${STAGES[stage]}`} />
         </div>
         <h1 className="title mt-6 text-[28px]" role="status">
-          {isEdit ? "Чек-ин обновлён" : "День отмечен"}
+          {stageUp ? `Новая стадия — «${STAGES[stage]}»!` : isEdit ? "Чек-ин обновлён" : "День отмечен"}
         </h1>
+        {stageUp && (
+          <Link href="/tree/" className="mt-2 inline-flex min-h-11 items-center text-[15px] font-semibold text-link">
+            Посмотреть сад и поделиться
+          </Link>
+        )}
         <p className="mt-2 text-[17px] text-muted">
           {isEdit ? "Изменения сохранены только на этом устройстве." : "Ещё 90 секунд — и узнаете свой Focus Score на сегодня."}
         </p>
+        {tags.length > 0 && (
+          <p className="mt-4 text-[15px] text-ink" aria-label={`Ваш день: ${tags.join(", ")}`}>
+            {tags.slice(0, 6).join(" · ")}
+            {tags.length > 6 ? ` · +${tags.length - 6}` : ""}
+          </p>
+        )}
+        {echo && <p className="mt-2 inline-flex rounded-full bg-s-activity-tint px-3 py-1 text-[15px] font-semibold text-s-activity-ink">{echo}</p>}
         {!isEdit && (
           <div className="mt-5">
             <NewAwardChip />

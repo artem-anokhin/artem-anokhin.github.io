@@ -33,3 +33,13 @@ describe("home extras", () => {
     expect(memory([{ text: "  ", createdAt: at("2026-11-15") }], [], "2026-11-22", key)).toBeNull();
   });
 });
+
+describe("weekEcho", () => {
+  it("names a today tag that repeats ≥3 times this week", async () => {
+    const { weekEcho } = await import("./homeExtras");
+    const swim = (date: string) => ci(date, { activity: { level: "medium", note: "", kinds: ["swim"] } });
+    const rows = [swim("2026-11-18"), swim("2026-11-20"), swim("2026-11-22")];
+    expect(weekEcho(rows[2]!, rows)).toBe("🏊 Плавание — 3-й раз за неделю");
+    expect(weekEcho(ci("2026-11-22"), rows)).toBeNull();
+  });
+});
