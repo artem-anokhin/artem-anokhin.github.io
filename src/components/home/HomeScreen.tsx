@@ -233,11 +233,11 @@ function Loaded({ data, onChange }: { data: Data; onChange: () => void }) {
         <h2 id="more-h" className="px-4 pb-1.5 text-[13px] text-muted uppercase">
           Обзор
         </h2>
-        <nav aria-label="Обзор" className="group-list">
-          <Row href="/tree/" icon={<Sprout aria-hidden size={18} />} tint="bg-leaf text-white" title="Сад" sub={`${tree.stageName[0]!.toUpperCase()}${tree.stageName.slice(1)} · ${tree.drops} ${plural(tree.drops, ["капля", "капли", "капель"])}`} />
-          <Row href="/week/" icon={<CalendarRange aria-hidden size={18} />} tint="bg-s-mind text-white" title="Итоги недели" sub="Как прошли ваши 7 дней" />
-          <Row href="/history/" icon={<ChartLine aria-hidden size={18} />} tint="bg-accent text-white" title="История" sub="Focus Score за 30 дней" />
-          <Row href="/settings/#reminder" icon={<BellRing aria-hidden size={18} />} tint="bg-red text-white" title="Напоминание" sub="Каждый день в удобное время" plain />
+        <nav aria-label="Обзор" className="grid grid-cols-2 gap-3">
+          <Tile href="/tree/" icon={<Sprout aria-hidden size={18} />} tint="bg-leaf text-white" title="Сад" sub={`${tree.stageName[0]!.toUpperCase()}${tree.stageName.slice(1)} · ${tree.drops} ${plural(tree.drops, ["капля", "капли", "капель"])}`} />
+          <Tile href="/week/" icon={<CalendarRange aria-hidden size={18} />} tint="bg-s-mind text-white" title="Итоги недели" sub="Ваши 7 дней" />
+          <Tile href="/history/" icon={<ChartLine aria-hidden size={18} />} tint="bg-accent text-white" title="История" sub="30 дней" />
+          <Tile href="/settings/#reminder" icon={<BellRing aria-hidden size={18} />} tint="bg-red text-white" title="Напоминание" sub="В удобное время" plain />
         </nav>
       </section>
     </>
@@ -253,6 +253,29 @@ function Fact({ label, value, dot }: { label: string; value: string; dot: string
       </dt>
       <dd className="text-[15px] font-semibold text-ink tabular-nums">{value}</dd>
     </div>
+  );
+}
+
+function Tile({ href, icon, tint, title, sub, plain }: { href: string; icon: React.ReactNode; tint: string; title: string; sub: string; plain?: boolean }) {
+  const cls = "pressable flex min-h-[96px] flex-col justify-between rounded-card-lg bg-surface p-3.5 active:bg-pressed";
+  const inner = (
+    <>
+      <span className={`grid size-8 place-items-center rounded-[8px] ${tint}`}>{icon}</span>
+      <span>
+        <span className="block text-[17px] font-semibold text-ink">{title}</span>
+        <span className="block truncate text-[13px] text-muted">{sub}</span>
+      </span>
+    </>
+  );
+  // Hash deep links need a full load so the target section can scroll into view.
+  return plain ? (
+    <a href={href} className={cls}>
+      {inner}
+    </a>
+  ) : (
+    <Link href={href} className={cls}>
+      {inner}
+    </Link>
   );
 }
 
