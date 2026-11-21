@@ -16,7 +16,13 @@ export interface Exam {
   date: DayKey;
 }
 
-const isDay = (v: unknown): v is DayKey => typeof v === "string" && /^\d{4}-\d{2}-\d{2}$/.test(v) && !Number.isNaN(new Date(`${v}T00:00:00`).getTime());
+/** Real calendar day "YYYY-MM-DD" (rejects rolled-over dates like 2026-02-30). */
+const isDay = (v: unknown): v is DayKey => {
+  if (typeof v !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(v)) return false;
+  const [y, m, d] = v.split("-").map(Number);
+  const dt = new Date(y!, m! - 1, d!);
+  return dt.getFullYear() === y && dt.getMonth() === m! - 1 && dt.getDate() === d;
+};
 
 export function cleanTitle(v: unknown): string | undefined {
   if (typeof v !== "string") return undefined;

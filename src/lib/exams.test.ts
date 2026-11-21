@@ -22,7 +22,7 @@ describe("exams", () => {
   it("caps the list and drops junk on import", () => {
     const many = Array.from({ length: 10 }, (_, i) => ({ id: `e${i}`, title: `E${i}`, date: "2026-12-01" }));
     expect(sanitizeExams(many)).toHaveLength(MAX_EXAMS);
-    expect(sanitizeExams([{ id: "x", title: "<b>", date: "bad" }, null, "s"])).toEqual([]);
+    expect(sanitizeExams([{ id: "x", title: "<b>", date: "bad" }, { id: "y", title: "Y", date: "2026-02-30" }, null, "s"])).toEqual([]);
   });
 
   it("counts calendar days", () => {
