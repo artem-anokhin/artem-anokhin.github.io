@@ -17,6 +17,7 @@ import { latestTestByDay, pickTip } from "@/lib/today";
 import type { TreeState } from "@/lib/tree";
 import { weeklyReview, type WeeklyReview } from "@/lib/weekly";
 import { btnPrimary } from "@/components/ui/controls";
+import { ExamsCard } from "./ExamsCard";
 import { DayRings, ProgressRing, WeekStrip } from "@/components/ui/visuals";
 
 type Data = {
@@ -189,6 +190,8 @@ function Loaded({ data, onChange }: { data: Data; onChange: () => void }) {
       </section>
 
       <HabitsToday onChange={onChange} />
+
+      <ExamsCard />
 
       {usable < MIN_DAYS && <Countdown days={usable} />}
       {today && <Tip data={today} />}

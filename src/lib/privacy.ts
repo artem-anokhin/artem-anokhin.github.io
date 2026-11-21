@@ -3,6 +3,7 @@ import { SESSION_LENGTHS, cleanTask, type SessionLength } from "./focusSession";
 import { HABIT_TITLE_MAX, MAX_HABITS } from "./habits";
 import { db as defaultDb, dayKey, type CheckIn, type FocusDB, type FocusSession, type Habit, type HabitLog, type FocusTestResult, type Setting } from "./db";
 import { getProfile, isExperiment, isWindow } from "./settings";
+import { EXAMS_KEY, sanitizeExams } from "./exams";
 
 export const EXPORT_FORMAT = "focusai-export";
 export const EXPORT_VERSION = 1;
@@ -197,6 +198,8 @@ export async function importData(raw: unknown, database: FocusDB = defaultDb): P
     });
     if (isExperiment(experiment)) await database.settings.put({ key: "experiment", value: experiment });
     if (history.length) await database.settings.put({ key: "experimentHistory", value: history });
+    const exams = sanitizeExams(settings.get(EXAMS_KEY));
+    if (exams.length) await database.settings.put({ key: EXAMS_KEY, value: exams });
     // Demo label only if the file really holds demo-tagged rows.
     if ([...checkins, ...tests, ...sessions, ...habits].some((r) => r.demo === true)) await database.settings.put({ key: "demo", value: true });
     await database.checkins.bulkPut(checkins);
