@@ -151,3 +151,14 @@ export function minutesByTask(sessions: FocusSession[]): { task: string; minutes
   }
   return [...m.values()].sort((a, b) => b.minutes - a.minutes);
 }
+
+/** Fewest rated sessions of one length before we show its average. */
+export const MIN_RATED = 3;
+
+/** Average «Как прошла сессия?» (1–3) per session length; lengths with < MIN_RATED ratings get null. */
+export function feelByLength(sessions: Pick<FocusSession, "minutes" | "feel">[]): { minutes: SessionLength; avg: number | null; rated: number }[] {
+  return SESSION_LENGTHS.map((m) => {
+    const xs = sessions.filter((s) => s.minutes === m && isFeel(s.feel)).map((s) => s.feel!);
+    return { minutes: m, rated: xs.length, avg: xs.length >= MIN_RATED ? xs.reduce((a, b) => a + b, 0) / xs.length : null };
+  });
+}

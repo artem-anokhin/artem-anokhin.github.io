@@ -1,6 +1,7 @@
 import { FocusDB } from "./db";
 import { buildDemo, clearDemo, isDemo, loadDemo, DEMO_DAYS } from "./demo";
 import { sanitizeCheckIn } from "./checkin";
+import { feelByLength } from "./focusSession";
 
 const today = new Date(2026, 10, 21, 12);
 
@@ -13,6 +14,11 @@ describe("demo data", () => {
     for (const c of a.checkins) expect(sanitizeCheckIn(c)).toMatchObject({ sleep: c.sleep, mind: c.mind });
     expect(a.tests.every((t) => t.score >= 0 && t.score <= 100)).toBe(true);
     expect(buildDemo(today)).toEqual(a);
+  });
+
+  it("has enough rated sessions to show the session-length card", () => {
+    const fit = feelByLength(buildDemo(today).sessions);
+    expect(fit.filter((f) => f.avg !== null).length).toBeGreaterThanOrEqual(2);
   });
 
   it("loads only into an empty consented app and can be cleared", async () => {

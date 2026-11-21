@@ -1,5 +1,5 @@
 import { FocusDB } from "./db";
-import { TASK_MAX, cancelSession, cleanTask, finishSession, getActiveSession, markAway, minutesByDay, minutesByTask, rateSession, recentTasks, remainingMs, startSession } from "./focusSession";
+import { TASK_MAX, cancelSession, cleanTask, finishSession, getActiveSession, markAway, minutesByDay, minutesByTask, feelByLength, rateSession, recentTasks, remainingMs, startSession } from "./focusSession";
 
 const T0 = new Date(2026, 10, 21, 10, 0).getTime();
 
@@ -81,11 +81,24 @@ describe("task label and away count", () => {
 describe("session rating", () => {
   it("saves a 1–3 feel on a finished session", async () => {
     const db = new FocusDB("session-test-5");
-    const id = await db.sessions.add({ date: "2026-11-21", startedAt: 1, minutes: 25 });
+    const id = (await db.sessions.add({ date: "2026-11-21", startedAt: 1, minutes: 25 }))!;
     expect(await rateSession(id, 3, db)).toBe(true);
     expect(await rateSession(id, 7, db)).toBe(false);
     expect(await rateSession(999, 2, db)).toBe(false);
     expect((await db.sessions.get(id))?.feel).toBe(3);
     await db.delete();
+  });
+});
+
+describe("feel by length", () => {
+  it("averages ratings per length with a minimum count", () => {
+    const s = [
+      ...[3, 3, 2].map((feel) => ({ minutes: 25, feel: feel as 1 | 2 | 3 })),
+      ...[1, 2].map((feel) => ({ minutes: 50, feel: feel as 1 | 2 | 3 })),
+      { minutes: 50 },
+    ];
+    const r = feelByLength(s);
+    expect(r.find((x) => x.minutes === 25)).toMatchObject({ rated: 3, avg: 8 / 3 });
+    expect(r.find((x) => x.minutes === 50)).toMatchObject({ rated: 2, avg: null });
   });
 });

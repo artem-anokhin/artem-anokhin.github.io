@@ -27,8 +27,9 @@ import { ProgressRing } from "@/components/ui/visuals";
 import { latestTestByDay } from "@/lib/today";
 import { SPHERE_STYLE } from "@/lib/spheres";
 import { SPHERES } from "@/lib/checkin";
-import { ArrowRight, Clock, FlaskConical } from "lucide-react";
+import { ArrowRight, Clock, FlaskConical, Timer } from "lucide-react";
 import { MIN_GAP, timeOfDay, type TimeOfDay } from "@/lib/timeOfDay";
+import { FEELS, feelByLength } from "@/lib/focusSession";
 
 const LIMITS_URL = "https://www.frontiersin.org/journals/digital-health/articles/10.3389/fdgth.2020.00003/full";
 
@@ -44,6 +45,7 @@ type Ready = {
   /** Focus Score for each of the last 7 days (oldest → today), null = no test. */
   week: (number | null)[];
   tod: TimeOfDay | null;
+  fit: ReturnType<typeof feelByLength>;
 };
 type State = { kind: "loading" } | { kind: "error" } | Ready;
 
@@ -164,8 +166,8 @@ export function InsightsScreen() {
 
   useEffect(() => {
     let alive = true;
-    Promise.all([db.checkins.toArray(), db.focusTests.toArray(), getExperiment()])
-      .then(([checkins, tests, experiment]) => {
+    Promise.all([db.checkins.toArray(), db.focusTests.toArray(), getExperiment(), db.sessions.toArray()])
+      .then(([checkins, tests, experiment, sessions]) => {
         if (!alive) return;
         const pairs = pairDays(checkins, tests);
         const days = usableDays(pairs);
@@ -182,6 +184,7 @@ export function InsightsScreen() {
           days,
           week,
           tod: timeOfDay(tests),
+          fit: feelByLength(sessions),
           splits: Object.fromEntries(top.map((i) => [i.metric.key, splitMeans(pairs, i.metric)])),
           insights: top,
           candidate: pickExperiment(all),
@@ -226,7 +229,7 @@ export function InsightsScreen() {
     );
   }
 
-  const { days, insights, candidate, experiment, splits, week, tod } = state;
+  const { days, insights, candidate, experiment, splits, week, tod, fit } = state;
   const locked = days < MIN_DAYS;
 
   return (
@@ -280,6 +283,7 @@ export function InsightsScreen() {
       )}
 
       {tod && <TimeOfDayCard tod={tod} />}
+      <SessionFitCard fit={fit} />
 
       {(experiment || candidate) && (
         <ExperimentCard
@@ -433,6 +437,45 @@ function TimeOfDayCard({ tod }: { tod: TimeOfDay }) {
         Средний Focus Score по всем тестам; разницу меньше {MIN_GAP} баллов не считаем.
         {tod.best && " Можно попробовать ставить сложные задачи на это время и посмотреть, что изменится."}
       </p>
+    </section>
+  );
+}
+
+/** «Длина сессии»: how the user rated 15/25/50-minute sessions (needs ≥2 lengths with ≥3 ratings). */
+function SessionFitCard({ fit }: { fit: ReturnType<typeof feelByLength> }) {
+  const shown = fit.filter((f) => f.avg !== null).sort((a, b) => b.avg! - a.avg!);
+  if (shown.length < 2) return null;
+  const best = shown[0]!.avg! - shown[1]!.avg! >= 0.3 ? shown[0]! : null;
+  const rated = fit.reduce((a, f) => a + f.rated, 0);
+  const word = (avg: number) => FEELS[Math.round(avg) - 1]!;
+  return (
+    <section aria-labelledby="fit-h" className="rounded-card-lg bg-surface p-4">
+      <p className="flex items-center gap-1.5 text-[15px] font-semibold text-link">
+        <Timer aria-hidden size={18} /> Длина сессии
+      </p>
+      <h2 id="fit-h" className="mt-1 text-[20px] font-bold text-ink">
+        {best ? `Сессии по ${best.minutes} минут вы чаще оцениваете выше` : "Оценки сессий разной длины пока похожи"}
+      </h2>
+      <p className="mt-1 text-[13px] text-muted">
+        По {rated} {plural(rated, ["оценке", "оценкам", "оценкам"])} «Как прошла сессия?»
+      </p>
+      <ul className="group-list mt-3 !bg-fill/40">
+        {fit.map((f) => (
+          <li key={f.minutes} className="flex min-h-11 items-center gap-3 px-3 py-2">
+            <span className="w-16 text-[15px] font-semibold text-ink">{f.minutes} мин</span>
+            {f.avg === null ? (
+              <span className="text-[15px] text-muted">мало оценок</span>
+            ) : (
+              <span className="text-[15px] text-ink">
+                <span aria-hidden>{word(f.avg).emoji} </span>
+                в среднем «{word(f.avg).label.toLowerCase()}»
+              </span>
+            )}
+            <span className="ml-auto text-[13px] text-muted tabular-nums">{f.rated}</span>
+          </li>
+        ))}
+      </ul>
+      <p className="mt-3 text-[13px] text-muted">Это ваши ощущения, а не замер. Удобная длина — та, которую легче повторять.</p>
     </section>
   );
 }
