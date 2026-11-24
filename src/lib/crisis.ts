@@ -1,6 +1,6 @@
 /**
  * Detects crisis / self-harm wording in a free-text note so the UI can show
- * a calm help card (CLAUDE.md §4). It never blocks saving and never diagnoses.
+ * a calm help card. It never blocks saving and never diagnoses.
  * Runs locally only. False positives are acceptable; the card is gentle.
  */
 

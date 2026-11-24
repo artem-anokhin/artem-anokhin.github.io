@@ -1,5 +1,5 @@
 /**
- * «Библиотека»: short knowledge cards. Texts by content-scientist, only from docs/sources.md.
+ * «Библиотека»: short knowledge cards. Texts only from docs/sources.md.
  * Card ids are fixed here because tips and insights link to them.
  */
 

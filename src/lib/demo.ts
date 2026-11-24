@@ -3,7 +3,7 @@ import { db as defaultDb, dayKey, type CheckIn, type FocusDB, type FocusSession,
 import { getProfile } from "./settings";
 
 /**
- * Demo data for presentations (CLAUDE.md §4: always labelled «демо-данные»).
+ * Demo data for presentations (always labelled «демо-данные»).
  * Values are synthetic. Loaded only into an empty, consented app, and the
  * "demo" settings flag makes the UI show a visible label until data is deleted.
  */

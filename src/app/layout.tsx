@@ -50,6 +50,14 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         {process.env.NODE_ENV === "production" && <meta httpEquiv="Content-Security-Policy" content={CSP} />}
         {/* Invite links carry a start time: never send page URLs to other sites. */}
         <meta name="referrer" content="no-referrer" />
+        {/* GitHub Pages can't send frame-ancestors, so refuse to run inside other sites' frames
+            (clickjacking). Telegram web is allowed for the future Mini App. */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html:
+              "if(window.top!==window.self&&!/^https:\\/\\/([a-z0-9-]+\\.)?telegram\\.org\\//.test(document.referrer)){document.documentElement.style.display='none';try{window.top.location.replace(window.location.href)}catch(e){}}",
+          }}
+        />
       </head>
       <body>
         <AppShell>{children}</AppShell>

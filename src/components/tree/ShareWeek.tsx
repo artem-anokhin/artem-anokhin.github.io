@@ -12,7 +12,7 @@ const appUrl = () => process.env.NEXT_PUBLIC_APP_URL || window.location.host;
 /** «Поделиться неделей»: builds a story image on the device and opens the share sheet. */
 export function ShareWeek({ stageName, activeDays }: { stageName: string; activeDays: number }) {
   const [status, setStatus] = useState<"idle" | "busy" | "downloaded" | "error">("idle");
-  // Demo data must not leave the app as an unlabelled image (CLAUDE.md §4).
+  // Demo data must not leave the app as an unlabelled image.
   const [demo, setDemo] = useState<boolean | null>(null);
   useEffect(() => {
     isDemo().then(setDemo, () => setDemo(false));

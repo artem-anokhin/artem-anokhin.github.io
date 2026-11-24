@@ -1,7 +1,7 @@
 import { HeartHandshake } from "lucide-react";
 import { HELP_LINES } from "@/lib/crisis";
 
-/** Calm, non-blocking help card (CLAUDE.md §4). */
+/** Calm, non-blocking help card. */
 export function CrisisCard() {
   return (
     <aside role="note" aria-label="Где найти поддержку" className="card border-bloom/60 p-5">

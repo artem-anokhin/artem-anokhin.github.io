@@ -1,5 +1,5 @@
 /**
- * Tip texts for "one tip for tomorrow". Written by content-scientist from docs/sources.md only.
+ * Tip texts for "one tip for tomorrow". Written from docs/sources.md only.
  * Trigger logic lives in src/lib/today.ts; this file holds wording + source per trigger.
  */
 

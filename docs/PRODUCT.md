@@ -6,7 +6,7 @@
 
 ## Milestones (do them in order, commit after each)
 
-**M0 — Setup.** Next.js + TS strict + Tailwind + Dexie + Vitest + ESLint. Design tokens from CLAUDE.md. App shell: bottom navigation on mobile (Сегодня · Тест · Инсайты · Дерево · Библиотека), sidebar on desktop. PWA manifest. Scripts: `typecheck`, `lint`, `test`, `build`.
+**M0 — Setup.** Next.js + TS strict + Tailwind + Dexie + Vitest + ESLint. Design tokens from docs/DESIGN.md. App shell: bottom navigation on mobile (Сегодня · Тест · Инсайты · Дерево · Библиотека), sidebar on desktop. PWA manifest. Scripts: `typecheck`, `lint`, `test`, `build`.
 
 **M1 — Onboarding + daily check-in.** Onboarding: mode («Учусь» / «Работаю»), consent, disclaimer. Check-in, 7 spheres, each a card, ≤60 seconds total, a progress bar on top:
 1. Сон: bedtime, wake time (→ hours), quality 1–5.
@@ -26,13 +26,13 @@ Optional free-text note. One check-in per day, editable.
 
 **M5 — Tree.** 5 stages: семя → росток → саженец → дерево → цветёт (~30 days). Drops for check-in, test, completed step. A single missed day is not punished; the tree only wilts after 3 silent days. Flat SVG, nature colors. Short motivational messages built from real facts of the user's week.
 
-**M6 — Библиотека.** 15 short knowledge cards (sleep, caffeine, breakfast, water, activity, stress, breaks, phone) written by `content-scientist` from `docs/sources.md`, each with a source link. Insights and tips link to the matching card.
+**M6 — Библиотека.** 15 short knowledge cards (sleep, caffeine, breakfast, water, activity, stress, breaks, phone) based on `docs/sources.md`, each with a source link. Insights and tips link to the matching card.
 
-**M7 — Safety & privacy pass.** Crisis help card, export JSON, delete all data, consent screen, disclaimers everywhere advice appears. Full `security-auditor` review.
+**M7 — Safety & privacy pass.** Crisis help card, export JSON, delete all data, consent screen, disclaimers everywhere advice appears. Full security review.
 
-**M8 — Polish & demo.** `ux-designer` full review, accessibility, empty states, loading states. Demo-data generator (21 days, labelled «демо-данные») for the presentation. README: how to run and deploy for free.
+**M8 — Polish & demo.** Full UX review, accessibility, empty states, loading states. Demo-data generator (21 days, labelled «демо-данные») for the presentation. README: how to run and deploy for free.
 
-**M9 (optional) — LLM layer.** Provider interface, OFF by default. If an API key is set in `.env.local`: parse a free-text check-in into the 7 spheres and rephrase insights. Note: a Claude Pro subscription does not include API usage, so the app must work fully without this layer.
+**M9 (optional) — LLM layer.** Provider interface, OFF by default. If an API key is set in `.env.local`: parse a free-text check-in into the 7 spheres and rephrase insights. The app must work fully without this layer.
 
 ## Out of scope for MVP
 Accounts, backend, Telegram bot, payments, notes/workspace, social features, school students (minors).
